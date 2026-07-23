@@ -7,11 +7,11 @@ import android.os.Looper;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.example.smartkid.core.AppLogger;
-import com.example.smartkid.core.RoleNavigation;
+import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.navigation.RoleNavigation;
 import com.example.smartkid.data.local.SessionManager;
-import com.example.smartkid.ui.auth.LoginActivity;
-import com.example.smartkid.ui.common.BaseActivity;
+import com.example.smartkid.feature.auth.LoginActivity;
+import com.example.smartkid.common.ui.BaseActivity;
 
 public class MainActivity extends BaseActivity {
 

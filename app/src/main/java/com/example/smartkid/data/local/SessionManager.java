@@ -3,7 +3,7 @@ package com.example.smartkid.data.local;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.smartkid.core.AppLogger;
+import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.model.User;
 
 public class SessionManager {

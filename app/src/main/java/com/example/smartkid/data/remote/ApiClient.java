@@ -17,9 +17,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.example.smartkid.core.AppConstants;
-import com.example.smartkid.core.AppLogger;
-import com.example.smartkid.core.SafeJson;
+import com.example.smartkid.common.util.AppConstants;
+import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.local.SessionManager;
 
 import org.json.JSONArray;

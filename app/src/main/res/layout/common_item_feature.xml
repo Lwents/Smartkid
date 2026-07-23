@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/common_bg_glass_card"
+    android:clickable="true"
+    android:clipToOutline="true"
+    android:elevation="@dimen/glass_elevation"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="92dp"
+        android:orientation="vertical"
+        android:padding="15dp">
+
+        <TextView
+            android:background="@null"
+            android:id="@+id/textFeatureTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/smartkid_text"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:background="@null"
+            android:id="@+id/textFeatureSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/smartkid_primary"
+            android:textSize="13sp" />
+
+        <TextView
+            android:background="@null"
+            android:id="@+id/textFeatureDetail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:maxLines="3"
+            android:textColor="@color/smartkid_text_secondary"
+            android:textSize="13sp" />
+
+        <TextView
+            android:background="@null"
+            android:id="@+id/textFeatureStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/smartkid_success"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</FrameLayout>

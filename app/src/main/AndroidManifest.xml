@@ -30,24 +30,24 @@
         android:theme="@style/Theme.Smartkid"
         android:usesCleartextTraffic="false"
         tools:ignore="NotificationPermission">
-        <activity android:name=".ui.student.AITutorActivity" android:exported="false" />
-        <activity android:name=".ui.student.LessonDiscussionActivity" android:exported="false" />
-        <activity android:name=".ui.student.CartActivity" android:exported="false" />
-        <activity android:name=".ui.student.LearningAnalysisActivity" android:exported="false" />
-        <activity android:name=".ui.student.AssessmentActivity" android:exported="false" />
-        <activity android:name=".ui.management.ManagementFeatureActivity" android:exported="false" />
-        <activity android:name=".ui.management.ManagementCreateActivity" android:exported="false" />
-        <activity android:name=".ui.management.RolePortalActivity" android:exported="false" />
-        <activity android:name=".ui.profile.ParentActivity" android:exported="false" />
-        <activity android:name=".ui.profile.ChangePasswordActivity" android:exported="false" />
-        <activity android:name=".ui.profile.ProfileEditActivity" android:exported="false" />
-        <activity android:name=".ui.student.PaymentActivity" android:exported="false" />
-        <activity android:name=".ui.student.FeatureListActivity" android:exported="false" />
-        <activity android:name=".ui.games.GameActivity" android:exported="false" />
-        <activity android:name=".ui.exams.ExamActivity" android:exported="false" />
-        <activity android:name=".ui.courses.CatalogActivity" android:exported="false" />
+        <activity android:name=".feature.ai.AITutorActivity" android:exported="false" />
+        <activity android:name=".feature.course.LessonDiscussionActivity" android:exported="false" />
+        <activity android:name=".feature.payment.CartActivity" android:exported="false" />
+        <activity android:name=".feature.ai.LearningAnalysisActivity" android:exported="false" />
+        <activity android:name=".feature.ai.AssessmentActivity" android:exported="false" />
+        <activity android:name=".feature.management.ManagementFeatureActivity" android:exported="false" />
+        <activity android:name=".feature.management.ManagementCreateActivity" android:exported="false" />
+        <activity android:name=".feature.management.RolePortalActivity" android:exported="false" />
+        <activity android:name=".feature.profile.ParentActivity" android:exported="false" />
+        <activity android:name=".feature.profile.ChangePasswordActivity" android:exported="false" />
+        <activity android:name=".feature.profile.ProfileEditActivity" android:exported="false" />
+        <activity android:name=".feature.payment.PaymentActivity" android:exported="false" />
+        <activity android:name=".feature.notification.FeatureListActivity" android:exported="false" />
+        <activity android:name=".feature.game.GameActivity" android:exported="false" />
+        <activity android:name=".feature.exam.ExamActivity" android:exported="false" />
+        <activity android:name=".feature.course.CatalogActivity" android:exported="false" />
         <activity
-            android:name=".ui.auth.ResetPasswordActivity"
+            android:name=".feature.auth.ResetPasswordActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -58,24 +58,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.auth.ForgotPasswordActivity"
+            android:name=".feature.auth.ForgotPasswordActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.auth.RegisterActivity"
+            android:name=".feature.auth.RegisterActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.courses.LessonPlayerActivity"
+            android:name=".feature.course.LessonPlayerActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.courses.CourseDetailActivity"
+            android:name=".feature.course.CourseDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.home.HomeActivity"
+            android:name=".feature.home.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.auth.LoginActivity"
+            android:name=".feature.auth.LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
