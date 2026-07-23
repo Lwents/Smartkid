@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarAssessment"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/glass_toolbar"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationIconTint="@color/smartkid_text"
+        app:subtitleTextColor="@color/smartkid_text_secondary"
+        app:title="@string/entry_assessment"
+        app:titleTextColor="@color/smartkid_text" />
+    <ProgressBar
+        android:id="@+id/progressAssessment"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone" />
+    <TextView
+        android:background="@null"
+        android:id="@+id/textAssessmentStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="14dp"
+        android:textColor="@color/smartkid_text_secondary" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <LinearLayout
+            android:id="@+id/containerAssessmentQuestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/screen_padding_compact"
+            android:background="@drawable/bg_glass_card"
+            android:orientation="vertical"
+            android:padding="18dp" />
+    </ScrollView>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonSubmitAssessment"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:layout_margin="12dp"
+        android:enabled="false"
+        android:text="@string/submit_assessment" />
+</LinearLayout>

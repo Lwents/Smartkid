@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="screen_padding">32dp</dimen>
+    <dimen name="screen_padding_compact">24dp</dimen>
+    <dimen name="glass_elevation">8dp</dimen>
+    <dimen name="glass_elevation_high">14dp</dimen>
+</resources>

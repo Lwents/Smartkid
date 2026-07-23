@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Base.Theme.Smartkid" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/smartkid_primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorPrimaryContainer">@color/smartkid_avatar</item>
+        <item name="colorOnPrimaryContainer">@color/smartkid_primary_dark</item>
+        <item name="colorSecondary">@color/smartkid_secondary</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+        <item name="colorSurface">@color/glass_surface_strong</item>
+        <item name="colorSurfaceVariant">@color/glass_surface</item>
+        <item name="colorOnSurface">@color/smartkid_text</item>
+        <item name="colorOnSurfaceVariant">@color/smartkid_text_secondary</item>
+        <item name="colorOutline">@color/smartkid_outline_visible</item>
+        <item name="colorError">@color/smartkid_error</item>
+
+        <item name="android:colorAccent">@color/smartkid_primary</item>
+        <item name="android:windowBackground">@drawable/bg_liquid_screen</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/glass_toolbar</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:windowActionModeOverlay">true</item>
+
+        <item name="materialButtonStyle">@style/Widget.Smartkid.GlassButton</item>
+        <item name="textInputStyle">@style/Widget.Smartkid.GlassInput</item>
+        <item name="toolbarStyle">@style/Widget.Smartkid.GlassToolbar</item>
+        <item name="bottomNavigationStyle">@style/Widget.Smartkid.FloatingNavigation</item>
+        <item name="materialCardViewStyle">@style/Widget.Smartkid.GlassCard</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Smartkid.GlassDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Smartkid.GlassDialog</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.Smartkid.GlassBottomSheet</item>
+        <item name="android:windowAnimationStyle">@style/Animation.Smartkid.Window</item>
+    </style>
+
+    <style name="Theme.Smartkid" parent="Base.Theme.Smartkid" />
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@color/smartkid_accent"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M6.2,3.2 H18.3 C19.4,3.2 20.3,4.1 20.3,5.2 V16.9 C20.3,18 19.4,18.9 18.3,18.9 H7.2 C5.3,18.9 3.7,17.6 3.7,15.9 V5.7 C3.7,4.3 4.8,3.2 6.2,3.2 Z M7.2,18.9 C5.3,18.9 3.7,20 3.7,21.1 H18.7 M8,7.2 H16 M8,10.6 H14.2" />
+    <path android:fillColor="@color/smartkid_accent"
+        android:pathData="M16.8,12.3 L17.5,14.2 L19.4,14.9 L17.5,15.6 L16.8,17.5 L16.1,15.6 L14.2,14.9 L16.1,14.2 Z" />
+</vector>

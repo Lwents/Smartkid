@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="@dimen/floating_nav_icon_size"
+        android:height="@dimen/floating_nav_icon_size"
+        android:drawable="@drawable/icon_glass_courses_clean"
+        android:gravity="center" />
+</layer-list>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="315"
+                android:startColor="@color/smartkid_background"
+                android:centerColor="@color/smartkid_background"
+                android:endColor="@color/smartkid_background_deep" />
+        </shape>
+    </item>
+    <item android:gravity="top|end" android:width="260dp" android:height="260dp" android:top="-90dp" android:right="-80dp">
+        <shape android:shape="oval">
+            <!-- The radius stays inside half the drawable size so the glow reaches
+                 full transparency before Android clips the layer bounds. -->
+            <gradient android:type="radial" android:gradientRadius="124dp" android:startColor="@color/glow_primary" android:endColor="@color/glow_primary_transparent" />
+        </shape>
+    </item>
+    <item android:gravity="bottom|start" android:width="300dp" android:height="300dp" android:bottom="-130dp" android:left="-120dp">
+        <shape android:shape="oval">
+            <gradient android:type="radial" android:gradientRadius="144dp" android:startColor="@color/glow_secondary" android:endColor="@color/glow_secondary_transparent" />
+        </shape>
+    </item>
+</layer-list>

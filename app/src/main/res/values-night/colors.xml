@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Liquid Glass palette - dark -->
+    <color name="black">#FF05060A</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="smartkid_background">#FF0B0D14</color>
+    <color name="smartkid_background_deep">#FF05060A</color>
+    <color name="smartkid_text">#FFF7F7FA</color>
+    <color name="smartkid_text_secondary">#FFB4B8C3</color>
+    <color name="smartkid_text_tertiary">#FF8D93A1</color>
+
+    <color name="smartkid_primary">#FF8F8BFF</color>
+    <color name="smartkid_primary_dark">#FF706DEB</color>
+    <color name="smartkid_primary_end">#FFB0ADFF</color>
+    <color name="smartkid_secondary">#FF3ADBD2</color>
+    <color name="smartkid_secondary_end">#FF64D2FF</color>
+    <color name="smartkid_accent">#FFFFB340</color>
+    <color name="smartkid_success">#FF30D158</color>
+    <color name="smartkid_error">#FFFF6961</color>
+
+    <color name="smartkid_outline_visible">#FF3A3E4B</color>
+    <color name="smartkid_avatar">#FF292A48</color>
+
+    <color name="glass_surface">#D120232D</color>
+    <color name="glass_surface_strong">#F02A2D38</color>
+    <color name="glass_surface_soft">#B820232D</color>
+    <color name="glass_navigation_start">#D1262935</color>
+    <color name="glass_navigation_center">#B52B3042</color>
+    <color name="glass_navigation_end">#C9222530</color>
+    <color name="glass_navigation_active">#804D4B88</color>
+    <color name="glass_navigation_stroke">#52FFFFFF</color>
+    <color name="glass_service_tile">#D1262933</color>
+    <color name="glass_service_stroke">#42FFFFFF</color>
+    <color name="glass_input">#D1262933</color>
+    <color name="glass_toolbar">#000B0D14</color>
+    <color name="glass_navigation_bar">#E60B0D14</color>
+    <color name="glass_stroke">#38FFFFFF</color>
+    <color name="glass_text_on_gradient">#F2FFFFFF</color>
+    <color name="glass_text_on_gradient_secondary">#E6FFFFFF</color>
+    <color name="glass_divider_on_gradient">#4DFFFFFF</color>
+    <color name="glass_stroke_gradient">#66FFFFFF</color>
+    <color name="glass_logo_stroke">#80FFFFFF</color>
+    <color name="glow_primary">#305E5CE6</color>
+    <color name="glow_primary_transparent">#005E5CE6</color>
+    <color name="glow_secondary">#2400C7BE</color>
+    <color name="glow_secondary_transparent">#0000C7BE</color>
+
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="on_secondary">#FF00201E</color>
+    <color name="nav_inactive">#FFA7ABB6</color>
+</resources>

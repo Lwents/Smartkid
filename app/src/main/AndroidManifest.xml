@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".SmartKidApplication"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Smartkid"
+        android:usesCleartextTraffic="false"
+        tools:ignore="NotificationPermission">
+        <activity android:name=".ui.student.AITutorActivity" android:exported="false" />
+        <activity android:name=".ui.student.LessonDiscussionActivity" android:exported="false" />
+        <activity android:name=".ui.student.CartActivity" android:exported="false" />
+        <activity android:name=".ui.student.LearningAnalysisActivity" android:exported="false" />
+        <activity android:name=".ui.student.AssessmentActivity" android:exported="false" />
+        <activity android:name=".ui.management.ManagementFeatureActivity" android:exported="false" />
+        <activity android:name=".ui.management.ManagementCreateActivity" android:exported="false" />
+        <activity android:name=".ui.management.RolePortalActivity" android:exported="false" />
+        <activity android:name=".ui.profile.ParentActivity" android:exported="false" />
+        <activity android:name=".ui.profile.ChangePasswordActivity" android:exported="false" />
+        <activity android:name=".ui.profile.ProfileEditActivity" android:exported="false" />
+        <activity android:name=".ui.student.PaymentActivity" android:exported="false" />
+        <activity android:name=".ui.student.FeatureListActivity" android:exported="false" />
+        <activity android:name=".ui.games.GameActivity" android:exported="false" />
+        <activity android:name=".ui.exams.ExamActivity" android:exported="false" />
+        <activity android:name=".ui.courses.CatalogActivity" android:exported="false" />
+        <activity
+            android:name=".ui.auth.ResetPasswordActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="smartkid" android:host="reset-password" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.auth.ForgotPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.auth.RegisterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.courses.LessonPlayerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.courses.CourseDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.home.HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.auth.LoginActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
