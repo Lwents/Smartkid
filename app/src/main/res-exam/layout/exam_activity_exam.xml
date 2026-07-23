@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarExam"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/glass_toolbar"
+        app:navigationIcon="@drawable/common_ic_arrow_back"
+        app:navigationIconTint="@color/smartkid_text"
+        app:title="@string/exam_detail"
+        app:titleTextColor="@color/smartkid_text" />
+    <ProgressBar
+        android:id="@+id/progressExam"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/screen_padding_compact"
+            android:background="@drawable/common_bg_glass_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:background="@null"
+                android:id="@+id/textExamInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/loading"
+                android:textColor="@color/smartkid_text_secondary" />
+            <TextView
+                android:background="@null"
+                android:id="@+id/textExamTimer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:textColor="@color/smartkid_error"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+            <TextView
+                android:id="@+id/textExamStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@color/smartkid_avatar"
+                android:padding="12dp"
+                android:textColor="@color/smartkid_text"
+                android:visibility="gone" />
+            <LinearLayout
+                android:id="@+id/containerExamQuestions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonStartExam"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:enabled="false"
+                android:text="@string/start_exam" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonSubmitExam"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/submit_exam"
+                android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonExamRanking"
+                style="@style/Widget.Smartkid.GlassButton.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/ranking"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -3,8 +3,8 @@ package com.example.smartkid.data.local;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.smartkid.core.AppLogger;
-import com.example.smartkid.core.SafeJson;
+import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.model.Course;
 
 import org.json.JSONArray;

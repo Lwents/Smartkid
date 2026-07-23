@@ -2,7 +2,7 @@ package com.example.smartkid;
 
 import android.app.Application;
 
-import com.example.smartkid.core.AppLogger;
+import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.remote.ApiClient;
 
 /**

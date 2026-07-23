@@ -2,9 +2,9 @@ package com.example.smartkid.data.repository;
 
 import android.content.Context;
 
-import com.example.smartkid.core.AppConstants;
-import com.example.smartkid.core.AppLogger;
-import com.example.smartkid.core.SafeJson;
+import com.example.smartkid.common.util.AppConstants;
+import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.model.Course;
 import com.example.smartkid.data.model.CourseDetail;
 import com.example.smartkid.data.model.CourseListResult;

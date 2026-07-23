@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarCatalog"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/glass_toolbar"
+        app:navigationIcon="@drawable/common_ic_arrow_back"
+        app:navigationIconTint="@color/smartkid_text"
+        app:title="@string/course_catalog"
+        app:titleTextColor="@color/smartkid_text" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="14dp">
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Smartkid.GlassInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/search_course_hint"
+            app:startIconDrawable="@drawable/common_ic_search">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputCatalogSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonCatalogSearch"
+            style="@style/Widget.Smartkid.GlassButton.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/search"
+            app:icon="@drawable/common_ic_search" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressCatalog"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp">
+        <ListView
+            android:id="@+id/listCatalog"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="10dp"
+            android:paddingBottom="14dp" />
+        <TextView
+            android:background="@null"
+            android:id="@+id/textCatalogEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="24dp"
+            android:text="@string/no_catalog_courses"
+            android:textColor="@color/smartkid_text_secondary" />
+    </FrameLayout>
+</LinearLayout>

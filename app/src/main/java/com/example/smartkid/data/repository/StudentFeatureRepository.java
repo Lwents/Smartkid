@@ -2,8 +2,8 @@ package com.example.smartkid.data.repository;
 
 import android.content.Context;
 
-import com.example.smartkid.core.AppLogger;
-import com.example.smartkid.core.SafeJson;
+import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.local.SessionManager;
 import com.example.smartkid.data.remote.ApiCallback;

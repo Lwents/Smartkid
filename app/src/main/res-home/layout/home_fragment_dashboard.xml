@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:id="@+id/dashboardContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="@dimen/space_md"
+            android:paddingEnd="@dimen/screen_padding"
+            android:paddingBottom="@dimen/space_3xl">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/common_bg_glass_card"
+                android:elevation="@dimen/glass_elevation">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/space_lg">
+
+                    <TextView
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:background="@drawable/common_bg_avatar"
+                        android:contentDescription="@string/dashboard_avatar"
+                        android:gravity="center"
+                        android:text="@string/avatar_default"
+                        android:textColor="@color/on_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_md"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/textWelcome"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:textAppearance="@style/TextAppearance.Smartkid.Title" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:background="@null"
+                            android:text="@string/welcome_message"
+                            android:textAppearance="@style/TextAppearance.Smartkid.Body"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonDashboardNotifications"
+                        style="@style/Widget.Smartkid.GlassButton.Outlined"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:contentDescription="@string/open_notifications"
+                        android:minWidth="0dp"
+                        android:padding="7dp"
+                        android:text=""
+                        app:icon="@drawable/home_icon_glass_bell"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="34dp"
+                        app:iconTint="@null"
+                        app:backgroundTint="@color/glass_surface"
+                        app:strokeColor="@color/glass_stroke"
+                        app:strokeWidth="1dp" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_lg"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="@dimen/glass_radius_large"
+                app:cardElevation="@dimen/glass_elevation_high"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/common_bg_primary_gradient"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_xl">
+
+                    <TextView
+                        android:background="@null"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/learning_overview"
+                        android:textColor="@color/on_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:background="@null"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/learning_overview_hint"
+                        android:textColor="@color/glass_text_on_gradient"
+                        android:textSize="14sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:background="@null"
+                                android:id="@+id/textCourseCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/count_zero"
+                                android:textColor="@color/on_primary"
+                                android:textSize="34sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:background="@null"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/course_count_label"
+                                android:textColor="@color/glass_text_on_gradient_secondary"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="52dp"
+                            android:layout_marginHorizontal="@dimen/space_lg"
+                            android:background="@color/glass_divider_on_gradient" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:background="@null"
+                                android:id="@+id/textExamCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/count_zero"
+                                android:textColor="@color/on_primary"
+                                android:textSize="34sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:background="@null"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/exam_count_label"
+                                android:textColor="@color/glass_text_on_gradient_secondary"
+                                android:textSize="13sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:background="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_2xl"
+                android:text="@string/quick_actions"
+                android:textAppearance="@style/TextAppearance.Smartkid.Title"
+                android:textSize="19sp" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:scrollbars="none">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:id="@+id/buttonQuickAi"
+                        android:layout_width="@dimen/service_tile_width"
+                        android:layout_height="@dimen/service_tile_height"
+                        android:background="@drawable/common_bg_service_tile"
+                        android:clickable="true"
+                        android:contentDescription="@string/ai_tutor"
+                        android:focusable="true">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@android:color/transparent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="@dimen/space_md">
+
+                            <ImageView
+                                android:layout_width="@dimen/service_tile_icon_size"
+                                android:layout_height="@dimen/service_tile_icon_size"
+                                android:background="@android:color/transparent"
+                                android:contentDescription="@null"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/home_icon_glass_ai_tutor" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/space_xs"
+                                android:background="@null"
+                                android:gravity="center"
+                                android:maxLines="2"
+                                android:text="@string/ai_tutor"
+                                android:textColor="@color/smartkid_text"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/buttonQuickAnalysis"
+                        android:layout_width="@dimen/service_tile_width"
+                        android:layout_height="@dimen/service_tile_height"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:background="@drawable/common_bg_service_tile"
+                        android:clickable="true"
+                        android:contentDescription="@string/learning_analysis"
+                        android:focusable="true">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@android:color/transparent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="@dimen/space_md">
+
+                            <ImageView
+                                android:layout_width="@dimen/service_tile_icon_size"
+                                android:layout_height="@dimen/service_tile_icon_size"
+                                android:background="@android:color/transparent"
+                                android:contentDescription="@null"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/home_icon_glass_analytics" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/space_xs"
+                                android:background="@null"
+                                android:gravity="center"
+                                android:maxLines="2"
+                                android:text="@string/learning_analysis"
+                                android:textColor="@color/smartkid_text"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/buttonQuickCatalog"
+                        android:layout_width="@dimen/service_tile_width"
+                        android:layout_height="@dimen/service_tile_height"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:background="@drawable/common_bg_service_tile"
+                        android:clickable="true"
+                        android:contentDescription="@string/course_catalog"
+                        android:focusable="true">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@android:color/transparent"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="@dimen/space_md">
+
+                            <ImageView
+                                android:layout_width="@dimen/service_tile_icon_size"
+                                android:layout_height="@dimen/service_tile_icon_size"
+                                android:background="@android:color/transparent"
+                                android:contentDescription="@null"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/home_icon_glass_catalog" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/space_xs"
+                                android:background="@null"
+                                android:gravity="center"
+                                android:maxLines="2"
+                                android:text="@string/course_catalog"
+                                android:textColor="@color/smartkid_text"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <TextView
+                android:background="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_2xl"
+                android:text="@string/recent_activity"
+                android:textAppearance="@style/TextAppearance.Smartkid.Title"
+                android:textSize="19sp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md"
+                android:background="@drawable/common_bg_glass_card"
+                android:elevation="@dimen/glass_elevation">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_xl">
+
+                    <TextView
+                        android:id="@+id/textResumeTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:text="@string/no_learning_course"
+                        android:textColor="@color/smartkid_text"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textResumeProgress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_sm"
+                        android:background="@null"
+                        android:text="@string/choose_course_hint"
+                        android:textAppearance="@style/TextAppearance.Smartkid.Body"
+                        android:textSize="14sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonResumeCourse"
+                        style="@style/Widget.Smartkid.GlassButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_marginTop="@dimen/space_lg"
+                        android:enabled="false"
+                        android:text="@string/continue_button" />
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/progressDashboard"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/loading" />
+
+    <LinearLayout
+        android:id="@+id/dashboardError"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/screen_padding"
+        android:background="@drawable/common_bg_glass_card_strong"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/space_2xl"
+        android:visibility="gone">
+
+        <TextView
+            android:background="@null"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/dashboard_error_title"
+            android:textColor="@color/smartkid_text"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:background="@null"
+            android:id="@+id/textDashboardError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:gravity="center"
+            android:text="@string/unknown_error"
+            android:textColor="@color/smartkid_error"
+            android:textSize="14sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonRetryDashboard"
+            style="@style/Widget.Smartkid.GlassButton.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="@dimen/space_lg"
+            android:text="@string/retry" />
+    </LinearLayout>
+</FrameLayout>

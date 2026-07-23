@@ -15,7 +15,7 @@
         <item name="colorError">@color/smartkid_error</item>
 
         <item name="android:colorAccent">@color/smartkid_primary</item>
-        <item name="android:windowBackground">@drawable/bg_liquid_screen</item>
+        <item name="android:windowBackground">@drawable/common_bg_liquid_screen</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@color/glass_toolbar</item>

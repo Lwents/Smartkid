@@ -39,6 +39,24 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    sourceSets {
+        getByName("main") {
+            res.srcDirs(
+                "src/main/res",
+                "src/main/res-auth",
+                "src/main/res-home",
+                "src/main/res-course",
+                "src/main/res-exam",
+                "src/main/res-game",
+                "src/main/res-ai",
+                "src/main/res-profile",
+                "src/main/res-payment",
+                "src/main/res-notification",
+                "src/main/res-management"
+            )
+        }
+    }
 }
 
 dependencies {
