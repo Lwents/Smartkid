@@ -156,6 +156,19 @@ public final class AdminDashboardData {
         private static int clamp(int value) { return Math.max(0, Math.min(100, value)); }
     }
 
+    public static final class ActivityPoint {
+        private final String date;
+        private final int newUsers;
+
+        public ActivityPoint(String date, int newUsers) {
+            this.date = safe(date);
+            this.newUsers = Math.max(0, newUsers);
+        }
+
+        public String getDate() { return date; }
+        public int getNewUsers() { return newUsers; }
+    }
+
     private static String safe(String value) {
         return value == null ? "" : value.trim();
     }

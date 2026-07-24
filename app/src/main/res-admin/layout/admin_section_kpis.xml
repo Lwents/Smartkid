@@ -3,262 +3,115 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
-        style="@style/TextAppearance.Smartkid.Title"
+        style="@style/TextAppearance.Smartkid.AdminSectionTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:text="@string/admin_kpi_title"
-        android:textSize="18sp" />
+        android:text="@string/admin_kpi_title" />
 
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="12dp"
         android:columnCount="3">
 
         <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.Smartkid.GlassCard"
-            android:layout_width="0dp"
-            android:layout_height="132dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="3dp"
-            app:cardBackgroundColor="@color/admin_card_blue">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="10dp">
-                <ImageView
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:background="@drawable/common_bg_glass_capsule"
-                    android:contentDescription="@null"
-                    android:padding="7dp"
-                    android:src="@drawable/admin_ic_users"
-                    app:tint="@color/smartkid_primary" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_weight="1"
-                    android:maxLines="2"
-                    android:text="@string/admin_dau_label"
-                    android:textColor="@color/smartkid_text_secondary"
-                    android:textSize="10sp" />
-                <TextView
-                    android:id="@+id/textAdminDau"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dashboard_zero"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+            android:id="@+id/cardAdminKpiDau"
+            style="@style/Widget.Smartkid.AdminGlassCard.Interactive"
+            android:layout_width="0dp" android:layout_height="126dp"
+            android:layout_columnWeight="1" android:layout_margin="4dp" app:cardCornerRadius="20dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_blue" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_users" app:tint="@color/white" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="↑ 0%" android:textColor="@color/admin_green" android:textSize="10sp" android:textStyle="bold" />
+                </LinearLayout>
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_users_short" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:id="@+id/textAdminDau" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="Đang hoạt động" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.Smartkid.GlassCard"
-            android:layout_width="0dp"
-            android:layout_height="150dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="4dp"
-            app:cardBackgroundColor="@color/admin_card_green">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="12dp">
-                <ImageView
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:background="@drawable/common_bg_glass_capsule"
-                    android:contentDescription="@null"
-                    android:padding="8dp"
-                    android:src="@drawable/admin_ic_user_add"
-                    app:tint="@color/smartkid_success" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_weight="1"
-                    android:maxLines="2"
-                    android:text="@string/admin_signups_label"
-                    android:textColor="@color/smartkid_text_secondary"
-                    android:textSize="11sp" />
-                <TextView
-                    android:id="@+id/textAdminSignups"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dashboard_zero"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+            android:id="@+id/cardAdminKpiSignups"
+            style="@style/Widget.Smartkid.AdminGlassCard.Interactive"
+            android:layout_width="0dp" android:layout_height="126dp"
+            android:layout_columnWeight="1" android:layout_margin="4dp" app:cardCornerRadius="20dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_green" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_user_add" app:tint="@color/white" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="↑ 0%" android:textColor="@color/admin_green" android:textSize="10sp" android:textStyle="bold" />
+                </LinearLayout>
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_signups_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:id="@+id/textAdminSignups" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="Trong 7 ngày gần đây" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.Smartkid.GlassCard"
-            android:layout_width="0dp"
-            android:layout_height="150dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="4dp"
-            app:cardBackgroundColor="@color/admin_card_gold">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="12dp">
-                <ImageView
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:background="@drawable/common_bg_glass_capsule"
-                    android:contentDescription="@null"
-                    android:padding="8dp"
-                    android:src="@drawable/admin_ic_revenue"
-                    app:tint="@color/smartkid_accent" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_weight="1"
-                    android:maxLines="2"
-                    android:text="@string/admin_revenue_label"
-                    android:textColor="@color/smartkid_text_secondary"
-                    android:textSize="11sp" />
-                <TextView
-                    android:id="@+id/textAdminRevenue"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/dashboard_zero_currency"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+            android:id="@+id/cardAdminKpiRevenue"
+            style="@style/Widget.Smartkid.AdminGlassCard.Interactive"
+            android:layout_width="0dp" android:layout_height="126dp"
+            android:layout_columnWeight="1" android:layout_margin="4dp" app:cardCornerRadius="20dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_orange" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_revenue" app:tint="@color/white" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="↑ 0%" android:textColor="@color/admin_green" android:textSize="10sp" android:textStyle="bold" />
+                </LinearLayout>
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_revenue_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:id="@+id/textAdminRevenue" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/dashboard_zero_currency" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="Tổng thanh toán" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.Smartkid.GlassCard"
-            android:layout_width="0dp"
-            android:layout_height="150dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="4dp"
-            app:cardBackgroundColor="@color/admin_card_cyan">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="12dp">
-                <ImageView
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:background="@drawable/common_bg_glass_capsule"
-                    android:contentDescription="@null"
-                    android:padding="8dp"
-                    android:src="@drawable/admin_ic_card"
-                    app:tint="@color/smartkid_primary" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_weight="1"
-                    android:maxLines="2"
-                    android:text="@string/admin_transactions_label"
-                    android:textColor="@color/smartkid_text_secondary"
-                    android:textSize="11sp" />
-                <TextView
-                    android:id="@+id/textAdminTransactionsToday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dashboard_zero"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+            android:id="@+id/cardAdminKpiTransactions"
+            style="@style/Widget.Smartkid.AdminGlassCard.Interactive"
+            android:layout_width="0dp" android:layout_height="126dp"
+            android:layout_columnWeight="1" android:layout_margin="4dp" app:cardCornerRadius="20dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_purple" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_card" app:tint="@color/white" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="↑ 0%" android:textColor="@color/admin_green" android:textSize="10sp" android:textStyle="bold" />
+                </LinearLayout>
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_transactions_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:id="@+id/textAdminTransactionsToday" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="Giao dịch ghi nhận" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.Smartkid.GlassCard"
-            android:layout_width="0dp"
-            android:layout_height="150dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="4dp"
-            app:cardBackgroundColor="@color/admin_card_red">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="12dp">
-                <ImageView
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:background="@drawable/common_bg_glass_capsule"
-                    android:contentDescription="@null"
-                    android:padding="8dp"
-                    android:src="@drawable/admin_ic_refund"
-                    app:tint="@color/smartkid_error" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_weight="1"
-                    android:maxLines="2"
-                    android:text="@string/admin_refund_label"
-                    android:textColor="@color/smartkid_text_secondary"
-                    android:textSize="11sp" />
-                <TextView
-                    android:id="@+id/textAdminRefundRate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dashboard_zero_percent"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+            android:id="@+id/cardAdminKpiRefund"
+            style="@style/Widget.Smartkid.AdminGlassCard.Interactive"
+            android:layout_width="0dp" android:layout_height="126dp"
+            android:layout_columnWeight="1" android:layout_margin="4dp" app:cardCornerRadius="20dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_red" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_refund" app:tint="@color/white" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="↓ 0%" android:textColor="@color/admin_red" android:textSize="10sp" android:textStyle="bold" />
+                </LinearLayout>
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_refund_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:id="@+id/textAdminRefundRate" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/dashboard_zero_percent" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="Trong 7 ngày" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.Smartkid.GlassCard"
-            android:layout_width="0dp"
-            android:layout_height="150dp"
-            android:layout_columnWeight="1"
-            android:layout_margin="4dp"
-            app:cardBackgroundColor="@color/admin_card_orange">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="12dp">
-                <ImageView
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:background="@drawable/common_bg_glass_capsule"
-                    android:contentDescription="@null"
-                    android:padding="8dp"
-                    android:src="@drawable/admin_ic_approval"
-                    app:tint="@color/smartkid_accent" />
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_weight="1"
-                    android:maxLines="2"
-                    android:text="@string/admin_pending_label"
-                    android:textColor="@color/smartkid_text_secondary"
-                    android:textSize="11sp" />
-                <TextView
-                    android:id="@+id/textAdminPending"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dashboard_zero"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+            android:id="@+id/cardAdminKpiPending"
+            style="@style/Widget.Smartkid.AdminGlassCard.Interactive"
+            android:layout_width="0dp" android:layout_height="126dp"
+            android:layout_columnWeight="1" android:layout_margin="4dp" app:cardCornerRadius="20dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
+                    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_cyan" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_approval" app:tint="@color/white" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="↑ 0%" android:textColor="@color/admin_green" android:textSize="10sp" android:textStyle="bold" />
+                </LinearLayout>
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_pending_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:id="@+id/textAdminPending" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="1" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="Đang chờ xử lý" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </GridLayout>

@@ -24,7 +24,7 @@ import com.google.android.material.card.MaterialCardView;
 
 import java.util.Locale;
 
-/** Shared navigation and session actions for the two role-specific dashboards. */
+/** Shared navigation and session actions for role-specific dashboards. */
 public abstract class RoleDashboardActivity extends BaseActivity {
     private SessionManager sessionManager;
     private AuthRepository authRepository;
@@ -47,6 +47,11 @@ public abstract class RoleDashboardActivity extends BaseActivity {
 
     protected final void bindLogoutAction(int logoutButtonId) {
         findViewById(logoutButtonId).setOnClickListener(view -> confirmLogout());
+    }
+
+    protected final void bindLogoutAction(int logoutButtonId, int titleRes, int messageRes) {
+        findViewById(logoutButtonId).setOnClickListener(view ->
+                confirmLogout(getString(titleRes), getString(messageRes)));
     }
 
     protected final void openManagementFeature(String key) {
@@ -133,9 +138,13 @@ public abstract class RoleDashboardActivity extends BaseActivity {
     }
 
     private void confirmLogout() {
+        confirmLogout(getString(R.string.logout), getString(R.string.logout_confirmation));
+    }
+
+    private void confirmLogout(String title, String message) {
         new AlertDialog.Builder(this)
-                .setTitle(R.string.logout)
-                .setMessage(R.string.logout_confirmation)
+                .setTitle(title)
+                .setMessage(message)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.logout, (dialog, which) -> logout())
                 .show();
