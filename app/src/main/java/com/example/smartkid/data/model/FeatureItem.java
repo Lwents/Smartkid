@@ -2,7 +2,7 @@ package com.example.smartkid.data.model;
 
 import org.json.JSONObject;
 
-/** Dữ liệu hiển thị chung cho các danh sách nhỏ như đề thi, game, thông báo. */
+/** Dữ liệu hiển thị chung cho các danh sách nhỏ như đề thi và thông báo. */
 public class FeatureItem {
     private final String id;
     private final String title;

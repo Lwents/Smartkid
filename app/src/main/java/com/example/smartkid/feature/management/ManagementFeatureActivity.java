@@ -21,6 +21,7 @@ import com.android.volley.Request;
 import com.example.smartkid.R;
 import com.example.smartkid.common.ui.FeatureItemAdapter;
 import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.data.local.SessionManager;
 import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
@@ -47,6 +48,12 @@ public class ManagementFeatureActivity extends BaseActivity {
     private View refreshButton;
 
     @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.common_slide_in_left, R.anim.common_slide_out_right);
+    }
+
+    @Override
     protected void onRestart() {
         super.onRestart();
         if (repository != null && spec != null && spec.isAvailable()) loadSafely();
@@ -59,7 +66,8 @@ public class ManagementFeatureActivity extends BaseActivity {
             setContentView(R.layout.common_activity_feature_list);
             String key = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_SPEC_KEY);
             spec = ManagementSpec.get(key);
-            if (spec == null || !spec.isAvailable()) {
+            String role = new SessionManager(this).getUser().getRole();
+            if (spec == null || !spec.isAvailable() || !spec.isAllowedForRole(role)) {
                 showErrorDialog("Chức năng quản lý không hợp lệ");
                 finish();
                 return;
@@ -117,7 +125,7 @@ public class ManagementFeatureActivity extends BaseActivity {
     private boolean supportsCreate() {
         String kind = spec == null ? "" : spec.getActionKind();
         return "admin_users".equals(kind) || "teacher_courses".equals(kind)
-                || "teacher_exams".equals(kind) || "teacher_games".equals(kind);
+                || "teacher_exams".equals(kind);
     }
 
     private void openCreate() {
@@ -179,7 +187,7 @@ public class ManagementFeatureActivity extends BaseActivity {
             labels = new String[]{"Khóa tài khoản", "Mở khóa tài khoản"};
         } else if ("teacher_courses".equals(kind)) {
             labels = new String[]{"Xuất bản", "Gỡ xuất bản", "Lưu trữ", "Khôi phục"};
-        } else if ("teacher_exams".equals(kind) || "teacher_games".equals(kind)) {
+        } else if ("teacher_exams".equals(kind)) {
             labels = new String[]{"Thêm câu hỏi", "Xem thống kê", "Xuất bản", "Gỡ xuất bản", "Xóa"};
         } else if ("teacher_exam_reports".equals(kind)) {
             labels = new String[]{"Xem thống kê", "Xem lượt nộp"};
@@ -254,44 +262,17 @@ public class ManagementFeatureActivity extends BaseActivity {
             JSONArray questions = source.optJSONArray("questions");
             return questions == null || questions.length() == 0;
         }
-        if ("teacher_games".equals(spec.getActionKind())) {
-            return source.optInt("question_count", 0) <= 0;
-        }
         return false;
     }
 
     private void promptQuestion(FeatureItem item) {
-        if ("teacher_games".equals(spec.getActionKind())) {
-            loadGameForQuestion(item);
-        } else {
-            showChoiceQuestionDialog(item, false, null);
-        }
+        showChoiceQuestionDialog(item);
     }
 
-    private void loadGameForQuestion(FeatureItem item) {
-        setLoading(true);
-        repository.loadObject("teacher/games/" + item.getId() + "/",
-                new ApiCallback<JSONObject>() {
-                    @Override public void onSuccess(JSONObject game) {
-                        if (!isUsable()) return;
-                        setLoading(false);
-                        String type = game == null ? "" : game.optString("game_type", "");
-                        if ("word_match".equals(type)) showWordPairDialog(item, game);
-                        else showChoiceQuestionDialog(item, true, game);
-                    }
-
-                    @Override public void onError(ApiError error) {
-                        if (!isUsable()) return;
-                        setLoading(false);
-                        handleApiError(error);
-                    }
-                });
-    }
-
-    private void showChoiceQuestionDialog(FeatureItem item, boolean game, JSONObject gameData) {
+    private void showChoiceQuestionDialog(FeatureItem item) {
         try {
             LinearLayout fields = dialogFields();
-            EditText prompt = dialogInput(game ? "Nội dung câu hỏi" : "Câu hỏi kiểm tra");
+            EditText prompt = dialogInput("Câu hỏi kiểm tra");
             fields.addView(prompt);
             EditText[] choices = new EditText[4];
             for (int index = 0; index < choices.length; index++) {
@@ -327,42 +308,13 @@ public class ManagementFeatureActivity extends BaseActivity {
                             optionValues.put(value);
                         }
                         dialog.dismiss();
-                        if (game) addGameQuestion(item, gameData, promptValue,
-                                optionValues, correct.getSelectedItemPosition());
-                        else addExamQuestion(item, promptValue, optionValues,
+                        addExamQuestion(item, promptValue, optionValues,
                                 correct.getSelectedItemPosition());
                     }));
             dialog.show();
         } catch (Exception exception) {
             AppLogger.error(this, "ManagementFeatureActivity", "Không thể mở câu hỏi", exception);
             showErrorDialog("Không thể mở biểu mẫu câu hỏi");
-        }
-    }
-
-    private void showWordPairDialog(FeatureItem item, JSONObject gameData) {
-        try {
-            LinearLayout fields = dialogFields();
-            EditText left = dialogInput("Từ hoặc phép tính bên trái");
-            EditText right = dialogInput("Nội dung tương ứng bên phải");
-            fields.addView(left);
-            fields.addView(right);
-            AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setTitle("Thêm cặp ghép từ").setView(fields)
-                    .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton("Lưu lên server", null).create();
-            dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                    .setOnClickListener(view -> {
-                        String leftValue = textOf(left);
-                        String rightValue = textOf(right);
-                        if (leftValue.isEmpty()) { left.setError("Không được để trống"); return; }
-                        if (rightValue.isEmpty()) { right.setError("Không được để trống"); return; }
-                        dialog.dismiss();
-                        addGamePair(item, gameData, leftValue, rightValue);
-                    }));
-            dialog.show();
-        } catch (Exception exception) {
-            AppLogger.error(this, "ManagementFeatureActivity", "Không thể mở cặp từ", exception);
-            showErrorDialog("Không thể mở biểu mẫu ghép từ");
         }
     }
 
@@ -389,44 +341,8 @@ public class ManagementFeatureActivity extends BaseActivity {
         }
     }
 
-    private void addGameQuestion(FeatureItem item, JSONObject gameData, String prompt,
-                                 JSONArray options, int correctIndex) {
-        try {
-            JSONArray questions = copyArray(gameData == null ? null : gameData.optJSONArray("questions"));
-            questions.put(new JSONObject().put("id", java.util.UUID.randomUUID().toString())
-                    .put("question", prompt).put("options", options).put("correct", correctIndex));
-            saveGameQuestions(item, questions);
-        } catch (Exception exception) {
-            AppLogger.error(this, "ManagementFeatureActivity", "Không thể thêm câu hỏi game", exception);
-            setLoading(false);
-            showErrorDialog("Không thể chuẩn bị câu hỏi trò chơi");
-        }
-    }
-
-    private void addGamePair(FeatureItem item, JSONObject gameData, String left, String right) {
-        try {
-            JSONArray questions = copyArray(gameData == null ? null : gameData.optJSONArray("questions"));
-            questions.put(new JSONObject().put("id", java.util.UUID.randomUUID().toString())
-                    .put("left", left).put("right", right));
-            saveGameQuestions(item, questions);
-        } catch (Exception exception) {
-            AppLogger.error(this, "ManagementFeatureActivity", "Không thể thêm cặp từ", exception);
-            setLoading(false);
-            showErrorDialog("Không thể chuẩn bị cặp ghép từ");
-        }
-    }
-
-    private void saveGameQuestions(FeatureItem item, JSONArray questions) throws Exception {
-        setLoading(true);
-        repository.action(Request.Method.PUT, "teacher/games/" + item.getId() + "/",
-                new JSONObject().put("questions", questions),
-                actionCallback("Đã cập nhật nội dung trò chơi trên server"));
-    }
-
     private void showStatistics(FeatureItem item) {
-        String endpoint = "teacher_games".equals(spec.getActionKind())
-                ? "teacher/games/" + item.getId() + "/stats/"
-                : "activities/exercises/" + item.getId() + "/stats/";
+        String endpoint = "activities/exercises/" + item.getId() + "/stats/";
         setLoading(true);
         repository.loadObject(endpoint, new ApiCallback<JSONObject>() {
             @Override public void onSuccess(JSONObject data) {
@@ -471,9 +387,7 @@ public class ManagementFeatureActivity extends BaseActivity {
     }
 
     private void deleteItem(FeatureItem item) {
-        String endpoint = "teacher_games".equals(spec.getActionKind())
-                ? "teacher/games/" + item.getId() + "/"
-                : "activities/exercises/" + item.getId() + "/";
+        String endpoint = "activities/exercises/" + item.getId() + "/";
         setLoading(true);
         repository.action(Request.Method.DELETE, endpoint, null,
                 actionCallback("Đã xóa dữ liệu khỏi server"));
@@ -508,10 +422,6 @@ public class ManagementFeatureActivity extends BaseActivity {
     private String textOf(EditText input) {
         return input == null || input.getText() == null
                 ? "" : input.getText().toString().trim();
-    }
-
-    private JSONArray copyArray(JSONArray source) throws Exception {
-        return source == null ? new JSONArray() : new JSONArray(source.toString());
     }
 
     private void performTextAction(FeatureItem item, String label, String value) {
@@ -704,10 +614,6 @@ public class ManagementFeatureActivity extends BaseActivity {
                 endpoint = "activities/exercises/" + item.getId() + "/";
                 method = Request.Method.PATCH;
                 body.put("published", "Xuất bản".equals(label));
-            } else if ("teacher_games".equals(kind)) {
-                endpoint = "teacher/games/" + item.getId() + "/";
-                method = Request.Method.PUT;
-                body.put("is_published", "Xuất bản".equals(label));
             } else return;
 
             setLoading(true);

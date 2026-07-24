@@ -48,24 +48,29 @@ android {
                 "src/main/res-home",
                 "src/main/res-course",
                 "src/main/res-exam",
-                "src/main/res-game",
                 "src/main/res-ai",
                 "src/main/res-profile",
                 "src/main/res-payment",
                 "src/main/res-notification",
-                "src/main/res-management"
+                "src/main/res-management",
+                "src/main/res-admin",
+                "src/main/res-teacher"
             )
         }
     }
 }
 
 dependencies {
+    // Admin UI dùng AOT để cuộn mượt ngay cả khi host Android chạy bản debug.
+    debugImplementation("com.example.smartkid.smartkid_admin_flutter_module:flutter_release:1.0")
+    releaseImplementation("com.example.smartkid.smartkid_admin_flutter_module:flutter_release:1.0")
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.material)
     implementation(libs.volley)
     implementation(libs.picasso)
+    implementation(libs.viewpager2)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)

@@ -78,7 +78,7 @@
             android:clipToPadding="false"
             android:divider="@android:color/transparent"
             android:dividerHeight="10dp"
-            android:paddingBottom="14dp" />
+            android:paddingBottom="@dimen/floating_nav_content_inset" />
 
         <TextView
             android:background="@null"

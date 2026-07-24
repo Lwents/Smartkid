@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.android.volley.Request;
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.data.local.SessionManager;
 import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
@@ -49,7 +50,8 @@ public class ManagementCreateActivity extends BaseActivity {
         try {
             setContentView(R.layout.management_activity_create);
             kind = getIntent() == null ? "" : safe(getIntent().getStringExtra(EXTRA_KIND));
-            if (!isSupported(kind)) {
+            if (!isSupported(kind) || !isAllowedForRole(kind,
+                    new SessionManager(this).getUser().getRole())) {
                 showErrorDialog("Chức năng tạo mới không hợp lệ");
                 finish();
                 return;
@@ -67,6 +69,13 @@ public class ManagementCreateActivity extends BaseActivity {
             AppLogger.error(this, "ManagementCreateActivity", "Không thể tạo biểu mẫu", exception);
             showErrorDialog("Không thể mở biểu mẫu tạo mới");
         }
+    }
+
+    private boolean isAllowedForRole(String value, String role) {
+        String safeRole = safe(role).toLowerCase(java.util.Locale.ROOT);
+        if (value.startsWith("admin_")) return "admin".equals(safeRole);
+        return value.startsWith("teacher_")
+                && ("teacher".equals(safeRole) || "instructor".equals(safeRole));
     }
 
     private void bindViews() {
@@ -98,13 +107,6 @@ public class ManagementCreateActivity extends BaseActivity {
             addCourseSpinner();
             addInput("duration", "Thời gian làm bài (phút)", InputType.TYPE_CLASS_NUMBER);
             addInput("pass_score", "Điểm đạt (0–100)", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        } else {
-            addInput("title", "Tên trò chơi", InputType.TYPE_CLASS_TEXT);
-            addInput("description", "Mô tả", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-            addInput("subject", "Môn học", InputType.TYPE_CLASS_TEXT);
-            addInput("grade_level", "Lớp: 1–5", InputType.TYPE_CLASS_NUMBER);
-            addSpinner(new String[]{"quiz", "word_match", "puzzle"});
-            addInput("difficulty", "Độ khó: easy, medium hoặc hard", InputType.TYPE_CLASS_TEXT);
         }
     }
 
@@ -196,8 +198,7 @@ public class ManagementCreateActivity extends BaseActivity {
             String endpoint;
             if ("admin_users".equals(kind)) endpoint = "account/admin/users/";
             else if ("teacher_courses".equals(kind)) endpoint = "content/courses/";
-            else if ("teacher_exams".equals(kind)) endpoint = "activities/exercises/";
-            else endpoint = "teacher/games/";
+            else endpoint = "activities/exercises/";
             setLoading(true);
             repository.action(Request.Method.POST, endpoint, body,
                     new ApiCallback<JSONObject>() {
@@ -269,20 +270,6 @@ public class ManagementCreateActivity extends BaseActivity {
             body.put("published", false);
             body.put("settings", settings);
             body.put("questions", new JSONArray());
-        } else {
-            String title = required("title");
-            String grade = required("grade_level");
-            if (title == null || grade == null) return null;
-            body.put("title", title);
-            body.put("description", value("description"));
-            body.put("subject", value("subject"));
-            body.put("grade_level", Integer.parseInt(grade));
-            body.put("game_type", selectedValue());
-            String difficulty = value("difficulty");
-            body.put("difficulty", difficulty.isEmpty() ? "easy" : difficulty);
-            body.put("is_published", false);
-            body.put("questions", new JSONArray());
-            body.put("settings", new JSONObject());
         }
         return body;
     }
@@ -333,13 +320,12 @@ public class ManagementCreateActivity extends BaseActivity {
     private String titleForKind() {
         if ("admin_users".equals(kind)) return "Tạo tài khoản";
         if ("teacher_courses".equals(kind)) return "Tạo khóa học";
-        if ("teacher_exams".equals(kind)) return "Tạo bài kiểm tra";
-        return "Tạo trò chơi";
+        return "Tạo bài kiểm tra";
     }
 
     private boolean isSupported(String value) {
         return "admin_users".equals(value) || "teacher_courses".equals(value)
-                || "teacher_exams".equals(value) || "teacher_games".equals(value);
+                || "teacher_exams".equals(value);
     }
 
     private void setLoading(boolean loading) {

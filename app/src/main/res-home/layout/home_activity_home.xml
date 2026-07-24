@@ -18,82 +18,87 @@
         app:layout_constraintTop_toTopOf="parent"
         app:title="@string/title_home" />
 
-    <FrameLayout
-        android:id="@+id/fragmentContainer"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/studentPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="92dp"
+        android:overScrollMode="never"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbarHome" />
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/bottomNavigation"
         style="@style/Widget.Smartkid.FloatingNavigation"
         android:layout_width="0dp"
         android:layout_height="@dimen/floating_nav_height"
-        android:layout_marginStart="@dimen/floating_nav_margin"
-        android:layout_marginEnd="@dimen/floating_nav_margin"
-        android:layout_marginBottom="@dimen/floating_nav_margin"
-        android:baselineAligned="false"
+        android:layout_marginStart="@dimen/floating_nav_margin_horizontal"
+        android:layout_marginEnd="@dimen/floating_nav_margin_horizontal"
+        android:layout_marginBottom="@dimen/floating_nav_margin_bottom"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-            android:background="@null"
-            android:id="@+id/nav_dashboard"
-            style="@style/Widget.Smartkid.FloatingNavigation.Item"
-            android:layout_width="0dp"
+        <View
+            android:id="@+id/navSelectionIndicator"
+            android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:contentDescription="@string/nav_home"
-            app:drawableTopCompat="@drawable/home_ic_nav_glass_home"
-            android:text="@string/nav_home" />
+            android:layout_gravity="start|center_vertical"
+            android:background="@drawable/common_bg_navigation_active"
+            android:clickable="false"
+            android:elevation="0dp"
+            android:focusable="false" />
 
-        <TextView
-            android:background="@null"
-            android:id="@+id/nav_courses"
-            style="@style/Widget.Smartkid.FloatingNavigation.Item"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/bottomNavigationItems"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:contentDescription="@string/nav_courses"
-            app:drawableTopCompat="@drawable/course_ic_nav_glass_courses"
-            android:text="@string/nav_courses" />
+            android:baselineAligned="false"
+            android:elevation="2dp"
+            android:orientation="horizontal">
 
-        <TextView
-            android:background="@null"
-            android:id="@+id/nav_exams"
-            style="@style/Widget.Smartkid.FloatingNavigation.Item"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:contentDescription="@string/nav_exams"
-            app:drawableTopCompat="@drawable/exam_ic_nav_glass_exams"
-            android:text="@string/nav_exams" />
+            <TextView
+                android:id="@+id/nav_dashboard"
+                style="@style/Widget.Smartkid.FloatingNavigation.Item.Pager"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:contentDescription="@string/nav_home"
+                android:text="@string/nav_home"
+                app:drawableTopCompat="@drawable/home_ic_nav_glass_home" />
 
-        <TextView
-            android:background="@null"
-            android:id="@+id/nav_games"
-            style="@style/Widget.Smartkid.FloatingNavigation.Item"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:contentDescription="@string/nav_games"
-            app:drawableTopCompat="@drawable/game_ic_nav_glass_games"
-            android:text="@string/nav_games" />
+            <TextView
+                android:id="@+id/nav_courses"
+                style="@style/Widget.Smartkid.FloatingNavigation.Item.Pager"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:contentDescription="@string/nav_courses"
+                android:text="@string/nav_courses"
+                app:drawableTopCompat="@drawable/course_ic_nav_glass_courses" />
 
-        <TextView
-            android:background="@null"
-            android:id="@+id/nav_profile"
-            style="@style/Widget.Smartkid.FloatingNavigation.Item"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:contentDescription="@string/nav_profile"
-            app:drawableTopCompat="@drawable/profile_ic_nav_glass_profile"
-            android:text="@string/nav_profile" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/nav_exams"
+                style="@style/Widget.Smartkid.FloatingNavigation.Item.Pager"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:contentDescription="@string/nav_exams"
+                android:text="@string/nav_exams"
+                app:drawableTopCompat="@drawable/exam_ic_nav_glass_exams" />
+
+            <TextView
+                android:id="@+id/nav_profile"
+                style="@style/Widget.Smartkid.FloatingNavigation.Item.Pager"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:contentDescription="@string/nav_profile"
+                android:text="@string/nav_profile"
+                app:drawableTopCompat="@drawable/profile_ic_nav_glass_profile" />
+        </LinearLayout>
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

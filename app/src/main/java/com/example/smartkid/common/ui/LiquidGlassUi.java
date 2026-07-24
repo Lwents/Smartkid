@@ -49,7 +49,7 @@ public final class LiquidGlassUi {
             configureSystemBars(activity);
             View content = activity.findViewById(android.R.id.content);
             if (content != null) {
-                content.setBackgroundResource(R.drawable.common_bg_liquid_screen);
+                applyWindowBackground(activity, content);
                 decorateTree(content);
             }
         } catch (Exception exception) {
@@ -69,6 +69,24 @@ public final class LiquidGlassUi {
         }
     }
 
+    /** Keeps the top system-bar area visually attached to a screen's header. */
+    public static void useStatusBarBackdrop(Activity activity, int rootId,
+                                            int backdropDrawable, boolean lightIcons) {
+        if (activity == null || activity.getWindow() == null) return;
+        View decor = activity.getWindow().getDecorView();
+        decor.setTag(R.id.tag_status_bar_backdrop, backdropDrawable);
+        decor.setTag(R.id.tag_status_bar_light_icons, lightIcons);
+        decor.setTag(R.id.tag_status_bar_root, rootId);
+        decorate(activity);
+    }
+
+    /** Matches the black Android navigation area used by the Flutter dashboard. */
+    public static void useDarkNavigationBar(Activity activity) {
+        if (activity == null || activity.getWindow() == null) return;
+        activity.getWindow().getDecorView().setTag(R.id.tag_dark_navigation_bar, true);
+        configureSystemBars(activity);
+    }
+
     private static void configureSystemBars(Activity activity) {
         Window window = activity.getWindow();
         if (window == null) {
@@ -76,16 +94,39 @@ public final class LiquidGlassUi {
         }
         WindowCompat.setDecorFitsSystemWindows(window, false);
         window.setStatusBarColor(ContextCompat.getColor(activity, android.R.color.transparent));
-        window.setNavigationBarColor(ContextCompat.getColor(activity, R.color.glass_navigation_bar));
+        boolean darkNavigationBar = Boolean.TRUE.equals(
+                window.getDecorView().getTag(R.id.tag_dark_navigation_bar));
+        window.setNavigationBarColor(ContextCompat.getColor(activity,
+                darkNavigationBar ? android.R.color.black : R.color.glass_navigation_bar));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarContrastEnforced(false);
+        }
         boolean darkMode = (activity.getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        Object lightIconTag = window.getDecorView().getTag(R.id.tag_status_bar_light_icons);
+        boolean lightStatusIcons = lightIconTag instanceof Boolean
+                ? (Boolean) lightIconTag : !darkMode;
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window,
                 window.getDecorView());
-        controller.setAppearanceLightStatusBars(!darkMode);
+        controller.setAppearanceLightStatusBars(lightStatusIcons);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            controller.setAppearanceLightNavigationBars(!darkMode);
+            controller.setAppearanceLightNavigationBars(!darkNavigationBar && !darkMode);
         }
         applySafeInsets(activity);
+    }
+
+    private static void applyWindowBackground(Activity activity, View content) {
+        View decor = activity.getWindow().getDecorView();
+        Object backdropTag = decor.getTag(R.id.tag_status_bar_backdrop);
+        Object rootTag = decor.getTag(R.id.tag_status_bar_root);
+        if (backdropTag instanceof Integer && rootTag instanceof Integer) {
+            decor.setBackgroundResource((Integer) backdropTag);
+            content.setBackgroundColor(ContextCompat.getColor(activity, android.R.color.transparent));
+            View root = activity.findViewById((Integer) rootTag);
+            if (root != null) root.setBackgroundResource(R.drawable.common_bg_liquid_screen);
+            return;
+        }
+        content.setBackgroundResource(R.drawable.common_bg_liquid_screen);
     }
 
     private static void applySafeInsets(Activity activity) {

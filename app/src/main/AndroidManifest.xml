@@ -37,13 +37,20 @@
         <activity android:name=".feature.ai.AssessmentActivity" android:exported="false" />
         <activity android:name=".feature.management.ManagementFeatureActivity" android:exported="false" />
         <activity android:name=".feature.management.ManagementCreateActivity" android:exported="false" />
-        <activity android:name=".feature.management.RolePortalActivity" android:exported="false" />
+        <activity
+            android:name=".feature.admin.AdminFlutterActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:exported="false"
+            android:hardwareAccelerated="true"
+            android:theme="@style/Theme.Smartkid"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".feature.admin.AdminDashboardActivity" android:exported="false" />
+        <activity android:name=".feature.teacher.TeacherDashboardActivity" android:exported="false" />
         <activity android:name=".feature.profile.ParentActivity" android:exported="false" />
         <activity android:name=".feature.profile.ChangePasswordActivity" android:exported="false" />
         <activity android:name=".feature.profile.ProfileEditActivity" android:exported="false" />
         <activity android:name=".feature.payment.PaymentActivity" android:exported="false" />
         <activity android:name=".feature.notification.FeatureListActivity" android:exported="false" />
-        <activity android:name=".feature.game.GameActivity" android:exported="false" />
         <activity android:name=".feature.exam.ExamActivity" android:exported="false" />
         <activity android:name=".feature.course.CatalogActivity" android:exported="false" />
         <activity

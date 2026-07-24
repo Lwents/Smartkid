@@ -19,9 +19,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("$rootDir/flutter_admin/build/host/outputs/repo") }
+        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
     }
 }
 
 rootProject.name = "Smartkid"
 include(":app")
- 

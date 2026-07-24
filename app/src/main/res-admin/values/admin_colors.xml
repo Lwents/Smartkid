@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="admin_header_start">#FFF8FBFF</color>
+    <color name="admin_header_end">#FFE7EEFF</color>
+    <color name="admin_accent">#FF635BFF</color>
+    <color name="admin_avatar_start">#FFC7D2FE</color>
+    <color name="admin_avatar_end">#FF818CF8</color>
+    <color name="admin_orb_start">#E6FFFFFF</color>
+    <color name="admin_orb_end">#668AB4FF</color>
+    <color name="admin_logout_surface">#FFFFF5F5</color>
+    <color name="admin_logout_stroke">#FFFFC9C9</color>
+    <color name="admin_card_blue">#FFE8F2FF</color>
+    <color name="admin_card_green">#FFE8F8F2</color>
+    <color name="admin_card_gold">#FFFFF4D8</color>
+    <color name="admin_card_orange">#FFFFEDE5</color>
+    <color name="admin_card_red">#FFFFE9EC</color>
+    <color name="admin_card_cyan">#FFE3F8FB</color>
+</resources>
