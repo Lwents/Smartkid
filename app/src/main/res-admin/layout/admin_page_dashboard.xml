@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scrollAdminDashboard"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="104dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/buttonAdminMenu"
+                style="@style/Widget.Smartkid.AdminGlassCard.Interactive"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/admin_management_tools"
+                app:cardCornerRadius="20dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@null"
+                    android:padding="10dp"
+                    android:src="@drawable/admin_ic_menu"
+                    app:tint="@color/admin_text_primary" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/admin_dashboard_title"
+                    android:textColor="@color/admin_text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/admin_dashboard_subtitle"
+                    android:textColor="@color/admin_text_secondary"
+                    android:textSize="11.5sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/buttonAdminNotifications"
+                    style="@style/Widget.Smartkid.AdminGlassCard.Interactive"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/notifications"
+                    app:cardCornerRadius="20dp">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:padding="10dp"
+                        android:src="@drawable/admin_ic_bell"
+                        app:tint="@color/admin_text_primary" />
+                </com.google.android.material.card.MaterialCardView>
+                <View
+                    android:layout_width="9dp"
+                    android:layout_height="9dp"
+                    android:layout_gravity="top|end"
+                    android:background="@drawable/admin_badge_dot_primary" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/buttonAdminProfile"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginStart="6dp"
+                android:clickable="true"
+                android:focusable="true">
+                <TextView
+                    android:id="@+id/textAdminAvatar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/admin_bg_avatar"
+                    android:gravity="center"
+                    android:text="AD"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+                <View
+                    android:layout_width="11dp"
+                    android:layout_height="11dp"
+                    android:layout_gravity="bottom|end"
+                    android:background="@drawable/admin_badge_dot_online" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressAdminDashboard"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginStart="22dp"
+            android:layout_marginEnd="22dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/admin_primary" />
+
+        <TextView
+            android:id="@+id/textAdminDashboardStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/admin_bg_error_message"
+            android:padding="12dp"
+            android:textColor="@color/admin_text_secondary"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <include layout="@layout/admin_section_kpis" />
+        <include layout="@layout/admin_section_quick_actions" />
+
+        <TextView
+            style="@style/TextAppearance.Smartkid.AdminSectionTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/admin_chart_title" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/admin_bg_chart_tabs"
+            android:orientation="horizontal"
+            android:padding="4dp">
+            <TextView android:id="@+id/buttonAdminChart7" style="@style/Widget.Smartkid.AdminChartTab" android:text="@string/admin_chart_7_days" />
+            <TextView android:id="@+id/buttonAdminChart30" style="@style/Widget.Smartkid.AdminChartTab" android:text="@string/admin_chart_30_days" />
+            <TextView android:id="@+id/buttonAdminChart90" style="@style/Widget.Smartkid.AdminChartTab" android:text="@string/admin_chart_90_days" />
+            <TextView android:id="@+id/buttonAdminChartCustom" style="@style/Widget.Smartkid.AdminChartTab" android:text="@string/admin_chart_custom" />
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.Smartkid.AdminGlassCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            app:cardCornerRadius="24dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/admin_chart_metric"
+                        android:textColor="@color/admin_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                    <ProgressBar
+                        android:id="@+id/progressAdminChart"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:indeterminateTint="@color/admin_primary" />
+                    <TextView
+                        android:id="@+id/textAdminChartPeriod"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/admin_bg_period_badge"
+                        android:text="@string/admin_chart_7_days"
+                        android:textColor="@color/admin_primary"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+                </LinearLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="188dp"
+                    android:layout_marginTop="8dp">
+                    <com.example.smartkid.feature.admin.ui.AdminActivityChartView
+                        android:id="@+id/adminActivityChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                    <TextView
+                        android:id="@+id/textAdminChartNoData"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:padding="24dp"
+                        android:text="@string/admin_chart_empty"
+                        android:textAlignment="center"
+                        android:textColor="@color/admin_text_muted"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
+                </FrameLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:id="@+id/textAdminManagementTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                style="@style/TextAppearance.Smartkid.AdminSectionTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/admin_management_tools" />
+            <TextView
+                android:id="@+id/textAdminToolCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/admin_bg_period_badge"
+                android:textColor="@color/admin_primary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/containerAdminManagement"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:orientation="vertical" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

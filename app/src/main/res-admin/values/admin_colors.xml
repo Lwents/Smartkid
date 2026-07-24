@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="admin_background_start">#FFF7F9FC</color>
+    <color name="admin_background_center">#FFFBFCFE</color>
+    <color name="admin_background_end">#FFF3F6FA</color>
+    <color name="admin_text_primary">#FF1E293B</color>
+    <color name="admin_text_secondary">#FF64748B</color>
+    <color name="admin_text_muted">#FF94A3B8</color>
+    <color name="admin_primary">#FF635BFF</color>
+    <color name="admin_primary_light">#FFEDE9FE</color>
+    <color name="admin_blue">#FF3B82F6</color>
+    <color name="admin_blue_light">#FF60A5FA</color>
+    <color name="admin_green">#FF10B981</color>
+    <color name="admin_green_light">#FF34D399</color>
+    <color name="admin_orange">#FFF59E0B</color>
+    <color name="admin_orange_light">#FFFBBF24</color>
+    <color name="admin_red">#FFEF4444</color>
+    <color name="admin_red_light">#FFF87171</color>
+    <color name="admin_cyan">#FF0EA5E9</color>
+    <color name="admin_cyan_light">#FF38BDF8</color>
+    <color name="admin_glass">#F5FFFFFF</color>
+    <color name="admin_glass_soft">#85FFFFFF</color>
+    <color name="admin_glass_stroke">#E8FFFFFF</color>
+    <color name="admin_divider">#FFE2E8F0</color>
     <color name="admin_header_start">#FFF8FBFF</color>
     <color name="admin_header_end">#FFE7EEFF</color>
     <color name="admin_accent">#FF635BFF</color>

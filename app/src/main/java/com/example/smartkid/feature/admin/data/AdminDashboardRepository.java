@@ -46,6 +46,31 @@ public final class AdminDashboardRepository {
         });
     }
 
+    public void loadActivityChart(String from, String to,
+                                  ApiCallback<List<AdminDashboardData.ActivityPoint>> callback) {
+        String endpoint = "admin/reports/users/?type=timeseries"
+                + (from == null || from.isEmpty() ? "" : "&from=" + from)
+                + (to == null || to.isEmpty() ? "" : "&to=" + to);
+        apiClient.getArray(endpoint, true, new ApiCallback<JSONArray>() {
+            @Override
+            public void onSuccess(JSONArray data) {
+                List<AdminDashboardData.ActivityPoint> points = new ArrayList<>();
+                for (int index = 0; index < data.length(); index++) {
+                    JSONObject value = data.optJSONObject(index);
+                    if (value == null) continue;
+                    points.add(new AdminDashboardData.ActivityPoint(
+                            value.optString("date", ""), value.optInt("newUsers", 0)));
+                }
+                callback.onSuccess(points);
+            }
+
+            @Override
+            public void onError(ApiError error) {
+                callback.onError(error);
+            }
+        });
+    }
+
     private AdminDashboardData parse(JSONObject response) {
         JSONObject root = response == null ? new JSONObject() : response;
         JSONObject kpis = object(root, "kpis");
