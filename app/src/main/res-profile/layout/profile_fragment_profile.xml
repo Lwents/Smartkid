@@ -10,7 +10,10 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="@dimen/floating_nav_content_inset">
 
         <TextView
             android:id="@+id/textProfileAvatar"

@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/teacherDashboardRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/teacherDashboardScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="104dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/teacher_bg_header"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="20dp"
+            android:paddingTop="18dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="22dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/teacher_dashboard_title"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textTeacherWelcome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/glass_text_on_gradient_secondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonTeacherRefresh"
+                style="@style/Widget.Smartkid.GlassButton.Outlined"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@string/refresh"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:icon="@drawable/role_ic_refresh"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="22dp"
+                app:iconTint="@color/white"
+                app:strokeColor="@color/glass_divider_on_gradient" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonTeacherLogout"
+                style="@style/Widget.Smartkid.GlassButton.Outlined"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@string/logout"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:icon="@drawable/role_ic_logout"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="22dp"
+                app:iconTint="@color/teacher_accent"
+                app:strokeColor="@color/glass_divider_on_gradient" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressTeacherDashboard"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/textTeacherDashboardStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="20dp"
+            android:textColor="@color/smartkid_error"
+            android:visibility="gone" />
+
+        <TextView
+            style="@style/TextAppearance.Smartkid.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="22dp"
+            android:layout_marginEnd="20dp"
+            android:text="@string/teacher_stats_title" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:fillViewport="true"
+            android:paddingStart="14dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="14dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    style="@style/Widget.Smartkid.GlassCard"
+                    android:layout_width="0dp"
+                    android:layout_height="116dp"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/teacher_card_green">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <ImageView android:layout_width="25dp" android:layout_height="25dp"
+                            android:contentDescription="@null" android:src="@drawable/role_ic_course"
+                            app:tint="@color/teacher_header_start" />
+                        <TextView android:id="@+id/textTeacherCourseCount"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp" android:text="@string/dashboard_zero"
+                            android:textColor="@color/teacher_header_start" android:textSize="25sp"
+                            android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="@string/teacher_courses_stat" android:textColor="@color/smartkid_text_secondary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    style="@style/Widget.Smartkid.GlassCard"
+                    android:layout_width="0dp"
+                    android:layout_height="116dp"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/teacher_card_blue">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <ImageView android:layout_width="25dp" android:layout_height="25dp"
+                            android:contentDescription="@null" android:src="@drawable/role_ic_users"
+                            app:tint="@color/smartkid_primary_dark" />
+                        <TextView android:id="@+id/textTeacherStudentCount"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp" android:text="@string/dashboard_zero"
+                            android:textColor="@color/smartkid_primary_dark" android:textSize="25sp"
+                            android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="@string/teacher_students_stat" android:textColor="@color/smartkid_text_secondary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    style="@style/Widget.Smartkid.GlassCard"
+                    android:layout_width="0dp"
+                    android:layout_height="116dp"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/teacher_card_orange">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <ImageView android:layout_width="25dp" android:layout_height="25dp"
+                            android:contentDescription="@null" android:src="@drawable/role_ic_exam"
+                            app:tint="@color/smartkid_accent" />
+                        <TextView android:id="@+id/textTeacherLessonCount"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp" android:text="@string/dashboard_zero"
+                            android:textColor="@color/smartkid_accent" android:textSize="25sp"
+                            android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="@string/teacher_lessons_stat" android:textColor="@color/smartkid_text_secondary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <TextView
+            style="@style/TextAppearance.Smartkid.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="22dp"
+            android:layout_marginEnd="20dp"
+            android:text="@string/role_quick_actions" />
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="14dp"
+            android:columnCount="2">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonTeacherCreateCourse"
+                style="@style/Widget.Smartkid.GlassButton.Secondary"
+                android:layout_width="0dp"
+                android:layout_height="58dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="6dp"
+                android:text="@string/create_course"
+                app:icon="@drawable/role_ic_course"
+                app:iconGravity="textStart"
+                app:iconSize="20dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonTeacherCreateExam"
+                style="@style/Widget.Smartkid.GlassButton.Secondary"
+                android:layout_width="0dp"
+                android:layout_height="58dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="6dp"
+                android:text="@string/create_exam"
+                app:icon="@drawable/role_ic_exam"
+                app:iconGravity="textStart"
+                app:iconSize="20dp" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonTeacherReports"
+                style="@style/Widget.Smartkid.GlassButton.Secondary"
+                android:layout_width="0dp"
+                android:layout_height="58dp"
+                android:layout_columnSpan="2"
+                android:layout_columnWeight="1"
+                android:layout_margin="6dp"
+                android:text="@string/view_reports"
+                app:icon="@drawable/role_ic_chart"
+                app:iconGravity="textStart"
+                app:iconSize="20dp" />
+        </GridLayout>
+
+        <TextView
+            style="@style/TextAppearance.Smartkid.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="22dp"
+            android:layout_marginEnd="20dp"
+            android:text="@string/my_courses" />
+
+        <TextView
+            android:id="@+id/textTeacherCoursesEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="24dp"
+            android:text="@string/no_teacher_courses"
+            android:textColor="@color/smartkid_text_secondary"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/containerTeacherCourses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="20dp"
+            android:orientation="vertical" />
+
+        <TextView
+            style="@style/TextAppearance.Smartkid.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="22dp"
+            android:layout_marginEnd="20dp"
+            android:text="@string/teacher_management_tools" />
+
+        <LinearLayout
+            android:id="@+id/containerTeacherManagement"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="20dp"
+            android:orientation="vertical" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/teacherBottomNavigation"
+        style="@style/Widget.Smartkid.FloatingNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/floating_nav_height"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="@dimen/floating_nav_margin_horizontal"
+        android:layout_marginEnd="@dimen/floating_nav_margin_horizontal"
+        android:layout_marginBottom="@dimen/floating_nav_margin_bottom">
+
+        <TextView
+            android:id="@+id/buttonTeacherNavOverview"
+            style="@style/Widget.Smartkid.FloatingNavigation.Item"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawableTint="@color/navigation_custom_item_color"
+            android:drawableTop="@drawable/common_ic_nav_home"
+            android:text="@string/admin_nav_overview" />
+
+        <TextView
+            android:id="@+id/buttonTeacherNavCourses"
+            style="@style/Widget.Smartkid.FloatingNavigation.Item"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawableTint="@color/navigation_custom_item_color"
+            android:drawableTop="@drawable/common_ic_nav_course"
+            android:text="@string/nav_courses" />
+
+        <TextView
+            android:id="@+id/buttonTeacherNavExams"
+            style="@style/Widget.Smartkid.FloatingNavigation.Item"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawableTint="@color/navigation_custom_item_color"
+            android:drawableTop="@drawable/common_ic_nav_exam"
+            android:text="@string/nav_exams" />
+
+        <TextView
+            android:id="@+id/buttonTeacherNavStudents"
+            style="@style/Widget.Smartkid.FloatingNavigation.Item"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawableTint="@color/navigation_custom_item_color"
+            android:drawableTop="@drawable/role_ic_users"
+            android:text="@string/teacher_students_stat" />
+    </LinearLayout>
+</FrameLayout>

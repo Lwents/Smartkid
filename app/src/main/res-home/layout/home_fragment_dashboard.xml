@@ -20,7 +20,7 @@
             android:paddingStart="@dimen/screen_padding"
             android:paddingTop="@dimen/space_md"
             android:paddingEnd="@dimen/screen_padding"
-            android:paddingBottom="@dimen/space_3xl">
+            android:paddingBottom="@dimen/floating_nav_content_inset">
 
             <FrameLayout
                 android:layout_width="match_parent"

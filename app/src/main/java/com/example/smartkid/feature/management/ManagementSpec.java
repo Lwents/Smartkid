@@ -2,6 +2,7 @@ package com.example.smartkid.feature.management;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /** Ánh xạ route frontend quản lý sang API thật tương ứng. */
@@ -22,7 +23,6 @@ public final class ManagementSpec {
                 "Frontend đang dùng mockDetail và backend chưa có API lịch học trực tuyến.");
         add(specs, "teacher_exams", "Bài kiểm tra", "activities/exercises/?page=1&pageSize=100&include_stats=true", "teacher_exams");
         add(specs, "teacher_exam_reports", "Báo cáo bài kiểm tra", "activities/exercises/?page=1&pageSize=100&include_stats=true", "teacher_exam_reports");
-        add(specs, "teacher_games", "Trò chơi", "teacher/games/", "teacher_games");
         add(specs, "teacher_students", "Học viên", "teacher/students/?page=1&pageSize=100", "teacher_students");
         add(specs, "teacher_progress", "Tiến độ học viên", "teacher/students/?page=1&pageSize=100", "");
         add(specs, "teacher_feedback", "Phản hồi học viên", "teacher/students/feedback/list/?page=1&pageSize=100", "");
@@ -75,6 +75,15 @@ public final class ManagementSpec {
     public String getActionKind() { return actionKind; }
     public String getUnavailableReason() { return unavailableReason; }
     public boolean isAvailable() { return unavailableReason.isEmpty(); }
+
+    public boolean isAllowedForRole(String role) {
+        String normalized = role == null ? "" : role.toLowerCase(Locale.ROOT);
+        if (key.startsWith("admin_")) return "admin".equals(normalized);
+        if (key.startsWith("teacher_")) {
+            return "teacher".equals(normalized) || "instructor".equals(normalized);
+        }
+        return false;
+    }
 
     private static void add(Map<String, ManagementSpec> target, String key, String title,
                             String endpoint, String actionKind) {

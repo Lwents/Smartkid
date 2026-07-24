@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/adminDashboardRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollAdminDashboard"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="108dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/admin_bg_header"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="12dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonAdminMenu"
+                    style="@style/Widget.Smartkid.GlassButton.Outlined"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:contentDescription="@string/admin_management_tools"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    app:backgroundTint="@color/glass_surface_strong"
+                    app:icon="@drawable/admin_ic_menu"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="20dp"
+                    app:iconTint="@color/smartkid_text"
+                    app:strokeColor="@color/white" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/admin_dashboard_title"
+                        android:textColor="@color/smartkid_text"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/admin_dashboard_subtitle"
+                        android:textColor="@color/smartkid_text_secondary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonAdminNotifications"
+                    style="@style/Widget.Smartkid.GlassButton.Outlined"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="8dp"
+                    android:contentDescription="@string/notifications"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    app:backgroundTint="@color/glass_surface_strong"
+                    app:icon="@drawable/admin_ic_bell"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="20dp"
+                    app:iconTint="@color/smartkid_text"
+                    app:strokeColor="@color/white" />
+
+                <TextView
+                    android:id="@+id/textAdminAvatar"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/admin_bg_avatar"
+                    android:gravity="center"
+                    android:text="AD"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Smartkid.GlassCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                app:cardBackgroundColor="@color/glass_surface_strong"
+                app:cardCornerRadius="28dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="116dp"
+                    android:paddingStart="12dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingBottom="10dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="58dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.card.MaterialCardView
+                            style="@style/Widget.Smartkid.GlassCard"
+                            android:layout_width="0dp"
+                            android:layout_height="72dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            app:cardBackgroundColor="@color/glass_surface_strong"
+                            app:cardCornerRadius="18dp">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:padding="8dp">
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:background="@drawable/common_bg_glass_capsule"
+                                    android:contentDescription="@null"
+                                    android:padding="7dp"
+                                    android:src="@drawable/admin_ic_users"
+                                    app:tint="@color/smartkid_primary" />
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="7dp"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:ellipsize="end"
+                                        android:maxLines="1"
+                                        android:text="@string/admin_users_short"
+                                        android:textColor="@color/smartkid_text_secondary"
+                                        android:textSize="9sp" />
+                                    <TextView
+                                        android:id="@+id/textAdminWelcomeUsers"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/dashboard_zero"
+                                        android:textColor="@color/smartkid_text"
+                                        android:textSize="16sp"
+                                        android:textStyle="bold" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
+                            style="@style/Widget.Smartkid.GlassCard"
+                            android:layout_width="0dp"
+                            android:layout_height="72dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            app:cardBackgroundColor="@color/glass_surface_strong"
+                            app:cardCornerRadius="18dp">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:padding="8dp">
+                                <ImageView
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:background="@drawable/common_bg_glass_capsule"
+                                    android:contentDescription="@null"
+                                    android:padding="7dp"
+                                    android:src="@drawable/admin_ic_course"
+                                    app:tint="@color/smartkid_success" />
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="7dp"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+                                    <TextView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:ellipsize="end"
+                                        android:maxLines="1"
+                                        android:text="@string/admin_courses_short"
+                                        android:textColor="@color/smartkid_text_secondary"
+                                        android:textSize="9sp" />
+                                    <TextView
+                                        android:id="@+id/textAdminWelcomeCourses"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/dashboard_zero"
+                                        android:textColor="@color/smartkid_text"
+                                        android:textSize="16sp"
+                                        android:textStyle="bold" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/buttonAdminRefresh"
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:layout_gravity="center_vertical|end"
+                        android:background="@drawable/admin_bg_glass_orb"
+                        android:contentDescription="@string/refresh"
+                        android:padding="24dp"
+                        android:src="@drawable/admin_ic_refresh"
+                        app:tint="@color/smartkid_primary" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <ProgressBar
+                android:id="@+id/progressAdminDashboard"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/textAdminDashboardStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="20dp"
+                android:textColor="@color/smartkid_error"
+                android:visibility="gone" />
+
+            <include layout="@layout/admin_section_kpis" />
+            <include layout="@layout/admin_section_quick_actions" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Smartkid.GlassCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="16dp"
+                app:cardBackgroundColor="@color/glass_surface_strong">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/active_users_title"
+                        android:textColor="@color/smartkid_text"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/textAdminActiveUsers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/dashboard_zero"
+                        android:textColor="@color/smartkid_primary"
+                        android:textSize="32sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/textAdminActiveWindow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/smartkid_text_secondary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Smartkid.GlassCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="16dp"
+                app:cardBackgroundColor="@color/glass_surface_strong">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/top_courses_title"
+                        android:textColor="@color/smartkid_text"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/textAdminCoursesEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="20dp"
+                        android:text="@string/no_top_courses"
+                        android:textColor="@color/smartkid_text_secondary"
+                        android:visibility="gone" />
+                    <LinearLayout
+                        android:id="@+id/containerAdminTopCourses"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Smartkid.GlassCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="14dp"
+                android:layout_marginEnd="16dp"
+                app:cardBackgroundColor="@color/glass_surface_strong">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/recent_transactions_title"
+                        android:textColor="@color/smartkid_text"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/textAdminTransactionsEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="20dp"
+                        android:text="@string/no_recent_transactions"
+                        android:textColor="@color/smartkid_text_secondary"
+                        android:visibility="gone" />
+                    <LinearLayout
+                        android:id="@+id/containerAdminTransactions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <include layout="@layout/admin_section_system_health" />
+            <include layout="@layout/admin_section_security" />
+
+            <TextView
+                android:id="@+id/textAdminManagementTitle"
+                style="@style/TextAppearance.Smartkid.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/admin_management_tools" />
+
+            <LinearLayout
+                android:id="@+id/containerAdminManagement"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:orientation="vertical" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAdminSession"
+                style="@style/Widget.Smartkid.GlassCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="16dp"
+                app:cardBackgroundColor="@color/admin_logout_surface"
+                app:strokeColor="@color/admin_logout_stroke">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:drawableStart="@drawable/admin_ic_logout"
+                        android:drawablePadding="8dp"
+                        android:drawableTint="@color/smartkid_error"
+                        android:text="@string/admin_end_session_title"
+                        android:textColor="@color/smartkid_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/admin_end_session_subtitle"
+                        android:textColor="@color/smartkid_text_secondary"
+                        android:textSize="12sp" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonAdminLogout"
+                        style="@style/Widget.Smartkid.GlassButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="14dp"
+                        android:text="@string/logout"
+                        app:backgroundTint="@color/smartkid_error"
+                        app:icon="@drawable/admin_ic_logout"
+                        app:iconGravity="textStart"
+                        app:iconSize="20dp"
+                        app:iconTint="@color/white" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/adminBottomNavigation"
+        style="@style/Widget.Smartkid.FloatingNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/floating_nav_height"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="@dimen/floating_nav_margin_horizontal"
+        android:layout_marginEnd="@dimen/floating_nav_margin_horizontal"
+        android:layout_marginBottom="@dimen/floating_nav_margin_bottom">
+
+        <TextView
+            android:id="@+id/buttonAdminNavOverview"
+            style="@style/Widget.Smartkid.FloatingNavigation.Item"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawableTint="@color/navigation_custom_item_color"
+            android:drawableTop="@drawable/admin_ic_home"
+            android:text="@string/admin_nav_overview" />
+        <TextView
+            android:id="@+id/buttonAdminNavUsers"
+            style="@style/Widget.Smartkid.FloatingNavigation.Item"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawableTint="@color/navigation_custom_item_color"
+            android:drawableTop="@drawable/admin_ic_users"
+            android:text="@string/admin_nav_users" />
+        <TextView
+            android:id="@+id/buttonAdminNavContent"
+            style="@style/Widget.Smartkid.FloatingNavigation.Item"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawableTint="@color/navigation_custom_item_color"
+            android:drawableTop="@drawable/admin_ic_course"
+            android:text="@string/admin_nav_content" />
+        <TextView
+            android:id="@+id/buttonAdminNavReports"
+            style="@style/Widget.Smartkid.FloatingNavigation.Item"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawableTint="@color/navigation_custom_item_color"
+            android:drawableTop="@drawable/admin_ic_chart"
+            android:text="@string/admin_nav_reports" />
+        <TextView
+            android:id="@+id/buttonAdminNavSettings"
+            style="@style/Widget.Smartkid.FloatingNavigation.Item"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:drawableTint="@color/navigation_custom_item_color"
+            android:drawableTop="@drawable/admin_ic_settings"
+            android:text="@string/admin_nav_settings" />
+    </LinearLayout>
+</FrameLayout>

@@ -3,20 +3,23 @@ package com.example.smartkid.feature.home;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.common.util.NetworkStateReceiver;
 import com.example.smartkid.common.ui.BaseActivity;
+import com.example.smartkid.common.ui.LiquidGlassUi;
 import com.example.smartkid.feature.course.CoursesFragment;
 import com.example.smartkid.feature.home.DashboardFragment;
 import com.example.smartkid.feature.exam.ExamsFragment;
-import com.example.smartkid.feature.game.GamesFragment;
 import com.example.smartkid.feature.profile.ProfileFragment;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.snackbar.Snackbar;
@@ -25,10 +28,11 @@ public class HomeActivity extends BaseActivity {
     private MaterialToolbar toolbar;
     private static final String STATE_SELECTED_NAVIGATION = "selected_navigation";
     private final int[] navigationIds = {
-            R.id.nav_dashboard, R.id.nav_courses, R.id.nav_exams,
-            R.id.nav_games, R.id.nav_profile
+            R.id.nav_dashboard, R.id.nav_courses, R.id.nav_exams, R.id.nav_profile
     };
-    private LinearLayout bottomNavigation;
+    private FrameLayout bottomNavigation;
+    private View navigationIndicator;
+    private ViewPager2 studentPager;
     private int selectedNavigationId = R.id.nav_dashboard;
     private NetworkStateReceiver networkReceiver;
     private boolean receiverRegistered;
@@ -38,20 +42,27 @@ public class HomeActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         try {
             setContentView(R.layout.home_activity_home);
+            LiquidGlassUi.useStatusBarBackdrop(this, R.id.homeRoot,
+                    R.drawable.common_bg_liquid_screen, true);
+            LiquidGlassUi.useDarkNavigationBar(this);
             toolbar = findViewById(R.id.toolbarHome);
             bottomNavigation = findViewById(R.id.bottomNavigation);
-            if (toolbar == null || bottomNavigation == null) {
+            navigationIndicator = findViewById(R.id.navSelectionIndicator);
+            studentPager = findViewById(R.id.studentPager);
+            if (toolbar == null || bottomNavigation == null || navigationIndicator == null
+                    || studentPager == null) {
                 throw new IllegalStateException("Giao diện trang chính chưa đầy đủ");
             }
             setSupportActionBar(toolbar);
             bindNavigationItems();
-            if (savedInstanceState == null) {
-                openNavigation(R.id.nav_dashboard);
-            } else {
-                selectedNavigationId = savedInstanceState.getInt(
-                        STATE_SELECTED_NAVIGATION, R.id.nav_dashboard);
-                updateNavigationSelection();
-            }
+            configurePager();
+            int initialNavigation = savedInstanceState == null
+                    ? R.id.nav_dashboard
+                    : savedInstanceState.getInt(STATE_SELECTED_NAVIGATION, R.id.nav_dashboard);
+            int initialIndex = Math.max(0, navigationIndex(initialNavigation));
+            studentPager.setCurrentItem(initialIndex, false);
+            applyNavigationState(initialIndex);
+            bottomNavigation.post(() -> updateIndicatorPosition(initialIndex, 0f));
             networkReceiver = new NetworkStateReceiver(this::showNetworkState);
         } catch (Exception exception) {
             AppLogger.error(this, "HomeActivity", "Không thể tạo trang chính", exception);
@@ -77,40 +88,82 @@ public class HomeActivity extends BaseActivity {
             if (item == null) {
                 throw new IllegalStateException("Thanh điều hướng thiếu mục bắt buộc");
             }
-            item.setOnClickListener(clicked -> openNavigation(clicked.getId()));
+            item.setOnClickListener(clicked -> {
+                int targetIndex = navigationIndex(clicked.getId());
+                if (targetIndex >= 0 && targetIndex != studentPager.getCurrentItem()) {
+                    studentPager.setCurrentItem(targetIndex, true);
+                }
+            });
         }
     }
 
-    private void openNavigation(int itemId) {
-        try {
-            Fragment fragment;
-            String title;
-            if (itemId == R.id.nav_courses) {
-                fragment = new CoursesFragment();
-                title = getString(R.string.title_my_courses);
-            } else if (itemId == R.id.nav_exams) {
-                fragment = new ExamsFragment();
-                title = getString(R.string.exams);
-            } else if (itemId == R.id.nav_games) {
-                fragment = new GamesFragment();
-                title = getString(R.string.games);
-            } else if (itemId == R.id.nav_profile) {
-                fragment = new ProfileFragment();
-                title = getString(R.string.title_profile);
-            } else {
-                fragment = new DashboardFragment();
-                title = getString(R.string.title_home);
+    private void configurePager() {
+        studentPager.setAdapter(new StudentPagerAdapter(this));
+        studentPager.setUserInputEnabled(true);
+        // Chỉ giữ trang liền kề để thao tác mượt mà nhưng không tải cả bốn API lúc mở app.
+        studentPager.setOffscreenPageLimit(1);
+        studentPager.setPageTransformer((page, position) -> {
+            float distance = Math.min(1f, Math.abs(position));
+            page.setAlpha(1f - distance * 0.28f);
+            page.setScaleX(1f - distance * 0.035f);
+            page.setScaleY(1f - distance * 0.035f);
+            page.setTranslationX(-position * page.getWidth() * 0.035f);
+        });
+        studentPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset,
+                                       int positionOffsetPixels) {
+                updateIndicatorPosition(position, positionOffset);
             }
-            selectedNavigationId = itemId;
-            updateNavigationSelection();
-            toolbar.setTitle(title);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragmentContainer, fragment)
-                    .commit();
-        } catch (Exception exception) {
-            AppLogger.error(this, "HomeActivity", "Không thể đổi màn hình", exception);
-            showErrorDialog("Không thể mở chức năng đã chọn");
+
+            @Override
+            public void onPageSelected(int position) {
+                applyNavigationState(position);
+            }
+        });
+    }
+
+    private int navigationIndex(int itemId) {
+        for (int index = 0; index < navigationIds.length; index++) {
+            if (navigationIds[index] == itemId) return index;
         }
+        return -1;
+    }
+
+    private String navigationTitle(int itemId) {
+        if (itemId == R.id.nav_courses) return getString(R.string.title_my_courses);
+        if (itemId == R.id.nav_exams) return getString(R.string.exams);
+        if (itemId == R.id.nav_profile) return getString(R.string.title_profile);
+        return getString(R.string.title_home);
+    }
+
+    private void applyNavigationState(int position) {
+        if (position < 0 || position >= navigationIds.length) return;
+        selectedNavigationId = navigationIds[position];
+        updateNavigationSelection();
+        toolbar.setTitle(navigationTitle(selectedNavigationId));
+    }
+
+    private void updateIndicatorPosition(int position, float positionOffset) {
+        int availableWidth = bottomNavigation.getWidth()
+                - bottomNavigation.getPaddingLeft() - bottomNavigation.getPaddingRight();
+        if (availableWidth <= 0) return;
+        float itemWidth = availableWidth / (float) navigationIds.length;
+        int horizontalInset = dpToPixels(2f);
+        FrameLayout.LayoutParams params =
+                (FrameLayout.LayoutParams) navigationIndicator.getLayoutParams();
+        int indicatorWidth = Math.round(itemWidth) - horizontalInset * 2;
+        if (params.width != indicatorWidth) {
+            params.width = indicatorWidth;
+            navigationIndicator.setLayoutParams(params);
+        }
+        navigationIndicator.setTranslationX(
+                itemWidth * (position + positionOffset) + horizontalInset);
+    }
+
+    private int dpToPixels(float dp) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        return Math.round(dp * metrics.density);
     }
 
     private void updateNavigationSelection() {
@@ -164,6 +217,26 @@ public class HomeActivity extends BaseActivity {
             }
         } catch (Exception exception) {
             AppLogger.error(this, "HomeActivity", "Không thể báo trạng thái mạng", exception);
+        }
+    }
+
+    private static final class StudentPagerAdapter extends FragmentStateAdapter {
+        StudentPagerAdapter(HomeActivity activity) {
+            super(activity);
+        }
+
+        @androidx.annotation.NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            if (position == 1) return new CoursesFragment();
+            if (position == 2) return new ExamsFragment();
+            if (position == 3) return new ProfileFragment();
+            return new DashboardFragment();
+        }
+
+        @Override
+        public int getItemCount() {
+            return 4;
         }
     }
 }

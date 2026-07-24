@@ -20,7 +20,7 @@ import java.util.List;
 /** Đọc và thao tác các API quản lý vốn có nhiều kiểu response khác nhau. */
 public class ManagementRepository {
     private static final String[] ARRAY_KEYS = {
-            "results", "items", "courses", "users", "students", "games", "transactions",
+            "results", "items", "courses", "users", "students", "transactions",
             "logs", "notifications", "backups", "sessions", "data", "questions", "feedback"
     };
 

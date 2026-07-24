@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        style="@style/TextAppearance.Smartkid.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/role_quick_actions"
+        android:textSize="18sp" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="12dp"
+        android:columnCount="2">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAdminUsers"
+            style="@style/Widget.Smartkid.GlassButton.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:gravity="start|center_vertical"
+            android:maxLines="2"
+            android:text="@string/manage_users"
+            android:textColor="@color/smartkid_text"
+            android:textSize="13sp"
+            app:backgroundTint="@color/glass_surface_strong"
+            app:icon="@drawable/admin_ic_users"
+            app:iconGravity="textStart"
+            app:iconSize="20dp"
+            app:iconTint="@color/smartkid_primary"
+            app:strokeColor="@color/white" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAdminApprovals"
+            style="@style/Widget.Smartkid.GlassButton.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:gravity="start|center_vertical"
+            android:maxLines="2"
+            android:text="@string/approve_courses"
+            android:textColor="@color/smartkid_text"
+            android:textSize="13sp"
+            app:backgroundTint="@color/glass_surface_strong"
+            app:icon="@drawable/admin_ic_approval"
+            app:iconGravity="textStart"
+            app:iconSize="20dp"
+            app:iconTint="@color/smartkid_success"
+            app:strokeColor="@color/white" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAdminTransactions"
+            style="@style/Widget.Smartkid.GlassButton.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:gravity="start|center_vertical"
+            android:maxLines="2"
+            android:text="@string/view_transactions"
+            android:textColor="@color/smartkid_text"
+            android:textSize="13sp"
+            app:backgroundTint="@color/glass_surface_strong"
+            app:icon="@drawable/admin_ic_card"
+            app:iconGravity="textStart"
+            app:iconSize="20dp"
+            app:iconTint="@color/smartkid_primary"
+            app:strokeColor="@color/white" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAdminHealth"
+            style="@style/Widget.Smartkid.GlassButton.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:gravity="start|center_vertical"
+            android:maxLines="2"
+            android:text="@string/quick_system"
+            android:textColor="@color/smartkid_text"
+            android:textSize="13sp"
+            app:backgroundTint="@color/glass_surface_strong"
+            app:icon="@drawable/admin_ic_health"
+            app:iconGravity="textStart"
+            app:iconSize="20dp"
+            app:iconTint="@color/smartkid_secondary"
+            app:strokeColor="@color/white" />
+    </GridLayout>
+</merge>
