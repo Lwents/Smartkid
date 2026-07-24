@@ -3,10 +3,7 @@ package com.example.smartkid;
 import android.app.Application;
 
 import com.example.smartkid.common.util.AppLogger;
-import com.example.smartkid.data.local.SessionManager;
 import com.example.smartkid.data.remote.ApiClient;
-
-import io.flutter.FlutterInjector;
 
 /**
  * Điểm khởi tạo dùng chung của ứng dụng.
@@ -22,16 +19,6 @@ public class SmartKidApplication extends Application {
             ApiClient.initialize(this);
         } catch (Exception exception) {
             AppLogger.error(this, "SmartKidApplication", "Không thể khởi tạo lớp gọi API", exception);
-        }
-
-        try {
-            String role = new SessionManager(this).getUser().getRole();
-            if ("admin".equalsIgnoreCase(role)) {
-                FlutterInjector.instance().flutterLoader().startInitialization(this);
-            }
-        } catch (Exception exception) {
-            AppLogger.error(this, "SmartKidApplication",
-                    "Không thể khởi tạo sớm giao diện quản trị", exception);
         }
 
         final Thread.UncaughtExceptionHandler defaultHandler =

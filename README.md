@@ -60,12 +60,11 @@ tài khoản học viên thật. Tài khoản giáo viên/quản trị do admin 
 
 ## Địa chỉ API Android
 
-- Debug trên Android Emulator: `http://10.0.2.2:8000/api/`.
-- Release: `https://api.smartedu.click/api/`.
-- Điện thoại thật: đổi `API_BASE_URL` debug trong `app/build.gradle.kts` thành
-  `http://<IP-LAN-máy-tính>:8000/api/` rồi build lại.
+- Debug và release: `http://160.250.181.242:8000/api/`.
+- Backend đang dùng HTTP nên ứng dụng bật cleartext traffic trong Android manifest.
 
-Chỉ manifest debug cho phép HTTP local; bản release chặn cleartext.
+Cả debug và release hiện cho phép HTTP để kết nối trực tiếp tới VPS. Khi backend có
+HTTPS, nên đổi lại `android:usesCleartextTraffic="false"`.
 
 ## Kiểm tra và APK
 

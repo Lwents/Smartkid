@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.model.FeatureItem;
@@ -71,7 +73,7 @@ public class FeatureItemAdapter extends BaseAdapter {
             holder.title.setText(item.getTitle());
             bindOptional(holder.subtitle, item.getSubtitle());
             bindOptional(holder.detail, item.getDetail());
-            bindOptional(holder.status, item.getStatus());
+            bindStatus(holder.status, item.getStatus());
         } catch (Exception exception) {
             AppLogger.error(context, "FeatureItemAdapter", "Không thể hiển thị mục", exception);
             if (convertView == null) {
@@ -87,6 +89,21 @@ public class FeatureItemAdapter extends BaseAdapter {
     private void bindOptional(TextView view, String value) {
         view.setText(value);
         view.setVisibility(value == null || value.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    private void bindStatus(TextView view, String value) {
+        bindOptional(view, value);
+        if (value == null || value.isEmpty()) return;
+        String normalized = normalize(value);
+        int color = R.color.smartkid_success;
+        if (normalized.contains("loi") || normalized.contains("cao")
+                || normalized.contains("gan het") || normalized.contains("that bai")) {
+            color = R.color.smartkid_error;
+        } else if (normalized.contains("can") || normalized.contains("sap")
+                || normalized.contains("chua") || normalized.contains("khong co")) {
+            color = R.color.smartkid_accent;
+        }
+        view.setTextColor(ContextCompat.getColor(context, color));
     }
 
     private static String normalize(String value) {
