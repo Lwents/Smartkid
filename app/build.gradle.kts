@@ -18,15 +18,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "API_BASE_URL", "\"https://api.smartedu.click/api/\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://160.250.181.242:8000/api/\"")
     }
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000/api/\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://160.250.181.242:8000/api/\"")
         }
         release {
-            buildConfigField("String", "API_BASE_URL", "\"https://api.smartedu.click/api/\"")
+            buildConfigField("String", "API_BASE_URL", "\"http://160.250.181.242:8000/api/\"")
             optimization {
                 enable = false
             }
@@ -61,9 +61,6 @@ android {
 }
 
 dependencies {
-    // Admin UI dùng AOT để cuộn mượt ngay cả khi host Android chạy bản debug.
-    debugImplementation("com.example.smartkid.smartkid_admin_flutter_module:flutter_release:1.0")
-    releaseImplementation("com.example.smartkid.smartkid_admin_flutter_module:flutter_release:1.0")
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)

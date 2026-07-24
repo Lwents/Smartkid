@@ -28,7 +28,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Smartkid"
-        android:usesCleartextTraffic="false"
+        android:usesCleartextTraffic="true"
         tools:ignore="NotificationPermission">
         <activity android:name=".feature.ai.AITutorActivity" android:exported="false" />
         <activity android:name=".feature.course.LessonDiscussionActivity" android:exported="false" />
@@ -37,13 +37,6 @@
         <activity android:name=".feature.ai.AssessmentActivity" android:exported="false" />
         <activity android:name=".feature.management.ManagementFeatureActivity" android:exported="false" />
         <activity android:name=".feature.management.ManagementCreateActivity" android:exported="false" />
-        <activity
-            android:name=".feature.admin.AdminFlutterActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:exported="false"
-            android:hardwareAccelerated="true"
-            android:theme="@style/Theme.Smartkid"
-            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".feature.admin.AdminDashboardActivity" android:exported="false" />
         <activity android:name=".feature.teacher.TeacherDashboardActivity" android:exported="false" />
         <activity android:name=".feature.profile.ParentActivity" android:exported="false" />

@@ -80,7 +80,7 @@ public final class LiquidGlassUi {
         decorate(activity);
     }
 
-    /** Matches the black Android navigation area used by the Flutter dashboard. */
+    /** Keeps the system navigation area consistent with the role dashboards. */
     public static void useDarkNavigationBar(Activity activity) {
         if (activity == null || activity.getWindow() == null) return;
         activity.getWindow().getDecorView().setTag(R.id.tag_dark_navigation_bar, true);
