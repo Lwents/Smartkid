@@ -22,11 +22,7 @@ android {
     }
 
     buildTypes {
-        debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://160.250.181.242:8000/api/\"")
-        }
         release {
-            buildConfigField("String", "API_BASE_URL", "\"http://160.250.181.242:8000/api/\"")
             optimization {
                 enable = false
             }

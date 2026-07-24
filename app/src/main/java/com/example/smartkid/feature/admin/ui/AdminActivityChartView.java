@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /** Native equivalent of the Flutter activity chart painter. */
 public final class AdminActivityChartView extends View {
@@ -128,7 +129,8 @@ public final class AdminActivityChartView extends View {
             paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
             float value = values.get(index);
             String valueLabel = value == Math.round(value)
-                    ? String.valueOf(Math.round(value)) : String.format("%.1f", value);
+                    ? String.valueOf(Math.round(value))
+                    : String.format(Locale.getDefault(), "%.1f", value);
             canvas.drawText(valueLabel, x, y - dp(11), paint);
 
             if (index < labels.size()) {

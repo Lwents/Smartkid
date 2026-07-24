@@ -1,5 +1,6 @@
 package com.example.smartkid.feature.admin;
 
+import android.animation.TimeInterpolator;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,13 +32,13 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
 import java.text.NumberFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /** Native XML implementation of the former Flutter admin experience. */
 public final class AdminDashboardActivity extends RoleDashboardActivity {
@@ -44,14 +46,20 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     private static final int PAGE_USERS = 1;
     private static final int PAGE_CONTENT = 2;
     private static final int PAGE_SETTINGS = 3;
-    private static final DateTimeFormatter API_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
-    private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("dd/MM");
+    private static final String STATE_SELECTED_PAGE = "admin_selected_page";
+    private static final String API_DATE_PATTERN = "yyyy-MM-dd";
+    private static final String SHORT_DATE_PATTERN = "dd/MM";
+    private static final long DAY_MILLIS = 86_400_000L;
+    private static final TimeInterpolator NAVIGATION_INTERPOLATOR =
+            new PathInterpolator(0.2f, 0f, 0f, 1f);
 
     private AdminDashboardRepository repository;
     private ProgressBar progressBar;
     private TextView statusText;
     private NestedScrollView dashboardScroll;
     private ViewFlipper pageFlipper;
+    private FrameLayout bottomNavigation;
+    private View navigationIndicator;
     private TextView[] navItems;
     private AdminActivityChartView activityChart;
     private ProgressBar chartProgress;
@@ -78,7 +86,10 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
             bindSectionPages();
             bindSettings();
             bindChart();
-            selectPage(PAGE_OVERVIEW, false);
+            int restoredPage = savedInstanceState == null ? PAGE_OVERVIEW
+                    : savedInstanceState.getInt(STATE_SELECTED_PAGE, PAGE_OVERVIEW);
+            int initialPage = Math.max(PAGE_OVERVIEW, Math.min(PAGE_SETTINGS, restoredPage));
+            selectPage(initialPage, false);
             renderAdminTools(null);
             loadDashboard();
             loadChartPeriod("7_days", 7, getString(R.string.admin_chart_7_days));
@@ -93,6 +104,8 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         statusText = findViewById(R.id.textAdminDashboardStatus);
         dashboardScroll = findViewById(R.id.scrollAdminDashboard);
         pageFlipper = findViewById(R.id.adminPageFlipper);
+        bottomNavigation = findViewById(R.id.adminBottomNavigation);
+        navigationIndicator = findViewById(R.id.adminNavSelectionIndicator);
         activityChart = findViewById(R.id.adminActivityChart);
         chartProgress = findViewById(R.id.progressAdminChart);
         chartPeriod = findViewById(R.id.textAdminChartPeriod);
@@ -104,7 +117,8 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 findViewById(R.id.buttonAdminChart30), findViewById(R.id.buttonAdminChart90),
                 findViewById(R.id.buttonAdminChartCustom)};
         if (progressBar == null || statusText == null || dashboardScroll == null
-                || pageFlipper == null || activityChart == null) {
+                || pageFlipper == null || bottomNavigation == null
+                || navigationIndicator == null || activityChart == null) {
             throw new IllegalStateException("Dashboard quản trị thiếu thành phần bắt buộc");
         }
     }
@@ -126,6 +140,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         navItems[1].setOnClickListener(view -> selectPage(PAGE_USERS, true));
         navItems[2].setOnClickListener(view -> selectPage(PAGE_CONTENT, true));
         navItems[3].setOnClickListener(view -> selectPage(PAGE_SETTINGS, true));
+        bottomNavigation.post(() -> updateNavigationIndicator(selectedPage, false));
         pageFlipper.setOnTouchListener((view, event) -> {
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 swipeStartX = event.getX();
@@ -216,18 +231,68 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     private void selectPage(int page, boolean animate) {
         if (page < PAGE_OVERVIEW || page > PAGE_SETTINGS) return;
         boolean pageChanged = page != selectedPage || pageFlipper.getDisplayedChild() != page;
+        int previousPage = selectedPage;
         pageFlipper.setInAnimation(null);
         pageFlipper.setOutAnimation(null);
+        resetPageTransforms();
         selectedPage = page;
         pageFlipper.setDisplayedChild(page);
-        long navigationDuration = animate && pageChanged ? 120L : 0L;
+        if (animate && pageChanged) animatePageEntry(page, page > previousPage);
+        updateNavigationIndicator(page, animate && pageChanged);
         for (int index = 0; index < navItems.length; index++) {
             boolean selected = index == page;
             navItems[index].animate().cancel();
+            navItems[index].setScaleX(1f);
+            navItems[index].setScaleY(1f);
             navItems[index].setSelected(selected);
-            navItems[index].animate().scaleX(selected ? 1.04f : 1f)
-                    .scaleY(selected ? 1.04f : 1f).setDuration(navigationDuration).start();
         }
+    }
+
+    private void resetPageTransforms() {
+        for (int index = 0; index < pageFlipper.getChildCount(); index++) {
+            View child = pageFlipper.getChildAt(index);
+            child.animate().cancel();
+            child.setAlpha(1f);
+            child.setTranslationX(0f);
+        }
+    }
+
+    private void animatePageEntry(int page, boolean forward) {
+        View child = pageFlipper.getChildAt(page);
+        if (child == null) return;
+        child.setAlpha(0.96f);
+        child.setTranslationX(dp(forward ? 7 : -7));
+        child.animate().alpha(1f).translationX(0f).setDuration(180L)
+                .setInterpolator(NAVIGATION_INTERPOLATOR).withLayer().start();
+    }
+
+    private void updateNavigationIndicator(int page, boolean animate) {
+        int availableWidth = bottomNavigation.getWidth()
+                - bottomNavigation.getPaddingLeft() - bottomNavigation.getPaddingRight();
+        if (availableWidth <= 0 || navItems.length == 0) return;
+
+        int itemWidth = Math.round(availableWidth / (float) navItems.length);
+        FrameLayout.LayoutParams params =
+                (FrameLayout.LayoutParams) navigationIndicator.getLayoutParams();
+        if (params.width != itemWidth) {
+            params.width = itemWidth;
+            navigationIndicator.setLayoutParams(params);
+        }
+
+        float target = itemWidth * page;
+        navigationIndicator.animate().cancel();
+        if (animate) {
+            navigationIndicator.animate().translationX(target).setDuration(260L)
+                    .setInterpolator(NAVIGATION_INTERPOLATOR).withLayer().start();
+        } else {
+            navigationIndicator.setTranslationX(target);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@androidx.annotation.NonNull Bundle outState) {
+        outState.putInt(STATE_SELECTED_PAGE, selectedPage);
+        super.onSaveInstanceState(outState);
     }
 
     private void loadDashboard() {
@@ -350,17 +415,18 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     }
 
     private void loadChartPeriod(String key, int days, String label) {
-        LocalDate to = LocalDate.now();
-        LocalDate from = to.minusDays(days - 1L);
+        long to = todayUtcMillis();
+        long from = to - Math.max(0, days - 1L) * DAY_MILLIS;
         loadChartRange(key, label, from, to);
     }
 
-    private void loadChartRange(String key, String label, LocalDate from, LocalDate to) {
+    private void loadChartRange(String key, String label, long from, long to) {
         selectChartTab(key);
         chartProgress.setVisibility(View.VISIBLE);
         chartPeriod.setVisibility(View.GONE);
         chartEmpty.setVisibility(View.GONE);
-        repository.loadActivityChart(API_DATE.format(from), API_DATE.format(to),
+        repository.loadActivityChart(formatDate(from, API_DATE_PATTERN),
+                formatDate(to, API_DATE_PATTERN),
                 new ApiCallback<List<AdminDashboardData.ActivityPoint>>() {
                     @Override
                     public void onSuccess(List<AdminDashboardData.ActivityPoint> data) {
@@ -403,15 +469,15 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 MaterialDatePicker.Builder.dateRangePicker()
                         .setTitleText("Chọn khoảng thời gian")
                         .setSelection(androidx.core.util.Pair.create(
-                                MaterialDatePicker.todayInUtcMilliseconds() - 13L * 86400000L,
+                                MaterialDatePicker.todayInUtcMilliseconds() - 13L * DAY_MILLIS,
                                 MaterialDatePicker.todayInUtcMilliseconds()))
                         .build();
         picker.addOnPositiveButtonClickListener(selection -> {
             if (selection == null || selection.first == null || selection.second == null) return;
-            LocalDate from = Instant.ofEpochMilli(selection.first).atZone(ZoneOffset.UTC).toLocalDate();
-            LocalDate to = Instant.ofEpochMilli(selection.second).atZone(ZoneOffset.UTC).toLocalDate();
-            loadChartRange("custom", SHORT_DATE.format(from) + " – " + SHORT_DATE.format(to),
-                    from, to);
+            loadChartRange("custom",
+                    formatDate(selection.first, SHORT_DATE_PATTERN) + " – "
+                            + formatDate(selection.second, SHORT_DATE_PATTERN),
+                    selection.first, selection.second);
         });
         picker.show(getSupportFragmentManager(), "admin_chart_range");
     }
@@ -485,10 +551,31 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
 
     private String shortDate(String value) {
         try {
-            return SHORT_DATE.format(LocalDate.parse(value, API_DATE));
+            Date parsed = dateFormat(API_DATE_PATTERN).parse(value == null ? "" : value);
+            return parsed == null ? "" : dateFormat(SHORT_DATE_PATTERN).format(parsed);
         } catch (Exception ignored) {
             return value == null ? "" : value;
         }
+    }
+
+    private long todayUtcMillis() {
+        Calendar local = Calendar.getInstance();
+        Calendar utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.US);
+        utc.clear();
+        utc.set(local.get(Calendar.YEAR), local.get(Calendar.MONTH),
+                local.get(Calendar.DAY_OF_MONTH));
+        return utc.getTimeInMillis();
+    }
+
+    private String formatDate(long millis, String pattern) {
+        return dateFormat(pattern).format(new Date(millis));
+    }
+
+    private SimpleDateFormat dateFormat(String pattern) {
+        SimpleDateFormat format = new SimpleDateFormat(pattern, Locale.US);
+        format.setLenient(false);
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return format;
     }
 
     private String initials(String name) {

@@ -328,9 +328,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTint="@color/navigation_custom_item_color"
-            android:drawableTop="@drawable/common_ic_nav_home"
-            android:text="@string/admin_nav_overview" />
+            android:text="@string/admin_nav_overview"
+            app:drawableTint="@color/navigation_custom_item_color"
+            app:drawableTopCompat="@drawable/common_ic_nav_home" />
 
         <TextView
             android:id="@+id/buttonTeacherNavCourses"
@@ -338,9 +338,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTint="@color/navigation_custom_item_color"
-            android:drawableTop="@drawable/common_ic_nav_course"
-            android:text="@string/nav_courses" />
+            android:text="@string/nav_courses"
+            app:drawableTint="@color/navigation_custom_item_color"
+            app:drawableTopCompat="@drawable/common_ic_nav_course" />
 
         <TextView
             android:id="@+id/buttonTeacherNavExams"
@@ -348,9 +348,9 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTint="@color/navigation_custom_item_color"
-            android:drawableTop="@drawable/common_ic_nav_exam"
-            android:text="@string/nav_exams" />
+            android:text="@string/nav_exams"
+            app:drawableTint="@color/navigation_custom_item_color"
+            app:drawableTopCompat="@drawable/common_ic_nav_exam" />
 
         <TextView
             android:id="@+id/buttonTeacherNavStudents"
@@ -358,8 +358,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:drawableTint="@color/navigation_custom_item_color"
-            android:drawableTop="@drawable/role_ic_users"
-            android:text="@string/teacher_students_stat" />
+            android:text="@string/teacher_students_stat"
+            app:drawableTint="@color/navigation_custom_item_color"
+            app:drawableTopCompat="@drawable/role_ic_users" />
     </LinearLayout>
 </FrameLayout>
