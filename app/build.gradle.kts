@@ -1,6 +1,20 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
 }
+
+val localProperties = Properties().apply {
+    val propertiesFile = rootProject.file("local.properties")
+    if (propertiesFile.exists()) {
+        propertiesFile.inputStream().use { load(it) }
+    }
+}
+
+val defaultApiBaseUrl = "http://160.250.181.242:8000/api/"
+val apiBaseUrl = providers.gradleProperty("API_BASE_URL").orNull
+    ?: localProperties.getProperty("API_BASE_URL")
+    ?: defaultApiBaseUrl
 
 android {
     namespace = "com.example.smartkid"
@@ -18,7 +32,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "API_BASE_URL", "\"http://160.250.181.242:8000/api/\"")
+        buildConfigField(
+            "String",
+            "API_BASE_URL",
+            "\"${apiBaseUrl.trimEnd('/')}/\""
+        )
     }
 
     buildTypes {
