@@ -27,7 +27,9 @@
     <string name="register_subtitle">Thông tin sẽ được lưu trực tiếp trên PostgreSQL của server</string>
     <string name="username_hint">Tên đăng nhập</string>
     <string name="email_hint">Email</string>
-    <string name="phone_hint">Số điện thoại (không bắt buộc)</string>
+    <string name="phone_hint">Số điện thoại</string>
+    <string name="register_phone_hint">Số điện thoại *</string>
+    <string name="phone_required_error">Vui lòng nhập số điện thoại</string>
     <string name="password_confirmation_hint">Nhập lại mật khẩu</string>
     <string name="register">Đăng ký</string>
     <string name="back_to_login">Quay lại đăng nhập</string>

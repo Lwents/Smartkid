@@ -15,12 +15,14 @@ import com.example.smartkid.data.repository.AuthRepository;
 import com.example.smartkid.domain.BusinessRules;
 import com.example.smartkid.common.ui.BaseActivity;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 /** Đăng ký tài khoản học viên bằng API thật của Django. */
 public class RegisterActivity extends BaseActivity {
     private TextInputEditText usernameInput;
     private TextInputEditText emailInput;
     private TextInputEditText phoneInput;
+    private TextInputLayout phoneInputLayout;
     private TextInputEditText passwordInput;
     private TextInputEditText confirmationInput;
     private Button registerButton;
@@ -47,12 +49,14 @@ public class RegisterActivity extends BaseActivity {
         usernameInput = findViewById(R.id.inputRegisterUsername);
         emailInput = findViewById(R.id.inputRegisterEmail);
         phoneInput = findViewById(R.id.inputRegisterPhone);
+        phoneInputLayout = findViewById(R.id.layoutRegisterPhone);
         passwordInput = findViewById(R.id.inputRegisterPassword);
         confirmationInput = findViewById(R.id.inputRegisterConfirmation);
         registerButton = findViewById(R.id.buttonRegister);
         progressBar = findViewById(R.id.progressRegister);
         statusText = findViewById(R.id.textRegisterStatus);
         if (usernameInput == null || emailInput == null || phoneInput == null
+                || phoneInputLayout == null
                 || passwordInput == null || confirmationInput == null || registerButton == null
                 || progressBar == null || statusText == null) {
             throw new IllegalStateException("Giao diện đăng ký thiếu thành phần bắt buộc");
@@ -66,14 +70,15 @@ public class RegisterActivity extends BaseActivity {
             String phone = textOf(phoneInput);
             String password = rawTextOf(passwordInput);
             String confirmation = rawTextOf(confirmationInput);
+            phoneInputLayout.setError(null);
+            showStatus("", false);
             String validation = BusinessRules.validateRegistration(
                     username, email, phone, password, confirmation);
             if (!validation.isEmpty()) {
-                showStatus(validation, true);
+                showValidationError(validation);
                 return;
             }
             setLoading(true);
-            showStatus("", false);
             repository.register(username, email, phone, password, new ApiCallback<String>() {
                 @Override
                 public void onSuccess(String message) {
@@ -91,8 +96,8 @@ public class RegisterActivity extends BaseActivity {
                 public void onError(ApiError error) {
                     if (!isUsable()) return;
                     setLoading(false);
-                    showStatus(error == null ? getString(R.string.unknown_error)
-                            : error.getMessage(), true);
+                    showRegistrationError(error == null ? getString(R.string.unknown_error)
+                            : error.getMessage());
                 }
             });
         } catch (Exception exception) {
@@ -115,6 +120,27 @@ public class RegisterActivity extends BaseActivity {
     private void showStatus(String message, boolean visible) {
         statusText.setText(message);
         statusText.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    private void showValidationError(String message) {
+        if (message != null && message.toLowerCase(java.util.Locale.ROOT).contains("số điện thoại")) {
+            phoneInputLayout.setError(message);
+            phoneInput.requestFocus();
+            return;
+        }
+        showStatus(message, true);
+    }
+
+    private void showRegistrationError(String message) {
+        String normalized = message == null ? "" : message.toLowerCase(java.util.Locale.ROOT);
+        if (normalized.contains("phone") || normalized.contains("số điện thoại")) {
+            String localized = normalized.contains("blank") || normalized.contains("required")
+                    ? getString(R.string.phone_required_error) : message;
+            phoneInputLayout.setError(localized);
+            phoneInput.requestFocus();
+            return;
+        }
+        showStatus(message, true);
     }
 
     private String textOf(TextInputEditText input) {

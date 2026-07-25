@@ -61,17 +61,18 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutRegisterPhone"
             style="@style/Widget.Smartkid.GlassInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="@string/phone_hint">
+            android:hint="@string/register_phone_hint">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputRegisterPhone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="phone"
-                android:maxLength="15"
+                android:maxLength="16"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 

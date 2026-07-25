@@ -121,10 +121,15 @@ public class AuthRepository {
     public void register(String username, String email, String phone, String password,
                          ApiCallback<String> callback) {
         try {
+            String normalizedPhone = phone == null ? "" : phone.trim();
+            if (normalizedPhone.isEmpty()) {
+                callback.onError(new ApiError(0, "Vui lòng nhập số điện thoại", false));
+                return;
+            }
             JSONObject body = new JSONObject();
             body.put("username", username == null ? "" : username.trim());
             body.put("email", email == null ? "" : email.trim());
-            body.put("phone", phone == null ? "" : phone.trim());
+            body.put("phone", normalizedPhone);
             body.put("password", password == null ? "" : password);
             body.put("role", "student");
             apiClient.post(AppConstants.REGISTER_ENDPOINT, body, false,
