@@ -39,7 +39,10 @@ public final class BusinessRules {
             return "Email không đúng định dạng";
         }
         String normalizedPhone = phone == null ? "" : phone.trim();
-        if (!normalizedPhone.isEmpty() && !normalizedPhone.matches("^[0-9+]{9,15}$")) {
+        if (normalizedPhone.isEmpty()) {
+            return "Vui lòng nhập số điện thoại";
+        }
+        if (!normalizedPhone.matches("^\\+?[0-9]{9,15}$")) {
             return "Số điện thoại phải có từ 9 đến 15 chữ số";
         }
         if (password == null || password.length() < 6) {

@@ -24,6 +24,19 @@ public class BusinessRulesTest {
     }
 
     @Test
+    public void validateRegistration_requiresAValidPhoneNumber() {
+        assertEquals("Vui lòng nhập số điện thoại",
+                BusinessRules.validateRegistration(
+                        "student", "student@example.com", "", "123456", "123456"));
+        assertEquals("Số điện thoại phải có từ 9 đến 15 chữ số",
+                BusinessRules.validateRegistration(
+                        "student", "student@example.com", "123", "123456", "123456"));
+        assertTrue(BusinessRules.validateRegistration(
+                "student", "student@example.com", "+84912345678", "123456", "123456")
+                .isEmpty());
+    }
+
+    @Test
     public void clampProgress_alwaysStaysBetweenZeroAndOneHundred() {
         assertEquals(0, BusinessRules.clampProgress(-30));
         assertEquals(48, BusinessRules.clampProgress(48));

@@ -3,40 +3,83 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F8FAFC"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:paddingStart="20dp"
         android:paddingTop="20dp"
         android:paddingEnd="20dp"
         android:paddingBottom="@dimen/floating_nav_content_inset">
 
-        <TextView
-            android:id="@+id/textProfileAvatar"
-            android:layout_width="92dp"
-            android:layout_height="92dp"
-            android:background="@drawable/common_bg_avatar"
-            android:gravity="center"
-            android:text="@string/avatar_default"
-            android:textColor="@color/on_primary"
-            android:textSize="34sp"
-            android:textStyle="bold" />
 
-        <TextView
-            android:background="@null"
-            android:id="@+id/textProfileName"
+
+        <!-- Avatar Block -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:gravity="center"
-            android:text="@string/student_default_name"
-            android:textColor="@color/smartkid_text"
-            android:textSize="23sp"
-            android:textStyle="bold" />
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <!-- Main Circular Avatar -->
+                <TextView
+                    android:id="@+id/textProfileAvatar"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:background="@drawable/profile_bg_avatar"
+                    android:gravity="center"
+                    android:text="@string/avatar_default"
+                    android:textColor="#FFFFFF"
+                    android:textSize="40sp"
+                    android:textStyle="bold" />
+
+                <!-- Camera badge overlay -->
+                <FrameLayout
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="bottom|end"
+                    android:background="@drawable/profile_bg_camera_badge"
+                    android:elevation="3dp"
+                    android:padding="7dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/profile_ic_camera"
+                        app:tint="#6C5CE7" />
+                </FrameLayout>
+            </FrameLayout>
+
+            <!-- Full Name -->
+            <TextView
+                android:id="@+id/textProfileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:text="@string/student_default_name"
+                android:textColor="#0F172A"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <!-- Student Code -->
+            <TextView
+                android:id="@+id/textProfileUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="Mã học sinh: A123456"
+                android:textColor="#64748B"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/progressProfile"
@@ -48,188 +91,512 @@
             android:visibility="gone" />
 
         <TextView
-            android:background="@null"
             android:id="@+id/textProfileStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:textColor="@color/smartkid_text_secondary"
+            android:textColor="#64748B"
             android:textSize="13sp"
             android:visibility="gone" />
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/common_bg_glass_card"
-            android:clipToOutline="true"
-            android:elevation="@dimen/glass_elevation">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="18dp">
-
-                <TextView
-                    android:background="@null"
-                    android:id="@+id/textProfileUsername"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:background="@null"
-                    android:id="@+id/textProfileEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="13dp"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:background="@null"
-                    android:id="@+id/textProfileClass"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="13dp"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:background="@null"
-                    android:id="@+id/textProfileRole"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="13dp"
-                    android:textColor="@color/smartkid_text"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:background="@null"
-                    android:id="@+id/textProfileServer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:textColor="@color/smartkid_text_secondary"
-                    android:textIsSelectable="true"
-                    android:textSize="12sp" />
-            </LinearLayout>
-        </FrameLayout>
-
-        <TextView
-            android:background="@null"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="@string/student_features"
-            android:textColor="@color/smartkid_text"
-            android:textSize="17sp"
-            android:textStyle="bold" />
-
+        <!-- Stats Card (3 Columns) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="vertical">
+            android:layout_marginTop="20dp"
+            android:background="@drawable/profile_bg_card"
+            android:elevation="2dp"
+            android:orientation="horizontal"
+            android:paddingTop="18dp"
+            android:paddingBottom="18dp">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonEditProfile"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
+            <!-- Col 1: Khóa học -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/edit_profile" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonChangePassword"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/profile_bg_icon_blue"
+                    android:padding="11dp"
+                    android:src="@drawable/profile_ic_book" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="5"
+                    android:textColor="#0F172A"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Khóa học"
+                    android:textColor="#64748B"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Divider 1 -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="52dp"
+                android:layout_gravity="center_vertical"
+                android:background="#F1F5F9" />
+
+            <!-- Col 2: Hoàn thành -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/change_password" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonParentInfo"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/profile_bg_icon_green"
+                    android:padding="11dp"
+                    android:src="@drawable/profile_ic_check" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="3"
+                    android:textColor="#0F172A"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Hoàn thành"
+                    android:textColor="#64748B"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Divider 2 -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="52dp"
+                android:layout_gravity="center_vertical"
+                android:background="#F1F5F9" />
+
+            <!-- Col 3: Điểm trung bình -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/parent_info" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonCatalog"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/course_catalog" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonLearningPath"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/learning_path" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonAiTutor"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/ai_tutor" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonLearningAnalysis"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/learning_analysis" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonCertificates"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/certificates" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonPayments"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/payments" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonCart"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/cart" />
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonNotifications"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/notifications" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/profile_bg_icon_orange"
+                    android:padding="11dp"
+                    android:src="@drawable/profile_ic_star" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="92%"
+                    android:textColor="#0F172A"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Điểm trung bình"
+                    android:textColor="#64748B"
+                    android:textSize="13sp" />
+            </LinearLayout>
         </LinearLayout>
+
+        <!-- Section 1 Header: Thông tin cá nhân -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/profile_ic_person"
+                app:tint="#6C5CE7" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Thông tin cá nhân"
+                android:textColor="#0F172A"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Section 1 Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/profile_bg_card"
+            android:elevation="2dp"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <!-- Item: Email -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/profile_bg_icon_blue"
+                    android:padding="9dp"
+                    android:src="@drawable/profile_ic_mail" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:text="Email"
+                    android:textColor="#1E293B"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/textProfileEmail"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:singleLine="true"
+                    android:text="kirito.vn777@gmail.com"
+                    android:textColor="#64748B"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#F1F5F9" />
+
+            <!-- Item: Mã học sinh -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/profile_bg_icon_blue"
+                    android:padding="9dp"
+                    android:src="@drawable/profile_ic_id_card" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:text="Mã học sinh"
+                    android:textColor="#1E293B"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/textProfileStudentCode"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:text="A123456"
+                    android:textColor="#64748B"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#F1F5F9" />
+
+            <!-- Item: Lớp -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/profile_bg_icon_blue"
+                    android:padding="9dp"
+                    android:src="@drawable/profile_ic_school" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:text="Lớp"
+                    android:textColor="#1E293B"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/textProfileClass"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:text="12A1"
+                    android:textColor="#64748B"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Hidden views retained for Java compatibility -->
+        <TextView
+            android:id="@+id/textProfileRole"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/textProfileServer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <!-- Section 2 Header: Tài khoản -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/profile_ic_lock"
+                app:tint="#6C5CE7" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Tài khoản"
+                android:textColor="#0F172A"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Section 2 Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/profile_bg_card"
+            android:elevation="2dp"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <!-- Item: Chỉnh sửa hồ sơ -->
+            <LinearLayout
+                android:id="@+id/rowEditProfile"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/profile_bg_icon_blue"
+                    android:padding="9dp"
+                    android:src="@drawable/profile_ic_edit" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:text="Chỉnh sửa hồ sơ"
+                    android:textColor="#1E293B"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/profile_ic_chevron_right" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#F1F5F9" />
+
+            <!-- Item: Đổi mật khẩu -->
+            <LinearLayout
+                android:id="@+id/rowChangePassword"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="?selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/profile_bg_icon_blue"
+                    android:padding="9dp"
+                    android:src="@drawable/profile_ic_lock" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:text="Đổi mật khẩu"
+                    android:textColor="#1E293B"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/profile_ic_chevron_right" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Hidden buttons retained for Java compatibility -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonEditProfile"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonChangePassword"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonParentInfo"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonCatalog"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonLearningPath"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAiTutor"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonLearningAnalysis"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonCertificates"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonPayments"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonCart"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonNotifications"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonRefreshProfile"
-            style="@style/Widget.Smartkid.GlassButton.Outlined"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="18dp"
-            android:text="@string/refresh" />
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
 
-        <com.google.android.material.button.MaterialButton
+        <!-- Logout Container/Button -->
+        <LinearLayout
             android:id="@+id/buttonLogout"
-            style="@style/Widget.Smartkid.GlassButton.Outlined"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="9dp"
-            android:layout_marginBottom="20dp"
-            android:text="@string/logout"
-            android:textColor="@color/smartkid_error"
-            app:strokeColor="@color/smartkid_error" />
+            android:layout_height="54dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/profile_bg_logout"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/profile_ic_logout" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="Đăng xuất"
+                android:textColor="#E53935"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

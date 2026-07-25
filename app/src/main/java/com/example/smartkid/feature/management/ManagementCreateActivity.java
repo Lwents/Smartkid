@@ -93,7 +93,7 @@ public class ManagementCreateActivity extends BaseActivity {
         if ("admin_users".equals(kind)) {
             addInput("username", "Tên đăng nhập", InputType.TYPE_CLASS_TEXT);
             addInput("email", "Email", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-            addInput("phone", "Số điện thoại (không bắt buộc)", InputType.TYPE_CLASS_PHONE);
+            addInput("phone", "Số điện thoại", InputType.TYPE_CLASS_PHONE);
             addInput("password", "Mật khẩu", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             addSpinner(new String[]{"student", "instructor", "admin"});
         } else if ("teacher_courses".equals(kind)) {

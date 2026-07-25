@@ -41,8 +41,9 @@ public class ProfileFragment extends Fragment {
     private TextView serverText;
     private TextView statusText;
     private ProgressBar progressBar;
-    private Button refreshButton;
-    private Button logoutButton;
+    private TextView studentCodeText;
+    private View refreshButton;
+    private View logoutButton;
     private AuthRepository repository;
 
     @Nullable
@@ -72,28 +73,58 @@ public class ProfileFragment extends Fragment {
     }
 
     private void bindFeatureNavigation(View view) {
-        view.findViewById(R.id.buttonEditProfile).setOnClickListener(clicked ->
-                openActivity(ProfileEditActivity.class));
-        view.findViewById(R.id.buttonChangePassword).setOnClickListener(clicked ->
-                openActivity(ChangePasswordActivity.class));
-        view.findViewById(R.id.buttonParentInfo).setOnClickListener(clicked ->
-                openActivity(ParentActivity.class));
-        view.findViewById(R.id.buttonCatalog).setOnClickListener(clicked ->
-                openActivity(CatalogActivity.class));
-        view.findViewById(R.id.buttonLearningPath).setOnClickListener(clicked ->
-                openFeature(FeatureListActivity.MODE_LEARNING_PATH));
-        view.findViewById(R.id.buttonAiTutor).setOnClickListener(clicked ->
-                openActivity(AITutorActivity.class));
-        view.findViewById(R.id.buttonLearningAnalysis).setOnClickListener(clicked ->
-                openActivity(LearningAnalysisActivity.class));
-        view.findViewById(R.id.buttonCertificates).setOnClickListener(clicked ->
-                openFeature(FeatureListActivity.MODE_CERTIFICATES));
-        view.findViewById(R.id.buttonPayments).setOnClickListener(clicked ->
-                openActivity(PaymentActivity.class));
-        view.findViewById(R.id.buttonCart).setOnClickListener(clicked ->
-                openActivity(CartActivity.class));
-        view.findViewById(R.id.buttonNotifications).setOnClickListener(clicked ->
-                openFeature(FeatureListActivity.MODE_NOTIFICATIONS));
+        View rowEdit = view.findViewById(R.id.rowEditProfile);
+        if (rowEdit != null) {
+            rowEdit.setOnClickListener(clicked -> openActivity(ProfileEditActivity.class));
+        }
+        View rowChange = view.findViewById(R.id.rowChangePassword);
+        if (rowChange != null) {
+            rowChange.setOnClickListener(clicked -> openActivity(ChangePasswordActivity.class));
+        }
+        View buttonEdit = view.findViewById(R.id.buttonEditProfile);
+        if (buttonEdit != null) {
+            buttonEdit.setOnClickListener(clicked -> openActivity(ProfileEditActivity.class));
+        }
+        View buttonPassword = view.findViewById(R.id.buttonChangePassword);
+        if (buttonPassword != null) {
+            buttonPassword.setOnClickListener(clicked -> openActivity(ChangePasswordActivity.class));
+        }
+        View buttonParent = view.findViewById(R.id.buttonParentInfo);
+        if (buttonParent != null) {
+            buttonParent.setOnClickListener(clicked -> openActivity(ParentActivity.class));
+        }
+        View buttonCat = view.findViewById(R.id.buttonCatalog);
+        if (buttonCat != null) {
+            buttonCat.setOnClickListener(clicked -> openActivity(CatalogActivity.class));
+        }
+        View buttonPath = view.findViewById(R.id.buttonLearningPath);
+        if (buttonPath != null) {
+            buttonPath.setOnClickListener(clicked -> openFeature(FeatureListActivity.MODE_LEARNING_PATH));
+        }
+        View buttonAi = view.findViewById(R.id.buttonAiTutor);
+        if (buttonAi != null) {
+            buttonAi.setOnClickListener(clicked -> openActivity(AITutorActivity.class));
+        }
+        View buttonAnalysis = view.findViewById(R.id.buttonLearningAnalysis);
+        if (buttonAnalysis != null) {
+            buttonAnalysis.setOnClickListener(clicked -> openActivity(LearningAnalysisActivity.class));
+        }
+        View buttonCerts = view.findViewById(R.id.buttonCertificates);
+        if (buttonCerts != null) {
+            buttonCerts.setOnClickListener(clicked -> openFeature(FeatureListActivity.MODE_CERTIFICATES));
+        }
+        View buttonPay = view.findViewById(R.id.buttonPayments);
+        if (buttonPay != null) {
+            buttonPay.setOnClickListener(clicked -> openActivity(PaymentActivity.class));
+        }
+        View buttonCart = view.findViewById(R.id.buttonCart);
+        if (buttonCart != null) {
+            buttonCart.setOnClickListener(clicked -> openActivity(CartActivity.class));
+        }
+        View buttonNotif = view.findViewById(R.id.buttonNotifications);
+        if (buttonNotif != null) {
+            buttonNotif.setOnClickListener(clicked -> openFeature(FeatureListActivity.MODE_NOTIFICATIONS));
+        }
     }
 
     private void openFeature(String mode) {
@@ -122,6 +153,7 @@ public class ProfileFragment extends Fragment {
         avatarText = view.findViewById(R.id.textProfileAvatar);
         fullNameText = view.findViewById(R.id.textProfileName);
         usernameText = view.findViewById(R.id.textProfileUsername);
+        studentCodeText = view.findViewById(R.id.textProfileStudentCode);
         emailText = view.findViewById(R.id.textProfileEmail);
         classText = view.findViewById(R.id.textProfileClass);
         roleText = view.findViewById(R.id.textProfileRole);
@@ -134,7 +166,7 @@ public class ProfileFragment extends Fragment {
         if (avatarText == null || fullNameText == null || usernameText == null
                 || emailText == null || classText == null || roleText == null
                 || serverText == null || statusText == null || progressBar == null
-                || refreshButton == null || logoutButton == null) {
+                || logoutButton == null) {
             throw new IllegalStateException("Giao diện hồ sơ thiếu thành phần bắt buộc");
         }
     }
@@ -182,14 +214,17 @@ public class ProfileFragment extends Fragment {
                 ? getString(R.string.student_default_name) : safeUser.getFullName();
         avatarText.setText(initialOf(displayName));
         fullNameText.setText(displayName);
-        usernameText.setText(getString(R.string.username_format,
-                valueOrUpdating(safeUser.getUsername())));
-        emailText.setText(getString(R.string.email_format,
-                valueOrUpdating(safeUser.getEmail())));
-        classText.setText(getString(R.string.class_format,
-                valueOrUpdating(safeUser.getClassName())));
-        roleText.setText(getString(R.string.role_format,
-                safeUser.getRole().isEmpty() ? "student" : safeUser.getRole()));
+
+        String username = valueOrUpdating(safeUser.getUsername());
+        usernameText.setText("Mã học sinh: " + username);
+        if (studentCodeText != null) {
+            studentCodeText.setText(username);
+        }
+        emailText.setText(valueOrUpdating(safeUser.getEmail()));
+        classText.setText(valueOrUpdating(safeUser.getClassName()));
+        if (roleText != null) {
+            roleText.setText(safeUser.getRole().isEmpty() ? "student" : safeUser.getRole());
+        }
     }
 
     private String initialOf(String value) {
