@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="teacher_header_start">#FF064E3B</color>
-    <color name="teacher_header_end">#FF0F766E</color>
+    <color name="teacher_header_start">#FF111B35</color>
+    <color name="teacher_header_end">#FF5E5CE6</color>
     <color name="teacher_accent">#FFF59E0B</color>
     <color name="teacher_card_green">#FFE8F8F2</color>
     <color name="teacher_card_blue">#FFE8F2FF</color>

@@ -163,15 +163,15 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         findViewById(R.id.buttonAdminProfile).setOnClickListener(view ->
                 selectPage(PAGE_SETTINGS, true));
         bindFeature(R.id.buttonAdminUsers, "admin_users");
-        bindFeature(R.id.buttonAdminApprovals, "admin_approval");
-        bindFeature(R.id.buttonAdminTransactions, "admin_transactions");
+        bindFeature(R.id.buttonAdminCourses, "admin_courses");
+        bindFeature(R.id.buttonAdminLearning, "admin_report_learning");
         bindFeature(R.id.buttonAdminHealth, "admin_health");
         bindFeature(R.id.cardAdminKpiDau, "admin_active_users");
         bindFeature(R.id.cardAdminKpiSignups, "admin_report_users");
-        bindFeature(R.id.cardAdminKpiRevenue, "admin_report_revenue");
-        bindFeature(R.id.cardAdminKpiTransactions, "admin_transactions");
-        bindFeature(R.id.cardAdminKpiRefund, "admin_transactions");
-        bindFeature(R.id.cardAdminKpiPending, "admin_approval");
+        bindFeature(R.id.cardAdminKpiStudents, "admin_users");
+        bindFeature(R.id.cardAdminKpiTeachers, "admin_users");
+        bindFeature(R.id.cardAdminKpiCourses, "admin_courses");
+        bindFeature(R.id.cardAdminKpiLessons, "admin_report_content");
     }
 
     private void bindSectionPages() {
@@ -193,15 +193,15 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         addSectionAction(content, "admin_courses", "Quản lý khóa học",
                 getString(R.string.admin_action_courses_description), R.drawable.admin_ic_course,
                 color(R.color.admin_green));
-        addSectionAction(content, "admin_approval", getString(R.string.approve_courses),
-                getString(R.string.admin_action_approval_description), R.drawable.admin_ic_approval,
-                color(R.color.admin_orange));
         addSectionAction(content, "admin_report_content", "Báo cáo nội dung",
                 getString(R.string.admin_action_report_content_description), R.drawable.admin_ic_chart,
                 Color.rgb(115, 87, 232));
         addSectionAction(content, "admin_report_learning", "Báo cáo học tập",
                 getString(R.string.admin_action_report_learning_description), R.drawable.role_ic_chart,
                 color(R.color.admin_cyan));
+        addSectionAction(content, "admin_notifications", "Thông báo hệ thống",
+                "Gửi và theo dõi thông báo dành cho giáo viên, học sinh",
+                R.drawable.admin_ic_bell, color(R.color.admin_orange));
     }
 
     private void bindSettings() {
@@ -319,11 +319,10 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         AdminDashboardData.Kpis kpis = data.getKpis();
         setText(R.id.textAdminDau, number(kpis.getDailyActiveUsers()));
         setText(R.id.textAdminSignups, number(kpis.getSignupsLastSevenDays()));
-        setText(R.id.textAdminRevenue, money(kpis.getGrossToday()));
-        setText(R.id.textAdminTransactionsToday, number(kpis.getTransactionsToday()));
-        setText(R.id.textAdminRefundRate,
-                getString(R.string.percent_format, kpis.getRefundRate()));
-        setText(R.id.textAdminPending, number(kpis.getApprovalsPending()));
+        setText(R.id.textAdminStudents, number(kpis.getStudents()));
+        setText(R.id.textAdminTeachers, number(kpis.getTeachers()));
+        setText(R.id.textAdminCourses, number(kpis.getCourses()));
+        setText(R.id.textAdminLessons, number(kpis.getLessons()));
         renderAdminTools(data);
     }
 
@@ -370,11 +369,8 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         tools.add(tool("admin_users", "Quản lý người dùng", "Phân quyền, khóa và quản lý tài khoản",
                 R.drawable.admin_ic_users, 0xFF635BFF, 0xFF818CF8, ""));
         tools.add(tool("admin_courses", "Quản lý khóa học",
-                "Quản lý nội dung, trạng thái và danh mục khóa học",
+                "Theo dõi khóa học và nội dung do giáo viên tự xuất bản",
                 R.drawable.admin_ic_course, 0xFF10B981, 0xFF34D399, ""));
-        tools.add(tool("admin_approval", "Duyệt khóa học",
-                "Kiểm tra và phê duyệt nội dung từ giáo viên",
-                R.drawable.admin_ic_approval, 0xFFF59E0B, 0xFFFBBF24, ""));
         tools.add(tool("admin_health", "Sức khỏe hệ thống",
                 "CPU " + cpu + "% • RAM " + ram + "% • Disk " + disk + "%",
                 R.drawable.admin_ic_health, 0xFFEF4444, 0xFFF87171, cpu + "%"));
@@ -393,9 +389,6 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         tools.add(tool("admin_backups", "Sao lưu hệ thống",
                 "Kiểm tra lịch sao lưu và khôi phục dữ liệu",
                 R.drawable.admin_ic_refresh, 0xFF0284C7, 0xFF38BDF8, ""));
-        tools.add(tool("admin_report_revenue", "Báo cáo doanh thu",
-                "Thống kê doanh thu theo mốc thời gian",
-                R.drawable.admin_ic_chart, 0xFF059669, 0xFF34D399, ""));
         tools.add(tool("admin_report_users", "Báo cáo người dùng",
                 "Phân tích tăng trưởng và người dùng hoạt động",
                 R.drawable.admin_ic_chart, 0xFF4F46E5, 0xFF818CF8, ""));
@@ -405,9 +398,6 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         tools.add(tool("admin_report_content", "Báo cáo nội dung",
                 "Hiệu quả và mức độ tương tác với bài học",
                 R.drawable.admin_ic_chart, 0xFF7C3AED, 0xFFA78BFA, ""));
-        tools.add(tool("admin_transactions", "Giao dịch",
-                "Tra cứu thanh toán và trạng thái giao dịch",
-                R.drawable.admin_ic_card, 0xFF2563EB, 0xFF60A5FA, ""));
         tools.add(tool("admin_notifications", "Thông báo",
                 "Xem và quản lý thông báo hệ thống",
                 R.drawable.admin_ic_bell, 0xFFDC2626, 0xFFF87171, ""));
@@ -542,11 +532,6 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
 
     private String number(int value) {
         return NumberFormat.getIntegerInstance(new Locale("vi", "VN")).format(value);
-    }
-
-    private String money(double value) {
-        return NumberFormat.getIntegerInstance(new Locale("vi", "VN"))
-                .format(Math.round(value)) + " đ";
     }
 
     private String shortDate(String value) {

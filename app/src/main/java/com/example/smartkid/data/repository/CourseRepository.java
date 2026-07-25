@@ -8,6 +8,7 @@ import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.model.Course;
 import com.example.smartkid.data.model.CourseDetail;
 import com.example.smartkid.data.model.CourseListResult;
+import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.model.Lesson;
 import com.example.smartkid.data.model.LessonContent;
 import com.example.smartkid.data.remote.ApiCallback;
@@ -204,7 +205,6 @@ public class CourseRepository {
         try {
             JSONObject body = new JSONObject();
             body.put("video_watched", true);
-            body.put("completed", true);
             apiClient.post("content/lessons/" + lessonId.trim() + "/progress/",
                     body, true, new ApiCallback<JSONObject>() {
                         @Override
@@ -220,6 +220,105 @@ public class CourseRepository {
         } catch (Exception exception) {
             AppLogger.error(appContext, "CourseRepository", "Không thể cập nhật tiến độ", exception);
             callback.onError(new ApiError(0, "Không thể chuẩn bị dữ liệu tiến độ", false));
+        }
+    }
+
+    public void loadLessonExercises(String lessonId, ApiCallback<List<FeatureItem>> callback) {
+        if (lessonId == null || lessonId.trim().isEmpty()) {
+            callback.onError(new ApiError(0, "Mã bài học không hợp lệ", false));
+            return;
+        }
+        apiClient.getValue("activities/exercises/?lesson_id=" + lessonId.trim()
+                        + "&status=published", true, new ApiCallback<Object>() {
+                    @Override
+                    public void onSuccess(Object data) {
+                        try {
+                            JSONArray items = data instanceof JSONArray ? (JSONArray) data
+                                    : SafeJson.array(data instanceof JSONObject
+                                            ? (JSONObject) data : new JSONObject(),
+                                    "results", "items");
+                            List<FeatureItem> result = new ArrayList<>();
+                            String expectedLessonId = lessonId.trim();
+                            for (int index = 0; index < items.length(); index++) {
+                                JSONObject item = items.optJSONObject(index);
+                                if (item == null) continue;
+                                Object lessonValue = item.opt("lesson");
+                                String linkedLessonId = "";
+                                if (lessonValue instanceof JSONObject) {
+                                    linkedLessonId = SafeJson.string(
+                                            (JSONObject) lessonValue, "", "id", "uuid");
+                                } else if (lessonValue != null
+                                        && lessonValue != JSONObject.NULL) {
+                                    linkedLessonId = String.valueOf(lessonValue).trim();
+                                }
+                                if (!expectedLessonId.equals(linkedLessonId)
+                                        || !SafeJson.bool(item, false, "published")) {
+                                    continue;
+                                }
+                                String id = SafeJson.string(item, "", "id");
+                                if (id.isEmpty()) continue;
+                                JSONObject settings = item.optJSONObject("settings");
+                                int questions = SafeJson.array(item, "questions").length();
+                                int seconds = SafeJson.integer(settings, 0,
+                                        "duration_seconds", "time_limit_seconds");
+                                result.add(new FeatureItem(id,
+                                        SafeJson.string(item, "Bài luyện tập", "title"),
+                                        questions + " câu hỏi",
+                                        seconds > 0 ? Math.max(1, seconds / 60) + " phút" : "",
+                                        "Sẵn sàng", item));
+                            }
+                            callback.onSuccess(result);
+                        } catch (Exception exception) {
+                            AppLogger.error(appContext, "CourseRepository",
+                                    "Không thể đọc bài luyện tập", exception);
+                            callback.onError(new ApiError(0,
+                                    "Dữ liệu bài luyện tập không hợp lệ", false));
+                        }
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        callback.onError(error);
+                    }
+                });
+    }
+
+    public void checkLessonUnlock(String lessonId, ApiCallback<JSONObject> callback) {
+        if (lessonId == null || lessonId.trim().isEmpty()) {
+            callback.onSuccess(new JSONObject());
+            return;
+        }
+        apiClient.get("content/lessons/" + lessonId.trim() + "/unlock-check/",
+                true, callback);
+    }
+
+    public void markExerciseCompleted(String lessonId, double score,
+                                      ApiCallback<Boolean> callback) {
+        if (lessonId == null || lessonId.trim().isEmpty()) {
+            callback.onError(new ApiError(0, "Mã bài học không hợp lệ", false));
+            return;
+        }
+        try {
+            JSONObject body = new JSONObject();
+            body.put("exercise_completed", true);
+            body.put("exercise_score", score);
+            body.put("completed", true);
+            apiClient.post("content/lessons/" + lessonId.trim() + "/progress/",
+                    body, true, new ApiCallback<JSONObject>() {
+                        @Override
+                        public void onSuccess(JSONObject data) {
+                            callback.onSuccess(SafeJson.bool(data, true, "completed"));
+                        }
+
+                        @Override
+                        public void onError(ApiError error) {
+                            callback.onError(error);
+                        }
+                    });
+        } catch (Exception exception) {
+            AppLogger.error(appContext, "CourseRepository",
+                    "Không thể cập nhật tiến độ bài tập", exception);
+            callback.onError(new ApiError(0, "Không thể lưu tiến độ bài tập", false));
         }
     }
 

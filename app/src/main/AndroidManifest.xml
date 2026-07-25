@@ -38,6 +38,7 @@
         <activity android:name=".feature.management.ManagementFeatureActivity" android:exported="false" />
         <activity android:name=".feature.management.ManagementCreateActivity" android:exported="false" />
         <activity android:name=".feature.admin.AdminDashboardActivity" android:exported="false" />
+        <activity android:name=".feature.teacher.TeacherCourseContentActivity" android:exported="false" />
         <activity android:name=".feature.teacher.TeacherDashboardActivity" android:exported="false" />
         <activity android:name=".feature.profile.ParentActivity" android:exported="false" />
         <activity android:name=".feature.profile.ChangePasswordActivity" android:exported="false" />
@@ -67,6 +68,9 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".feature.course.LessonPlayerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".feature.course.LessonExerciseActivity"
             android:exported="false" />
         <activity
             android:name=".feature.course.CourseDetailActivity"

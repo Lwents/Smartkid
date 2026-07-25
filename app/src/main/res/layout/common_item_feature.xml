@@ -4,10 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/common_bg_glass_card"
-    android:clickable="true"
     android:clipToOutline="true"
     android:elevation="@dimen/glass_elevation"
-    android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
     >
 

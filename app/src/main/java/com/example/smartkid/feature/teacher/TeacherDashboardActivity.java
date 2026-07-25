@@ -1,12 +1,18 @@
 package com.example.smartkid.feature.teacher;
 
+import android.animation.TimeInterpolator;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.PathInterpolator;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 
 import com.example.smartkid.R;
@@ -15,28 +21,41 @@ import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.model.User;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
+import com.example.smartkid.feature.admin.ui.AdminActivityChartView;
 import com.example.smartkid.feature.management.RoleDashboardActivity;
 import com.example.smartkid.feature.teacher.data.TeacherDashboardRepository;
 import com.example.smartkid.feature.teacher.model.TeacherDashboardData;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 /** Native teacher home based on SunEdu's quick actions and course overview. */
 public final class TeacherDashboardActivity extends RoleDashboardActivity {
-    private static final String[] MANAGEMENT_KEYS = {
-            "teacher_qa", "teacher_courses", "teacher_content_library", "teacher_classes",
-            "teacher_assignments", "teacher_live", "teacher_exams", "teacher_exam_reports",
-            "teacher_students", "teacher_progress", "teacher_feedback",
-            "teacher_notifications"
-    };
+    private static final int PAGE_OVERVIEW = 0;
+    private static final int PAGE_COURSES = 1;
+    private static final int PAGE_EXAMS = 2;
+    private static final int PAGE_STUDENTS = 3;
+    private static final String STATE_SELECTED_PAGE = "teacher_selected_page";
+    private static final TimeInterpolator NAVIGATION_INTERPOLATOR =
+            new PathInterpolator(0.2f, 0f, 0f, 1f);
 
     private TeacherDashboardRepository repository;
     private ProgressBar progressBar;
     private TextView statusText;
     private LinearLayout coursesContainer;
     private NestedScrollView dashboardScroll;
+    private AdminActivityChartView activityChart;
+    private TextView chartEmpty;
+    private TextView[] chartTabs;
+    private ViewFlipper pageFlipper;
+    private FrameLayout bottomNavigation;
+    private View navigationIndicator;
+    private TextView[] navItems;
+    private int selectedPage;
+    private float swipeStartX;
+    private float swipeStartY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,13 +64,17 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         try {
             setContentView(R.layout.teacher_activity_dashboard);
             LiquidGlassUi.useStatusBarBackdrop(this, R.id.teacherDashboardRoot,
-                    R.drawable.teacher_bg_header, false);
-            LiquidGlassUi.useDarkNavigationBar(this);
+                    R.drawable.admin_bg_screen, true);
+            findViewById(R.id.teacherDashboardRoot).setBackgroundResource(
+                    R.drawable.admin_bg_screen);
             repository = new TeacherDashboardRepository(this);
             bindViews();
             bindHeader();
             bindActions();
-            populateManagementActions(findViewById(R.id.containerTeacherManagement), MANAGEMENT_KEYS);
+            bindNavigation();
+            int restoredPage = savedInstanceState == null ? PAGE_OVERVIEW
+                    : savedInstanceState.getInt(STATE_SELECTED_PAGE, PAGE_OVERVIEW);
+            selectPage(Math.max(PAGE_OVERVIEW, Math.min(PAGE_STUDENTS, restoredPage)), false);
             loadDashboard();
         } catch (Exception exception) {
             AppLogger.error(this, "TeacherDashboardActivity", "Không thể tạo dashboard", exception);
@@ -59,13 +82,34 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         }
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (repository != null) loadDashboard();
+    }
+
     private void bindViews() {
         progressBar = findViewById(R.id.progressTeacherDashboard);
         statusText = findViewById(R.id.textTeacherDashboardStatus);
         coursesContainer = findViewById(R.id.containerTeacherCourses);
         dashboardScroll = findViewById(R.id.teacherDashboardScroll);
+        activityChart = findViewById(R.id.teacherActivityChart);
+        chartEmpty = findViewById(R.id.textTeacherChartEmpty);
+        pageFlipper = findViewById(R.id.teacherPageFlipper);
+        bottomNavigation = findViewById(R.id.teacherBottomNavigation);
+        navigationIndicator = findViewById(R.id.teacherNavSelectionIndicator);
+        navItems = new TextView[]{findViewById(R.id.buttonTeacherNavOverview),
+                findViewById(R.id.buttonTeacherNavCourses),
+                findViewById(R.id.buttonTeacherNavExams),
+                findViewById(R.id.buttonTeacherNavStudents)};
+        chartTabs = new TextView[]{findViewById(R.id.buttonTeacherChart7),
+                findViewById(R.id.buttonTeacherChart30),
+                findViewById(R.id.buttonTeacherChart90),
+                findViewById(R.id.buttonTeacherChartCustom)};
         if (progressBar == null || statusText == null || coursesContainer == null
-                || dashboardScroll == null) {
+                || dashboardScroll == null || activityChart == null || chartEmpty == null
+                || pageFlipper == null || bottomNavigation == null
+                || navigationIndicator == null) {
             throw new IllegalStateException("Dashboard giáo viên thiếu thành phần bắt buộc");
         }
     }
@@ -74,27 +118,150 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         User user = currentUser();
         String name = user.getFullName().isEmpty() ? user.getUsername() : user.getFullName();
         ((TextView) findViewById(R.id.textTeacherWelcome)).setText(
-                getString(R.string.teacher_welcome_format, name));
+                getString(R.string.teacher_welcome_format));
+        ((TextView) findViewById(R.id.textTeacherAvatar)).setText(initials(name));
         bindLogoutAction(R.id.buttonTeacherLogout);
     }
 
     private void bindActions() {
-        findViewById(R.id.buttonTeacherNavOverview).setSelected(true);
         findViewById(R.id.buttonTeacherRefresh).setOnClickListener(view -> loadDashboard());
+        findViewById(R.id.buttonTeacherNotifications).setOnClickListener(view ->
+                openManagementFeature("teacher_notifications"));
         findViewById(R.id.buttonTeacherCreateCourse).setOnClickListener(view ->
                 openCreate("teacher_courses"));
         findViewById(R.id.buttonTeacherCreateExam).setOnClickListener(view ->
                 openCreate("teacher_exams"));
         findViewById(R.id.buttonTeacherReports).setOnClickListener(view ->
                 openManagementFeature("teacher_exam_reports"));
-        findViewById(R.id.buttonTeacherNavOverview).setOnClickListener(view ->
-                dashboardScroll.smoothScrollTo(0, 0));
-        findViewById(R.id.buttonTeacherNavCourses).setOnClickListener(view ->
-                openManagementFeature("teacher_courses"));
-        findViewById(R.id.buttonTeacherNavExams).setOnClickListener(view ->
-                openManagementFeature("teacher_exams"));
-        findViewById(R.id.buttonTeacherNavStudents).setOnClickListener(view ->
+        findViewById(R.id.buttonTeacherStudents).setOnClickListener(view ->
                 openManagementFeature("teacher_students"));
+        findViewById(R.id.buttonTeacherViewAllCourses).setOnClickListener(view ->
+                openManagementFeature("teacher_courses"));
+        findViewById(R.id.buttonTeacherPageManageCourses).setOnClickListener(view ->
+                openManagementFeature("teacher_courses"));
+        findViewById(R.id.buttonTeacherPageCreateCourse).setOnClickListener(view ->
+                openCreate("teacher_courses"));
+        findViewById(R.id.buttonTeacherPageManageExams).setOnClickListener(view ->
+                openManagementFeature("teacher_exams"));
+        findViewById(R.id.buttonTeacherPageCreateExam).setOnClickListener(view ->
+                openCreate("teacher_exams"));
+        findViewById(R.id.buttonTeacherPageExamReports).setOnClickListener(view ->
+                openManagementFeature("teacher_exam_reports"));
+        findViewById(R.id.buttonTeacherPageStudents).setOnClickListener(view ->
+                openManagementFeature("teacher_students"));
+        findViewById(R.id.buttonTeacherPageProgress).setOnClickListener(view ->
+                openManagementFeature("teacher_progress"));
+        findViewById(R.id.buttonTeacherPageFeedback).setOnClickListener(view ->
+                openManagementFeature("teacher_feedback"));
+        findViewById(R.id.buttonTeacherPageNotifications).setOnClickListener(view ->
+                openManagementFeature("teacher_notifications"));
+        for (int index = 0; index < chartTabs.length; index++) {
+            final int selected = index;
+            chartTabs[index].setOnClickListener(view -> selectChartTab(selected));
+        }
+    }
+
+    private void bindNavigation() {
+        navItems[0].setOnClickListener(view -> {
+            if (selectedPage == PAGE_OVERVIEW) dashboardScroll.smoothScrollTo(0, 0);
+            else selectPage(PAGE_OVERVIEW, true);
+        });
+        navItems[1].setOnClickListener(view -> selectPage(PAGE_COURSES, true));
+        navItems[2].setOnClickListener(view -> selectPage(PAGE_EXAMS, true));
+        navItems[3].setOnClickListener(view -> selectPage(PAGE_STUDENTS, true));
+        bottomNavigation.post(() -> updateNavigationIndicator(selectedPage, false));
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            swipeStartX = event.getX();
+            swipeStartY = event.getY();
+        }
+        boolean handled = super.dispatchTouchEvent(event);
+        if (event.getActionMasked() == MotionEvent.ACTION_UP && bottomNavigation != null
+                && event.getY() < bottomNavigation.getTop()) {
+            float distanceX = event.getX() - swipeStartX;
+            float distanceY = event.getY() - swipeStartY;
+            if (Math.abs(distanceX) > dp(56)
+                    && Math.abs(distanceX) > Math.abs(distanceY) * 1.2f) {
+                int target = selectedPage + (distanceX < 0 ? 1 : -1);
+                selectPage(Math.max(PAGE_OVERVIEW, Math.min(PAGE_STUDENTS, target)), true);
+            }
+        }
+        return handled;
+    }
+
+    private void selectPage(int page, boolean animate) {
+        if (page < PAGE_OVERVIEW || page > PAGE_STUDENTS) return;
+        boolean changed = page != selectedPage || pageFlipper.getDisplayedChild() != page;
+        int previousPage = selectedPage;
+        pageFlipper.setInAnimation(null);
+        pageFlipper.setOutAnimation(null);
+        resetPageTransforms();
+        selectedPage = page;
+        pageFlipper.setDisplayedChild(page);
+        if (animate && changed) animatePageEntry(page, page > previousPage);
+        updateNavigationIndicator(page, animate && changed);
+        for (int index = 0; index < navItems.length; index++) {
+            navItems[index].setSelected(index == page);
+        }
+    }
+
+    private void resetPageTransforms() {
+        for (int index = 0; index < pageFlipper.getChildCount(); index++) {
+            View child = pageFlipper.getChildAt(index);
+            child.animate().cancel();
+            child.setAlpha(1f);
+            child.setScaleX(1f);
+            child.setScaleY(1f);
+            child.setTranslationX(0f);
+        }
+    }
+
+    private void animatePageEntry(int page, boolean forward) {
+        View child = pageFlipper.getChildAt(page);
+        if (child == null) return;
+        child.setAlpha(0.94f);
+        child.setScaleX(0.995f);
+        child.setScaleY(0.995f);
+        child.setTranslationX(dp(forward ? 12 : -12));
+        child.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .translationX(0f)
+                .setDuration(210L)
+                .setInterpolator(NAVIGATION_INTERPOLATOR)
+                .withLayer()
+                .start();
+    }
+
+    private void updateNavigationIndicator(int page, boolean animate) {
+        int availableWidth = bottomNavigation.getWidth()
+                - bottomNavigation.getPaddingLeft() - bottomNavigation.getPaddingRight();
+        if (availableWidth <= 0) return;
+        int itemWidth = Math.round(availableWidth / (float) navItems.length);
+        FrameLayout.LayoutParams params =
+                (FrameLayout.LayoutParams) navigationIndicator.getLayoutParams();
+        if (params.width != itemWidth) {
+            params.width = itemWidth;
+            navigationIndicator.setLayoutParams(params);
+        }
+        float target = itemWidth * page;
+        navigationIndicator.animate().cancel();
+        if (animate) {
+            navigationIndicator.animate().translationX(target).setDuration(260L)
+                    .setInterpolator(NAVIGATION_INTERPOLATOR).withLayer().start();
+        } else {
+            navigationIndicator.setTranslationX(target);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@androidx.annotation.NonNull Bundle outState) {
+        outState.putInt(STATE_SELECTED_PAGE, selectedPage);
+        super.onSaveInstanceState(outState);
     }
 
     private void loadDashboard() {
@@ -121,13 +288,29 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         setText(R.id.textTeacherCourseCount, number(data.getCourseCount()));
         setText(R.id.textTeacherStudentCount, number(data.getStudentCount()));
         setText(R.id.textTeacherLessonCount, number(data.getLessonCount()));
+        setText(R.id.textTeacherChartTotal, getString(R.string.teacher_chart_total_format,
+                number(data.getStudentCount())));
+        renderActivityChart(data.getCourses());
         renderCourses(data.getCourses());
+    }
+
+    private void renderActivityChart(List<TeacherDashboardData.CourseItem> courses) {
+        List<String> labels = new ArrayList<>();
+        List<Float> values = new ArrayList<>();
+        int count = Math.min(courses.size(), 7);
+        for (int index = 0; index < count; index++) {
+            TeacherDashboardData.CourseItem item = courses.get(index);
+            labels.add(getString(R.string.teacher_chart_course_label, index + 1));
+            values.add((float) item.getEnrolled());
+        }
+        activityChart.setData(labels, values);
+        chartEmpty.setVisibility(values.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void renderCourses(List<TeacherDashboardData.CourseItem> courses) {
         coursesContainer.removeAllViews();
-        TextView empty = findViewById(R.id.textTeacherCoursesEmpty);
-        empty.setVisibility(courses.isEmpty() ? View.VISIBLE : View.GONE);
+        findViewById(R.id.cardTeacherCoursesEmpty).setVisibility(
+                courses.isEmpty() ? View.VISIBLE : View.GONE);
         LayoutInflater inflater = LayoutInflater.from(this);
         for (TeacherDashboardData.CourseItem item : courses) {
             View row = inflater.inflate(R.layout.teacher_item_course_summary, coursesContainer, false);
@@ -139,6 +322,18 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                     statusLabel(item.getStatus()));
             row.setOnClickListener(view -> openManagementFeature("teacher_courses"));
             coursesContainer.addView(row);
+        }
+    }
+
+    private void selectChartTab(int selectedIndex) {
+        for (int index = 0; index < chartTabs.length; index++) {
+            boolean selected = index == selectedIndex;
+            chartTabs[index].setBackgroundResource(selected
+                    ? R.drawable.admin_bg_chart_tab_selected : android.R.color.transparent);
+            chartTabs[index].setTextColor(ContextCompat.getColor(this, selected
+                    ? R.color.admin_primary : R.color.admin_text_secondary));
+            chartTabs[index].setTypeface(null, selected
+                    ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
         }
     }
 
@@ -160,6 +355,19 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
 
     private String number(int value) {
         return NumberFormat.getIntegerInstance(new Locale("vi", "VN")).format(value);
+    }
+
+    private String initials(String value) {
+        String normalized = value == null ? "" : value.trim();
+        if (normalized.isEmpty()) return "GV";
+        String[] parts = normalized.split("\\s+");
+        String first = parts[0].substring(0, 1);
+        String last = parts.length > 1 ? parts[parts.length - 1].substring(0, 1) : "";
+        return (first + last).toUpperCase(new Locale("vi", "VN"));
+    }
+
+    private float dp(float value) {
+        return value * getResources().getDisplayMetrics().density;
     }
 
     private boolean isUsable() {

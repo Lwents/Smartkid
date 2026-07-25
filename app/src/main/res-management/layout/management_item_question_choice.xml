@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="6dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <RadioButton
+        android:id="@+id/radioQuestionChoiceCorrect"
+        android:layout_width="44dp"
+        android:layout_height="56dp"
+        android:buttonTint="@color/admin_primary" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Smartkid.GlassInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="@string/management_choice_hint"
+        app:boxBackgroundColor="@color/admin_glass_soft">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputQuestionChoiceText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="52dp"
+            android:textColor="@color/admin_text_primary"
+            android:textSize="13sp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/buttonQuestionChoiceDelete"
+        android:layout_width="40dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:text="×"
+        android:textColor="@color/admin_red"
+        android:textSize="22sp" />
+</LinearLayout>

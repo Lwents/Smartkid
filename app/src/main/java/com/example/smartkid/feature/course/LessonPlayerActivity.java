@@ -5,17 +5,25 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.VideoView;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
 import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.local.SessionManager;
+import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.model.LessonContent;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
@@ -26,8 +34,11 @@ import com.example.smartkid.feature.course.LessonDiscussionActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import org.json.JSONObject;
 
 public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.OnInitListener {
     private MaterialToolbar toolbar;
@@ -36,6 +47,10 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
     private TextView contentText;
     private TextView statusText;
     private VideoView videoView;
+    private WebView webVideo;
+    private View webVideoContainer;
+    private View exercisesCard;
+    private LinearLayout exercisesContainer;
     private Button openExternalButton;
     private Button speakButton;
     private Button completeButton;
@@ -76,10 +91,23 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (repository != null && lessonId != null && !lessonId.trim().isEmpty()) {
+            loadExercises();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         try {
             if (videoView != null) {
                 videoView.stopPlayback();
+            }
+            if (webVideo != null) {
+                webVideo.loadUrl("about:blank");
+                webVideo.stopLoading();
+                webVideo.destroy();
             }
             if (textToSpeech != null) {
                 textToSpeech.stop();
@@ -120,6 +148,10 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
         contentText = findViewById(R.id.textLessonContent);
         statusText = findViewById(R.id.textLessonContentStatus);
         videoView = findViewById(R.id.videoLesson);
+        webVideo = findViewById(R.id.webLessonVideo);
+        webVideoContainer = findViewById(R.id.containerLessonWebVideo);
+        exercisesCard = findViewById(R.id.cardLessonExercises);
+        exercisesContainer = findViewById(R.id.containerLessonExercises);
         openExternalButton = findViewById(R.id.buttonOpenExternal);
         speakButton = findViewById(R.id.buttonSpeakLesson);
         completeButton = findViewById(R.id.buttonCompleteLesson);
@@ -127,6 +159,34 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
 
     private void loadLesson() {
         setLoading(true);
+        if (lessonId == null || lessonId.trim().isEmpty()) {
+            loadLessonContent();
+            return;
+        }
+        repository.checkLessonUnlock(lessonId, new ApiCallback<JSONObject>() {
+            @Override
+            public void onSuccess(JSONObject data) {
+                if (isFinishing() || isDestroyed()) return;
+                if (!SafeJson.bool(data, true, "can_unlock")) {
+                    setLoading(false);
+                    statusText.setText(SafeJson.string(data,
+                            getString(R.string.lesson_locked), "reason", "detail"));
+                    completeButton.setEnabled(false);
+                    return;
+                }
+                loadLessonContent();
+            }
+
+            @Override
+            public void onError(ApiError error) {
+                if (isFinishing() || isDestroyed()) return;
+                // Player backend van kiem tra enrollment; khong chan bai neu endpoint unlock loi.
+                loadLessonContent();
+            }
+        });
+    }
+
+    private void loadLessonContent() {
         repository.loadLesson(courseId, lessonId, new ApiCallback<LessonContent>() {
             @Override
             public void onSuccess(LessonContent data) {
@@ -137,6 +197,7 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
                 lessonContent = data;
                 lessonId = data.getId().isEmpty() ? lessonId : data.getId();
                 bindContent(data);
+                loadExercises();
             }
 
             @Override
@@ -164,9 +225,33 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
         String externalUrl = preferredExternalUrl(content);
         openExternalButton.setVisibility(externalUrl.isEmpty() ? View.GONE : View.VISIBLE);
         videoView.setVisibility(View.GONE);
+        webVideo.setVisibility(View.GONE);
+        webVideoContainer.setVisibility(View.GONE);
 
-        if (!content.getVideoUrl().isEmpty() && !isWebEmbed(content.getVideoUrl())) {
-            prepareVideo(content.getVideoUrl());
+        if (!content.getVideoUrl().isEmpty()) {
+            if (isWebEmbed(content.getVideoUrl())) prepareEmbeddedVideo(content.getVideoUrl());
+            else prepareVideo(content.getVideoUrl());
+        }
+    }
+
+    private void prepareEmbeddedVideo(String videoUrl) {
+        try {
+            WebSettings settings = webVideo.getSettings();
+            settings.setJavaScriptEnabled(true);
+            settings.setDomStorageEnabled(true);
+            settings.setMediaPlaybackRequiresUserGesture(false);
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+            webVideo.setWebChromeClient(new WebChromeClient());
+            webVideo.setWebViewClient(new WebViewClient());
+            webVideoContainer.setVisibility(View.VISIBLE);
+            webVideo.setVisibility(View.VISIBLE);
+            webVideo.loadUrl(toEmbedUrl(videoUrl));
+        } catch (Exception exception) {
+            AppLogger.error(this, "LessonPlayerActivity",
+                    "Không thể nhúng video web", exception);
+            webVideoContainer.setVisibility(View.GONE);
+            webVideo.setVisibility(View.GONE);
+            openExternalButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -323,6 +408,89 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
         String normalized = value == null ? "" : value.toLowerCase(Locale.ROOT);
         return normalized.contains("youtube.com") || normalized.contains("youtu.be")
                 || normalized.contains("vimeo.com");
+    }
+
+    private String toEmbedUrl(String value) {
+        String source = value == null ? "" : value.trim();
+        try {
+            Uri uri = Uri.parse(source);
+            String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
+            if (host.contains("youtu.be")) {
+                String id = uri.getLastPathSegment();
+                if (id != null && !id.isEmpty()) return youtubeEmbed(id);
+            }
+            if (host.contains("youtube.com")) {
+                if (uri.getPath() != null && uri.getPath().contains("/embed/")) return source;
+                String id = uri.getQueryParameter("v");
+                if ((id == null || id.isEmpty()) && uri.getPathSegments().size() > 1) {
+                    List<String> parts = uri.getPathSegments();
+                    if ("shorts".equals(parts.get(0))) id = parts.get(1);
+                }
+                if (id != null && !id.isEmpty()) return youtubeEmbed(id);
+            }
+            if (host.contains("vimeo.com")) {
+                String id = uri.getLastPathSegment();
+                if (id != null && !id.isEmpty()) {
+                    return "https://player.vimeo.com/video/" + id;
+                }
+            }
+        } catch (Exception exception) {
+            AppLogger.error(this, "LessonPlayerActivity",
+                    "Không thể chuẩn hóa URL video", exception);
+        }
+        return source;
+    }
+
+    private String youtubeEmbed(String id) {
+        return "https://www.youtube.com/embed/" + id
+                + "?playsinline=1&rel=0&modestbranding=1";
+    }
+
+    private void loadExercises() {
+        if (lessonId == null || lessonId.trim().isEmpty()) return;
+        repository.loadLessonExercises(lessonId, new ApiCallback<List<FeatureItem>>() {
+            @Override
+            public void onSuccess(List<FeatureItem> data) {
+                if (isFinishing() || isDestroyed()) return;
+                exercisesContainer.removeAllViews();
+                exercisesCard.setVisibility(data == null || data.isEmpty()
+                        ? View.GONE : View.VISIBLE);
+                if (data == null) return;
+                LayoutInflater inflater = LayoutInflater.from(LessonPlayerActivity.this);
+                for (FeatureItem exercise : data) {
+                    View row = inflater.inflate(R.layout.course_item_lesson_exercise,
+                            exercisesContainer, false);
+                    ((TextView) row.findViewById(R.id.textLessonExerciseTitle))
+                            .setText(exercise.getTitle());
+                    String meta = exercise.getSubtitle();
+                    if (!exercise.getDetail().isEmpty()) meta += " • " + exercise.getDetail();
+                    ((TextView) row.findViewById(R.id.textLessonExerciseMeta)).setText(meta);
+                    row.setOnClickListener(view -> openExercise(exercise));
+                    exercisesContainer.addView(row);
+                }
+            }
+
+            @Override
+            public void onError(ApiError error) {
+                if (isFinishing() || isDestroyed()) return;
+                exercisesCard.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void openExercise(FeatureItem exercise) {
+        if (exercise == null || exercise.getId().isEmpty()) return;
+        try {
+            Intent intent = new Intent(this, LessonExerciseActivity.class);
+            intent.putExtra(LessonExerciseActivity.EXTRA_EXERCISE_ID, exercise.getId());
+            intent.putExtra(LessonExerciseActivity.EXTRA_EXERCISE_TITLE, exercise.getTitle());
+            intent.putExtra(LessonExerciseActivity.EXTRA_LESSON_ID, lessonId);
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "LessonPlayerActivity",
+                    "Không thể mở bài luyện tập", exception);
+            showErrorDialog(getString(R.string.lesson_exercise_open_error));
+        }
     }
 
     private void setLoading(boolean loading) {

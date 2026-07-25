@@ -82,10 +82,10 @@ public final class AdminDashboardRepository {
         AdminDashboardData.Kpis parsedKpis = new AdminDashboardData.Kpis(
                 SafeJson.integer(kpis, 0, "dau"),
                 SafeJson.integer(kpis, 0, "signups7d"),
-                SafeJson.decimal(kpis, 0, "gmvToday"),
-                SafeJson.integer(kpis, 0, "txToday"),
-                SafeJson.decimal(kpis, 0, "refundRate7d"),
-                SafeJson.integer(kpis, 0, "approvalsPending"));
+                SafeJson.integer(kpis, 0, "students"),
+                SafeJson.integer(kpis, 0, "teachers"),
+                SafeJson.integer(kpis, 0, "courses"),
+                SafeJson.integer(kpis, 0, "lessons"));
 
         AdminDashboardData.ActiveUsers parsedActive = new AdminDashboardData.ActiveUsers(
                 SafeJson.integer(active, 0, "count"),
@@ -102,7 +102,7 @@ public final class AdminDashboardRepository {
                 SafeJson.string(backup, "Chưa có bản sao lưu", "status"));
 
         return new AdminDashboardData(parsedKpis, parseCourses(root),
-                parseTransactions(root), parsedActive, parsedSecurity, parsedSystem);
+                parsedActive, parsedSecurity, parsedSystem);
     }
 
     private List<AdminDashboardData.CourseItem> parseCourses(JSONObject root) {
@@ -115,22 +115,6 @@ public final class AdminDashboardRepository {
                     SafeJson.string(item, "", "id"),
                     SafeJson.string(item, "Khóa học", "title"),
                     SafeJson.integer(item, 0, "enrollments")));
-        }
-        return result;
-    }
-
-    private List<AdminDashboardData.TransactionItem> parseTransactions(JSONObject root) {
-        List<AdminDashboardData.TransactionItem> result = new ArrayList<>();
-        JSONArray values = SafeJson.array(root, "recentTransactions");
-        for (int index = 0; index < values.length(); index++) {
-            JSONObject item = values.optJSONObject(index);
-            if (item == null) continue;
-            result.add(new AdminDashboardData.TransactionItem(
-                    SafeJson.string(item, "", "id"),
-                    SafeJson.string(item, "N/A", "user"),
-                    SafeJson.string(item, "N/A", "course"),
-                    SafeJson.decimal(item, 0, "amount"),
-                    SafeJson.string(item, "", "status")));
         }
         return result;
     }

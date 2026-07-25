@@ -3,23 +3,33 @@ package com.example.smartkid.data.repository;
 import android.content.Context;
 
 import com.android.volley.Request;
+import com.example.smartkid.common.util.AppConstants;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiClient;
 import com.example.smartkid.data.remote.ApiError;
+import com.example.smartkid.data.remote.MultipartFilePart;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /** Đọc và thao tác các API quản lý vốn có nhiều kiểu response khác nhau. */
 public class ManagementRepository {
+    static final int MAX_PAGINATION_PAGES = 100;
+    private static final String[] ITEM_ID_KEYS = {
+            "id", "uuid", "user_id", "course_id", "jti"
+    };
     private static final String[] ARRAY_KEYS = {
             "results", "items", "courses", "users", "students", "transactions",
             "logs", "notifications", "backups", "sessions", "data", "questions", "feedback"
@@ -34,24 +44,220 @@ public class ManagementRepository {
     }
 
     public void load(String endpoint, ApiCallback<List<FeatureItem>> callback) {
+        PaginationState state = new PaginationState();
+        if (endpoint == null || endpoint.trim().isEmpty()) {
+            deliverPaginationError(state, callback, "Đường dẫn API không hợp lệ");
+            return;
+        }
+        loadPage(endpoint, endpoint, state, callback);
+    }
+
+    private void loadPage(String rootEndpoint, String endpoint, PaginationState state,
+                          ApiCallback<List<FeatureItem>> callback) {
+        if (!state.visit(endpoint)) {
+            deliverPaginationError(state, callback,
+                    "Máy chủ trả về vòng lặp khi phân trang dữ liệu");
+            return;
+        }
         apiClient.getValue(endpoint, true, new ApiCallback<Object>() {
             @Override
             public void onSuccess(Object data) {
+                List<FeatureItem> pageItems;
+                String rawNext = "";
+                boolean paginated = false;
                 try {
-                    callback.onSuccess(parse(endpoint, data));
+                    if (data instanceof JSONObject
+                            && ((JSONObject) data).has("results")) {
+                        JSONObject page = (JSONObject) data;
+                        JSONArray results = page.optJSONArray("results");
+                        if (results == null) {
+                            throw new IllegalStateException(
+                                    "Trường results của trang không phải mảng");
+                        }
+                        pageItems = new ArrayList<>();
+                        appendArray(pageItems, results);
+                        Object nextValue = page.opt("next");
+                        if (nextValue != null && nextValue != JSONObject.NULL) {
+                            rawNext = String.valueOf(nextValue).trim();
+                        }
+                        paginated = true;
+                    } else {
+                        if (state.getPageCount() > 1) {
+                            throw new IllegalStateException(
+                                    "Trang tiếp theo không có cấu trúc phân trang DRF");
+                        }
+                        pageItems = parse(rootEndpoint, data);
+                    }
                 } catch (Exception exception) {
                     AppLogger.error(appContext, "ManagementRepository", "Không thể đọc API", exception);
-                    callback.onError(new ApiError(0, "Dữ liệu quản lý không hợp lệ", false));
+                    deliverPaginationError(state, callback,
+                            "Dữ liệu quản lý không hợp lệ");
+                    return;
                 }
+
+                appendUnique(state, pageItems);
+                if (!paginated || rawNext.isEmpty()) {
+                    deliverPaginationSuccess(state, callback);
+                    return;
+                }
+                if (state.getPageCount() >= MAX_PAGINATION_PAGES) {
+                    deliverPaginationError(state, callback,
+                            "Danh sách vượt quá giới hạn " + MAX_PAGINATION_PAGES + " trang");
+                    return;
+                }
+
+                final String nextEndpoint;
+                try {
+                    nextEndpoint = resolveNextEndpoint(
+                            endpoint, rawNext, AppConstants.API_BASE_URL);
+                } catch (Exception exception) {
+                    AppLogger.error(appContext, "ManagementRepository",
+                            "Đường dẫn trang tiếp theo không hợp lệ", exception);
+                    deliverPaginationError(state, callback,
+                            "Đường dẫn phân trang của máy chủ không hợp lệ");
+                    return;
+                }
+                loadPage(rootEndpoint, nextEndpoint, state, callback);
             }
 
-            @Override public void onError(ApiError error) { callback.onError(error); }
+            @Override
+            public void onError(ApiError error) {
+                if (state.finish()) callback.onError(error);
+            }
         });
+    }
+
+    private void appendUnique(PaginationState state, List<FeatureItem> items) {
+        if (items == null) return;
+        for (FeatureItem item : items) {
+            if (item == null) continue;
+            state.add(item, stableItemKey(item));
+        }
+    }
+
+    private String stableItemKey(FeatureItem item) {
+        JSONObject source = item.getSource();
+        for (String key : ITEM_ID_KEYS) {
+            if (!source.has(key) || source.isNull(key)) continue;
+            String value = String.valueOf(source.opt(key)).trim();
+            if (!value.isEmpty()) return key + ':' + value;
+        }
+        return null;
+    }
+
+    private void deliverPaginationSuccess(PaginationState state,
+                                          ApiCallback<List<FeatureItem>> callback) {
+        if (state.finish()) callback.onSuccess(state.snapshot());
+    }
+
+    private void deliverPaginationError(PaginationState state,
+                                        ApiCallback<List<FeatureItem>> callback,
+                                        String message) {
+        if (state.finish()) callback.onError(new ApiError(0, message, false));
+    }
+
+    static String resolveNextEndpoint(String currentEndpoint, String rawNext, String baseUrl)
+            throws Exception {
+        String nextValue = rawNext == null ? "" : rawNext.trim();
+        if (nextValue.isEmpty()) throw new IllegalArgumentException("Thiếu URL trang tiếp theo");
+
+        URI base = new URI(ensureTrailingSlash(baseUrl));
+        URI supplied = new URI(nextValue);
+        URI resolved;
+        if (supplied.isAbsolute()) {
+            resolved = supplied;
+        } else if (nextValue.startsWith("?")) {
+            String current = currentEndpoint == null ? "" : currentEndpoint.trim();
+            while (current.startsWith("/")) current = current.substring(1);
+            resolved = base.resolve(current).resolve(supplied);
+        } else if (nextValue.startsWith("/")) {
+            resolved = base.resolve(supplied);
+        } else {
+            resolved = base.resolve(supplied);
+        }
+
+        if (!sameOrigin(base, resolved)) {
+            throw new IllegalArgumentException("URL phân trang nằm ngoài API đã cấu hình");
+        }
+        if (resolved.getRawFragment() != null) {
+            throw new IllegalArgumentException("URL phân trang không được chứa fragment");
+        }
+
+        String basePath = ensureTrailingSlash(base.getRawPath());
+        String nextPath = resolved.getRawPath() == null ? "" : resolved.getRawPath();
+        if (!nextPath.startsWith(basePath)) {
+            throw new IllegalArgumentException("URL phân trang nằm ngoài đường dẫn API");
+        }
+        String relativePath = nextPath.substring(basePath.length());
+        if (relativePath.isEmpty()) {
+            throw new IllegalArgumentException("URL phân trang không có endpoint");
+        }
+        String query = resolved.getRawQuery();
+        return query == null || query.isEmpty()
+                ? relativePath : relativePath + '?' + query;
+    }
+
+    private static boolean sameOrigin(URI first, URI second) {
+        String firstScheme = first.getScheme() == null ? "" : first.getScheme();
+        String secondScheme = second.getScheme() == null ? "" : second.getScheme();
+        String firstHost = first.getHost() == null ? "" : first.getHost();
+        String secondHost = second.getHost() == null ? "" : second.getHost();
+        return firstScheme.equalsIgnoreCase(secondScheme)
+                && firstHost.equalsIgnoreCase(secondHost)
+                && effectivePort(first) == effectivePort(second);
+    }
+
+    private static int effectivePort(URI uri) {
+        if (uri.getPort() >= 0) return uri.getPort();
+        return "https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80;
+    }
+
+    private static String ensureTrailingSlash(String value) {
+        String safe = value == null ? "" : value.trim();
+        return safe.endsWith("/") ? safe : safe + '/';
+    }
+
+    static final class PaginationState {
+        private final List<FeatureItem> items = new ArrayList<>();
+        private final Set<String> itemKeys = new HashSet<>();
+        private final Set<String> visitedEndpoints = new LinkedHashSet<>();
+        private boolean finished;
+
+        synchronized boolean visit(String endpoint) {
+            if (finished) return false;
+            String key = endpoint == null ? "" : endpoint.trim();
+            return !key.isEmpty() && visitedEndpoints.add(key);
+        }
+
+        synchronized int getPageCount() {
+            return visitedEndpoints.size();
+        }
+
+        synchronized void add(FeatureItem item, String stableKey) {
+            if (finished) return;
+            if (stableKey == null || itemKeys.add(stableKey)) items.add(item);
+        }
+
+        synchronized boolean finish() {
+            if (finished) return false;
+            finished = true;
+            return true;
+        }
+
+        synchronized List<FeatureItem> snapshot() {
+            return new ArrayList<>(items);
+        }
     }
 
     public void action(int method, String endpoint, JSONObject body,
                        ApiCallback<JSONObject> callback) {
         apiClient.request(method, endpoint, body, true, callback);
+    }
+
+    public void multipartAction(int method, String endpoint, JSONObject fields,
+                                List<MultipartFilePart> files,
+                                ApiCallback<JSONObject> callback) {
+        apiClient.multipart(method, endpoint, fields, files, true, callback);
     }
 
     public void loadObject(String endpoint, ApiCallback<JSONObject> callback) {

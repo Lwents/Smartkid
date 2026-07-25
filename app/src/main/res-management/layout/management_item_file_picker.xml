@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    app:cardBackgroundColor="@color/admin_glass_soft"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/admin_glass_stroke"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="76dp"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="10dp">
+
+        <FrameLayout
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@drawable/admin_bg_quick_blue">
+
+            <ImageView
+                android:id="@+id/imageManagementFileType"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/profile_ic_camera"
+                app:tint="@color/admin_primary" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="11dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textManagementFileTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/admin_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textManagementFileName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:ellipsize="middle"
+                android:maxLines="2"
+                android:textColor="@color/admin_text_muted"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonManagementClearFile"
+            android:layout_width="wrap_content"
+            android:layout_height="42dp"
+            android:layout_marginStart="6dp"
+            android:minWidth="54dp"
+            android:text="@string/management_clear_file"
+            android:textAllCaps="false"
+            android:textColor="@color/smartkid_error"
+            android:textSize="11sp"
+            android:visibility="gone"
+            app:backgroundTint="@color/admin_glass_soft"
+            app:cornerRadius="17dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonManagementChooseFile"
+            android:layout_width="wrap_content"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            android:minWidth="82dp"
+            android:text="@string/management_choose_file"
+            android:textAllCaps="false"
+            android:textColor="@color/admin_primary"
+            android:textSize="12sp"
+            app:backgroundTint="@color/admin_primary_light"
+            app:cornerRadius="17dp" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

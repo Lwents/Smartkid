@@ -27,6 +27,7 @@ import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.ManagementRepository;
 import com.example.smartkid.common.ui.BaseActivity;
+import com.example.smartkid.feature.teacher.TeacherCourseContentActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -34,7 +35,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.Locale;
 
 /** Danh sách quản lý dùng API thật, kèm thao tác theo quyền của từng nhóm. */
 public class ManagementFeatureActivity extends BaseActivity {
@@ -90,8 +90,11 @@ public class ManagementFeatureActivity extends BaseActivity {
             adapter = new FeatureItemAdapter(this);
             list.setAdapter(adapter);
             list.setEmptyView(emptyText);
-            list.setOnItemClickListener((parent, row, position, id) ->
-                    showItem(adapter.getItem(position)));
+            list.setOnItemClickListener((parent, row, position, id) -> {
+                FeatureItem item = adapter.getItem(position);
+                if ("teacher_courses".equals(spec.getActionKind())) showActions(item);
+                else showItem(item);
+            });
             search.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
                 @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -146,7 +149,7 @@ public class ManagementFeatureActivity extends BaseActivity {
             public void onSuccess(List<FeatureItem> data) {
                 if (!isUsable()) return;
                 setLoading(false);
-                adapter.setItems(data);
+                adapter.setItems(filterForCurrentFeature(data));
             }
 
             @Override
@@ -156,6 +159,25 @@ public class ManagementFeatureActivity extends BaseActivity {
                 handleApiError(error);
             }
         });
+    }
+
+    private List<FeatureItem> filterForCurrentFeature(List<FeatureItem> data) {
+        if (data == null || spec == null) return data;
+        String kind = spec.getActionKind();
+        if (!("teacher_exams".equals(kind) || "teacher_exam_reports".equals(kind))) {
+            return data;
+        }
+        List<FeatureItem> standalone = new java.util.ArrayList<>();
+        for (FeatureItem item : data) {
+            if (item == null) continue;
+            JSONObject source = item.getSource();
+            Object lesson = source == null ? null : source.opt("lesson");
+            if (lesson == null || lesson == JSONObject.NULL
+                    || String.valueOf(lesson).trim().isEmpty()) {
+                standalone.add(item);
+            }
+        }
+        return standalone;
     }
 
     private void showItem(FeatureItem item) {
@@ -179,14 +201,16 @@ public class ManagementFeatureActivity extends BaseActivity {
     }
 
     private void showActions(FeatureItem item) {
+        if (item == null) return;
         String kind = spec.getActionKind();
         String[] labels;
-        if ("admin_courses".equals(kind)) {
-            labels = new String[]{"Duyệt", "Từ chối", "Xuất bản", "Gỡ xuất bản", "Lưu trữ", "Khôi phục"};
-        } else if ("admin_users".equals(kind)) {
+        if ("admin_users".equals(kind)) {
             labels = new String[]{"Khóa tài khoản", "Mở khóa tài khoản"};
         } else if ("teacher_courses".equals(kind)) {
-            labels = new String[]{"Xuất bản", "Gỡ xuất bản", "Lưu trữ", "Khôi phục"};
+            boolean published = item.getSource().optBoolean("published", false);
+            labels = published
+                    ? new String[]{"Quản lý nội dung", "Gỡ xuất bản"}
+                    : new String[]{"Quản lý nội dung", "Xuất bản"};
         } else if ("teacher_exams".equals(kind)) {
             labels = new String[]{"Thêm câu hỏi", "Xem thống kê", "Xuất bản", "Gỡ xuất bản", "Xóa"};
         } else if ("teacher_exam_reports".equals(kind)) {
@@ -195,9 +219,6 @@ public class ManagementFeatureActivity extends BaseActivity {
             labels = new String[]{"Trả lời học viên"};
         } else if ("teacher_students".equals(kind)) {
             labels = new String[]{"Gửi phản hồi"};
-        } else if ("admin_transactions".equals(kind)) {
-            // Backend refund hiện chỉ đổi status trong DB, chưa gọi hoàn tiền ở cổng MoMo.
-            labels = new String[]{"Đánh dấu tranh chấp"};
         } else {
             return;
         }
@@ -207,6 +228,10 @@ public class ManagementFeatureActivity extends BaseActivity {
     }
 
     private void confirmAction(FeatureItem item, String label) {
+        if ("Quản lý nội dung".equals(label)) {
+            openCourseContent(item);
+            return;
+        }
         if ("Xuất bản".equals(label) && hasNoPlayableContent(item)) {
             showErrorDialog("Hãy thêm ít nhất một câu hỏi trước khi xuất bản.");
             return;
@@ -232,13 +257,6 @@ public class ManagementFeatureActivity extends BaseActivity {
             promptFeedback(item);
             return;
         }
-        if ("admin_transactions".equals(spec.getActionKind())) {
-            String hint = "Hoàn tiền".equals(label)
-                    ? "Nhập lý do hoàn tiền" : "Nhập ghi chú tranh chấp";
-            promptText(label, hint, "Tiếp tục",
-                    value -> confirmSensitiveTransaction(item, label, value));
-            return;
-        }
         if ("Xóa".equals(label)) {
             new AlertDialog.Builder(this).setTitle("Xóa dữ liệu")
                     .setMessage("Xóa vĩnh viễn “" + item.getTitle()
@@ -253,6 +271,23 @@ public class ManagementFeatureActivity extends BaseActivity {
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton("Xác nhận", (dialog, which) -> performAction(item, label))
                 .show();
+    }
+
+    private void openCourseContent(FeatureItem item) {
+        if (item == null || item.getId().isEmpty()) {
+            showErrorDialog("Khóa học không có mã hợp lệ");
+            return;
+        }
+        try {
+            Intent intent = new Intent(this, TeacherCourseContentActivity.class);
+            intent.putExtra(TeacherCourseContentActivity.EXTRA_COURSE_ID, item.getId());
+            intent.putExtra(TeacherCourseContentActivity.EXTRA_COURSE_TITLE, item.getTitle());
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "ManagementFeatureActivity",
+                    "Không thể mở nội dung khóa học", exception);
+            showErrorDialog("Không thể mở nội dung khóa học");
+        }
     }
 
     private boolean hasNoPlayableContent(FeatureItem item) {
@@ -323,7 +358,7 @@ public class ManagementFeatureActivity extends BaseActivity {
         try {
             JSONObject body = new JSONObject();
             body.put("prompt", prompt);
-            body.put("meta", new JSONObject().put("type", "single").put("points", 1));
+            body.put("meta", new JSONObject().put("type", "mcq").put("points", 1));
             JSONArray choices = new JSONArray();
             for (int index = 0; index < options.length(); index++) {
                 choices.put(new JSONObject().put("text", options.optString(index))
@@ -504,34 +539,6 @@ public class ManagementFeatureActivity extends BaseActivity {
         }
     }
 
-    private void confirmSensitiveTransaction(FeatureItem item, String label, String note) {
-        new AlertDialog.Builder(this).setTitle("Xác nhận "
-                        + label.toLowerCase(Locale.getDefault()))
-                .setMessage("Giao dịch: " + item.getId()
-                        + "\n\nThao tác này cập nhật dữ liệu thanh toán thật trên server.")
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton("Xác nhận", (dialog, which) ->
-                        performTransactionAction(item, label, note)).show();
-    }
-
-    private void performTransactionAction(FeatureItem item, String label, String note) {
-        try {
-            boolean refund = "Hoàn tiền".equals(label);
-            JSONObject body = new JSONObject();
-            body.put(refund ? "reason" : "note", note);
-            setLoading(true);
-            repository.action(Request.Method.POST,
-                    "admin/transactions/" + item.getId()
-                            + (refund ? "/refund/" : "/dispute/"),
-                    body, actionCallback(refund ? "Đã cập nhật trạng thái hoàn tiền"
-                            : "Đã đánh dấu giao dịch tranh chấp"));
-        } catch (Exception exception) {
-            AppLogger.error(this, "ManagementFeatureActivity", "Không thể cập nhật giao dịch", exception);
-            setLoading(false);
-            showErrorDialog("Không thể chuẩn bị thao tác giao dịch");
-        }
-    }
-
     private void promptText(String title, String hint, String positive,
                             TextValueAction action) {
         try {
@@ -591,17 +598,12 @@ public class ManagementFeatureActivity extends BaseActivity {
             String endpoint;
             int method;
             JSONObject body = new JSONObject();
-            if ("admin_courses".equals(kind)) {
-                String action = adminCourseAction(label);
-                endpoint = "admin/courses/" + item.getId() + "/" + action + "/";
-                method = Request.Method.POST;
-                if ("reject".equals(action)) body.put("reason", "Từ chối từ ứng dụng Android");
-            } else if ("admin_users".equals(kind)) {
+            if ("admin_users".equals(kind)) {
                 endpoint = "account/admin/users/" + item.getId() + "/";
                 method = Request.Method.PATCH;
                 body.put("is_active", label.startsWith("Mở"));
             } else if ("teacher_courses".equals(kind)) {
-                if ("Xuất bản".equals(label) || "Khôi phục".equals(label)) {
+                if ("Xuất bản".equals(label)) {
                     endpoint = "content/courses/" + item.getId() + "/publish/";
                     method = Request.Method.POST;
                     body.put("published", true);
@@ -637,15 +639,6 @@ public class ManagementFeatureActivity extends BaseActivity {
             setLoading(false);
             showErrorDialog("Không thể chuẩn bị thao tác quản lý");
         }
-    }
-
-    private String adminCourseAction(String label) {
-        if ("Duyệt".equals(label)) return "approve";
-        if ("Từ chối".equals(label)) return "reject";
-        if ("Xuất bản".equals(label)) return "publish";
-        if ("Gỡ xuất bản".equals(label)) return "unpublish";
-        if ("Lưu trữ".equals(label)) return "archive";
-        return "restore";
     }
 
     private String limit(String value) {

@@ -32,9 +32,9 @@ page/service Vue và URL Django trong `/home/lwent/Downloads/SunEdu/backend`.
 | Route frontend | Trạng thái Android |
 |---|---|
 | Dashboard, lesson QA | Có; xem dữ liệu và trả lời học viên |
-| Courses/new/detail | Có; xem, tạo, xuất bản/gỡ xuất bản/lưu trữ |
+| Courses/new/detail | Có; tạo khóa học (giá/ảnh/video), rồi tạo chương và bài học video/text/PDF/tài liệu/bài tập |
 | Content library | Có danh sách API thật |
-| Exams/new/detail/reports | Có; tạo đề, thêm câu hỏi + đáp án, xuất bản, xóa, thống kê và lượt nộp |
+| Exams/new/detail/reports | Có; tạo/sửa đề hoặc bài tập với MCQ, trả lời ngắn, nối cặp; AI sinh câu hỏi, xuất bản, xóa, thống kê và lượt nộp |
 | Games | Có; tạo, thêm quiz/cặp word-match, xuất bản, xóa và thống kê |
 | Students/progress/feedback | Có; danh sách/tiến độ và gửi feedback + rating |
 | Notifications | Có danh sách API thật |

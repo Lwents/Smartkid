@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.textfield.TextInputLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutManagementCreateInput"
+    style="@style/Widget.Smartkid.GlassInput"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    app:boxBackgroundColor="@color/admin_glass_soft"
+    app:boxCornerRadiusBottomEnd="18dp"
+    app:boxCornerRadiusBottomStart="18dp"
+    app:boxCornerRadiusTopEnd="18dp"
+    app:boxCornerRadiusTopStart="18dp">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/inputManagementCreate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textColor="@color/admin_text_primary"
+        android:textColorHint="@color/admin_text_muted"
+        android:textSize="14sp" />
+</com.google.android.material.textfield.TextInputLayout>

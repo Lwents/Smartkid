@@ -1,6 +1,12 @@
 package com.example.smartkid.data.remote;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.OpenableColumns;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -26,11 +32,21 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Lớp duy nhất làm việc với Volley. Có gắn JWT, refresh token và chuẩn hóa lỗi.
@@ -41,6 +57,8 @@ public final class ApiClient {
     private final Context appContext;
     private final RequestQueue requestQueue;
     private final SessionManager sessionManager;
+    private final ExecutorService uploadExecutor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Object refreshLock = new Object();
     private final List<Runnable> pendingRetries = new ArrayList<>();
     private final List<Runnable> pendingRefreshFailures = new ArrayList<>();
@@ -125,6 +143,185 @@ public final class ApiClient {
         execute(method, endpoint, body, authenticated, true, safeCallback);
     }
 
+    public void multipart(int method, String endpoint, JSONObject fields,
+                          List<MultipartFilePart> files, boolean authenticated,
+                          ApiCallback<JSONObject> callback) {
+        ApiCallback<JSONObject> safeCallback = callback == null ? noOpCallback() : callback;
+        if (endpoint == null || endpoint.trim().isEmpty()) {
+            deliverError(safeCallback, new ApiError(0, "Đường dẫn API không hợp lệ", false));
+            return;
+        }
+        executeMultipart(method, endpoint, fields, files, authenticated, true, safeCallback);
+    }
+
+    private void executeMultipart(int method, String endpoint, JSONObject fields,
+                                  List<MultipartFilePart> files, boolean authenticated,
+                                  boolean allowRefresh, ApiCallback<JSONObject> callback) {
+        uploadExecutor.execute(() -> {
+            HttpURLConnection connection = null;
+            try {
+                String boundary = "SmartKid-" + UUID.randomUUID();
+                connection = (HttpURLConnection) new URL(buildUrl(endpoint)).openConnection();
+                connection.setRequestMethod(methodName(method));
+                connection.setConnectTimeout(AppConstants.NETWORK_TIMEOUT_MS);
+                connection.setReadTimeout(10 * 60 * 1000);
+                connection.setDoInput(true);
+                connection.setDoOutput(true);
+                connection.setUseCaches(false);
+                connection.setChunkedStreamingMode(64 * 1024);
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setRequestProperty("Content-Type",
+                        "multipart/form-data; boundary=" + boundary);
+                if (authenticated) {
+                    String accessToken = sessionManager.getAccessToken();
+                    if (!accessToken.isEmpty()) {
+                        connection.setRequestProperty("Authorization", "Bearer " + accessToken);
+                    }
+                }
+
+                try (OutputStream output = new BufferedOutputStream(connection.getOutputStream())) {
+                    writeMultipartFields(output, boundary, fields);
+                    writeMultipartFiles(output, boundary, files);
+                    writeUtf8(output, "--" + boundary + "--\r\n");
+                    output.flush();
+                }
+
+                int statusCode = connection.getResponseCode();
+                String raw = readResponse(connection, statusCode);
+                if (statusCode >= 200 && statusCode < 300) {
+                    JSONObject response = raw.trim().isEmpty() ? new JSONObject()
+                            : new JSONObject(raw);
+                    mainHandler.post(() -> deliverSuccess(callback, response));
+                } else if (authenticated && allowRefresh && statusCode == 401) {
+                    mainHandler.post(() -> queueForTokenRefresh(
+                            () -> executeMultipart(method, endpoint, fields, files,
+                                    true, false, callback),
+                            () -> deliverError(callback,
+                                    new ApiError(401, "Phiên đăng nhập đã hết hạn", true))));
+                } else {
+                    ApiError apiError = responseError(statusCode, raw);
+                    mainHandler.post(() -> deliverError(callback, apiError));
+                }
+            } catch (Exception exception) {
+                AppLogger.error(appContext, "ApiClient", "Không thể upload tệp", exception);
+                mainHandler.post(() -> deliverError(callback,
+                        new ApiError(0, "Không thể tải tệp lên máy chủ", false)));
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        });
+    }
+
+    private void writeMultipartFields(OutputStream output, String boundary,
+                                      JSONObject fields) throws Exception {
+        if (fields == null) return;
+        JSONArray names = fields.names();
+        if (names == null) return;
+        for (int index = 0; index < names.length(); index++) {
+            String name = names.optString(index, "");
+            if (name.isEmpty() || fields.isNull(name)) continue;
+            Object value = fields.opt(name);
+            writeUtf8(output, "--" + boundary + "\r\n");
+            writeUtf8(output, "Content-Disposition: form-data; name=\""
+                    + headerValue(name) + "\"\r\n\r\n");
+            writeUtf8(output, String.valueOf(value));
+            writeUtf8(output, "\r\n");
+        }
+    }
+
+    private void writeMultipartFiles(OutputStream output, String boundary,
+                                     List<MultipartFilePart> files) throws Exception {
+        if (files == null || files.isEmpty()) return;
+        ContentResolver resolver = appContext.getContentResolver();
+        byte[] buffer = new byte[64 * 1024];
+        for (MultipartFilePart part : files) {
+            if (part == null || part.getUri() == null || part.getFieldName().isEmpty()) continue;
+            Uri uri = part.getUri();
+            String fileName = displayName(resolver, uri);
+            String mimeType = resolver.getType(uri);
+            if (mimeType == null || mimeType.trim().isEmpty()) {
+                mimeType = "application/octet-stream";
+            }
+            writeUtf8(output, "--" + boundary + "\r\n");
+            writeUtf8(output, "Content-Disposition: form-data; name=\""
+                    + headerValue(part.getFieldName()) + "\"; filename=\""
+                    + headerValue(fileName) + "\"\r\n");
+            writeUtf8(output, "Content-Type: " + mimeType + "\r\n\r\n");
+            try (InputStream input = new BufferedInputStream(resolver.openInputStream(uri))) {
+                int read;
+                while ((read = input.read(buffer)) != -1) output.write(buffer, 0, read);
+            }
+            writeUtf8(output, "\r\n");
+        }
+    }
+
+    private String displayName(ContentResolver resolver, Uri uri) {
+        String name = "upload";
+        try (Cursor cursor = resolver.query(uri,
+                new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int column = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (column >= 0) name = cursor.getString(column);
+            }
+        } catch (Exception ignored) {
+            // The provider may not expose a display name.
+        }
+        return name == null || name.trim().isEmpty() ? "upload" : name.trim();
+    }
+
+    private String readResponse(HttpURLConnection connection, int statusCode) throws Exception {
+        InputStream source = statusCode >= 200 && statusCode < 400
+                ? connection.getInputStream() : connection.getErrorStream();
+        if (source == null) return "";
+        try (InputStream input = source; ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = input.read(buffer)) != -1) output.write(buffer, 0, read);
+            return output.toString(StandardCharsets.UTF_8.name());
+        }
+    }
+
+    private ApiError responseError(int statusCode, String raw) {
+        try {
+            JSONObject json = new JSONObject(raw == null ? "" : raw);
+            String message = SafeJson.string(json, "", "detail", "message", "error");
+            if (message.isEmpty()) {
+                JSONArray names = json.names();
+                if (names != null && names.length() > 0) {
+                    Object value = json.opt(names.optString(0));
+                    message = value instanceof JSONArray
+                            ? ((JSONArray) value).optString(0, "") : String.valueOf(value);
+                }
+            }
+            if (!message.isEmpty()) return new ApiError(statusCode, message, statusCode == 401);
+        } catch (Exception ignored) {
+            // Fall back to the normalized status message below.
+        }
+        if (statusCode == 403) {
+            return new ApiError(403, "Bạn không có quyền thực hiện chức năng này", false);
+        }
+        if (statusCode == 413) {
+            return new ApiError(413, "Tệp vượt quá dung lượng máy chủ cho phép", false);
+        }
+        return new ApiError(statusCode, "Không thể tải tệp lên máy chủ", statusCode == 401);
+    }
+
+    private String methodName(int method) {
+        if (method == Request.Method.POST) return "POST";
+        if (method == Request.Method.PUT) return "PUT";
+        if (method == Request.Method.PATCH) return "PATCH";
+        throw new IllegalArgumentException("Multipart chỉ hỗ trợ POST, PUT hoặc PATCH");
+    }
+
+    private void writeUtf8(OutputStream output, String value) throws Exception {
+        output.write(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String headerValue(String value) {
+        return value == null ? "" : value.replace("\r", "_")
+                .replace("\n", "_").replace("\"", "_");
+    }
+
     private void execute(int method, String endpoint, JSONObject body, boolean authenticated,
                          boolean allowRefresh, ApiCallback<JSONObject> callback) {
         try {
@@ -167,7 +364,9 @@ public final class ApiClient {
                 }
             };
             request.setRetryPolicy(new DefaultRetryPolicy(
-                    AppConstants.NETWORK_TIMEOUT_MS,
+                    endpoint.contains("activities/ai/")
+                            ? AppConstants.AI_NETWORK_TIMEOUT_MS
+                            : AppConstants.NETWORK_TIMEOUT_MS,
                     0,
                     1f
             ));

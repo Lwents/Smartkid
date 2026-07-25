@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="teacher_exercise_loading_status">Đang kiểm tra bài tập…</string>
+    <string name="teacher_exercise_loading_button">Đang tải…</string>
+    <string name="teacher_exercise_none">Chưa có bài tập</string>
+    <string name="teacher_exercise_summary_format">Bài tập: %1$s • %2$s</string>
+    <string name="teacher_exercise_multiple_format">Có %1$d bài tập • Chọn bài cần sửa</string>
+    <string name="teacher_add_exercise_button">Thêm bài tập</string>
+    <string name="teacher_edit_exercise_button">Sửa bài tập</string>
+    <string name="teacher_retry_exercise_button">Thử lại</string>
+    <string name="teacher_exercise_load_error">Không tải được trạng thái bài tập</string>
+    <string name="teacher_exercise_picker_title">Chọn bài tập cần sửa</string>
+</resources>

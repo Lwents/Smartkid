@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:background="@drawable/admin_bg_chart_tabs"
+    android:orientation="vertical"
+    android:paddingStart="14dp"
+    android:paddingTop="9dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="7dp">
+
+    <TextView
+        android:id="@+id/textManagementCreateSpinnerLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/admin_text_secondary"
+        android:textSize="11.5sp"
+        android:textStyle="bold" />
+
+    <Spinner
+        android:id="@+id/spinnerManagementCreate"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:background="@android:color/transparent"
+        android:popupBackground="@color/white"
+        android:spinnerMode="dropdown" />
+</LinearLayout>

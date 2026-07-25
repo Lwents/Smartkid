@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="7dp"
+    android:background="@drawable/admin_bg_chart_tabs"
+    android:gravity="center_vertical"
+    android:minHeight="68dp"
+    android:orientation="horizontal"
+    android:paddingStart="12dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="8dp">
+
+    <ImageView
+        android:id="@+id/imageTeacherLessonType"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="@drawable/admin_bg_quick_blue"
+        android:contentDescription="@null"
+        android:padding="8dp"
+        android:src="@drawable/role_ic_course"
+        app:tint="@color/admin_blue" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textTeacherLessonTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/admin_text_primary"
+            android:textSize="13.5sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textTeacherLessonMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/admin_text_secondary"
+            android:textSize="10.5sp" />
+
+        <TextView
+            android:id="@+id/textTeacherLessonExerciseStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="@string/teacher_exercise_loading_status"
+            android:textColor="@color/admin_primary"
+            android:textSize="10.5sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonTeacherLessonExercise"
+        android:layout_width="wrap_content"
+        android:layout_height="42dp"
+        android:layout_marginStart="6dp"
+        android:minWidth="0dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:enabled="false"
+        android:text="@string/teacher_exercise_loading_button"
+        android:textAllCaps="false"
+        android:textColor="@color/admin_primary"
+        android:textSize="10.5sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/admin_primary_light"
+        app:cornerRadius="16dp" />
+</LinearLayout>
