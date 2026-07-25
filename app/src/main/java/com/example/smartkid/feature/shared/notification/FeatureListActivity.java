@@ -27,7 +27,6 @@ import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.feature.student.course.CatalogActivity;
 import com.example.smartkid.feature.student.course.CourseDetailActivity;
 import com.example.smartkid.feature.student.ai.LearningAnalysisActivity;
-import com.example.smartkid.feature.student.payment.PaymentActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -39,7 +38,6 @@ import java.util.List;
 public class FeatureListActivity extends BaseActivity {
     public static final String EXTRA_MODE = "feature_mode";
     public static final String MODE_LEARNING_PATH = "learning_path";
-    public static final String MODE_PAYMENTS = "payments";
     public static final String MODE_NOTIFICATIONS = "notifications";
     public static final String MODE_CERTIFICATES = "certificates";
 
@@ -106,11 +104,6 @@ public class FeatureListActivity extends BaseActivity {
             emptyText.setText(R.string.no_learning_path);
             actionButton.setText(R.string.learning_analysis);
             actionButton.setOnClickListener(view -> openActivity(LearningAnalysisActivity.class));
-        } else if (MODE_PAYMENTS.equals(mode)) {
-            toolbar.setTitle(R.string.payment_history);
-            emptyText.setText(R.string.no_payments);
-            actionButton.setText(R.string.make_payment);
-            actionButton.setOnClickListener(view -> openActivity(PaymentActivity.class));
         } else if (MODE_NOTIFICATIONS.equals(mode)) {
             toolbar.setTitle(R.string.notifications);
             emptyText.setText(R.string.no_notifications);
@@ -128,7 +121,6 @@ public class FeatureListActivity extends BaseActivity {
             setLoading(true);
             ApiCallback<List<FeatureItem>> callback = listCallback();
             if (MODE_LEARNING_PATH.equals(mode)) featureRepository.loadLearningPath(callback);
-            else if (MODE_PAYMENTS.equals(mode)) featureRepository.loadPayments(callback);
             else if (MODE_NOTIFICATIONS.equals(mode)) featureRepository.loadNotifications(callback);
             else examRepository.loadCertificates(callback);
         } catch (Exception exception) {
@@ -256,7 +248,7 @@ public class FeatureListActivity extends BaseActivity {
     }
 
     private boolean isModeValid(String value) {
-        return MODE_LEARNING_PATH.equals(value) || MODE_PAYMENTS.equals(value)
+        return MODE_LEARNING_PATH.equals(value)
                 || MODE_NOTIFICATIONS.equals(value) || MODE_CERTIFICATES.equals(value);
     }
 

@@ -32,7 +32,6 @@
         tools:ignore="NotificationPermission">
         <activity android:name=".feature.student.ai.AITutorActivity" android:exported="false" />
         <activity android:name=".feature.student.course.LessonDiscussionActivity" android:exported="false" />
-        <activity android:name=".feature.student.payment.CartActivity" android:exported="false" />
         <activity android:name=".feature.student.ai.LearningAnalysisActivity" android:exported="false" />
         <activity android:name=".feature.student.ai.AssessmentActivity" android:exported="false" />
         <activity android:name=".feature.teacher.TeacherManagementActivity" android:exported="false" />
@@ -49,7 +48,6 @@
         <activity android:name=".feature.student.profile.ParentActivity" android:exported="false" />
         <activity android:name=".feature.shared.profile.ChangePasswordActivity" android:exported="false" />
         <activity android:name=".feature.shared.profile.ProfileEditActivity" android:exported="false" />
-        <activity android:name=".feature.student.payment.PaymentActivity" android:exported="false" />
         <activity android:name=".feature.shared.notification.FeatureListActivity" android:exported="false" />
         <activity android:name=".feature.student.exam.ExamActivity" android:exported="false" />
         <activity android:name=".feature.student.course.CatalogActivity" android:exported="false" />

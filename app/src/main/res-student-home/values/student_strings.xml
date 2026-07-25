@@ -34,12 +34,10 @@
     <string name="lesson_exercise_result_saved">Đã hoàn thành • Điểm %1$.1f • Tiến độ đã được lưu</string>
     <string name="lesson_exercise_result_not_saved">Đã nộp bài • Điểm %1$.1f • Chưa lưu được tiến độ</string>
     <string name="no_suggested_lessons">Chưa có bài học được gợi ý</string>
-    <string name="cart_total_empty">Tổng thanh toán: 0 ₫</string>
     <string name="no_discussion_questions">Chưa có câu hỏi nào</string>
     <string name="discussion_question_hint">Nhập câu hỏi cho giáo viên</string>
     <string name="view_course">Xem khóa học  →</string>
     <string name="numbered_question">%1$d. %2$s</string>
-    <string name="cart_total_format">Tổng thanh toán: %1$s</string>
     <string name="exam_info_format">%1$s • %2$s • Điểm đạt %3$s</string>
     <string name="exam_info_with_description">%1$s\n%2$s</string>
     <string name="exam_timer_format">Còn %1$02d:%2$02d</string>
@@ -55,8 +53,14 @@
     <string name="search_course_hint">Tìm theo tên, môn học, giáo viên</string>
     <string name="sort_az">Sắp xếp A–Z</string>
     <string name="sort_za">Sắp xếp Z–A</string>
-    <string name="no_courses">Bạn chưa có khóa học nào</string>
+    <string name="no_courses">Bé chưa có khóa học nào</string>
+    <string name="no_courses_hint">Bấm nút bên dưới để chọn khóa học và bắt đầu học nhé!</string>
+    <string name="browse_catalog_button">Tìm khóa học để học</string>
+    <string name="browse_catalog_subtitle">Khám phá và bắt đầu học ngay</string>
     <string name="no_matching_courses">Không tìm thấy khóa học phù hợp</string>
+    <string name="no_matching_courses_title">Chưa thấy khóa học phù hợp?</string>
+    <string name="no_matching_courses_hint">Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc nhé!</string>
+    <string name="dismiss">Đóng</string>
     <string name="course_catalog">Danh mục khóa học</string>
     <string name="no_catalog_courses">Chưa có khóa học được phát hành</string>
     <string name="invalid_course">Khóa học không hợp lệ</string>
@@ -70,10 +74,6 @@
     <string name="start_learning">Bắt đầu học</string>
     <string name="enroll_free">Đăng ký miễn phí</string>
     <string name="enrolled_success">Đăng ký khóa học thành công</string>
-    <string name="buy_course_price">Thêm vào giỏ • %1$s ₫</string>
-    <string name="cart">Giỏ hàng</string>
-    <string name="empty_cart">Giỏ hàng đang trống</string>
-    <string name="checkout">Thanh toán</string>
     <string name="no_lessons">Khóa học chưa có bài học</string>
     <string name="invalid_lesson">Bài học không hợp lệ</string>
     <string name="lesson_completed">Đã hoàn thành</string>
@@ -127,12 +127,4 @@
     <string name="submit_assessment">Nộp bài đánh giá</string>
     <string name="restore_streak">Khôi phục chuỗi học</string>
     <string name="no_learning_path">Bạn chưa có khóa học trong lộ trình</string>
-    <string name="payments">Thanh toán</string>
-    <string name="payment_history">Lịch sử thanh toán</string>
-    <string name="no_payments">Chưa có giao dịch thanh toán</string>
-    <string name="make_payment">Nạp tiền</string>
-    <string name="amount_hint">Số tiền (VNĐ)</string>
-    <string name="payment_description_hint">Nội dung thanh toán</string>
-    <string name="pay_with_momo">Thanh toán bằng MoMo</string>
-    <string name="payment_real_note">Giao dịch được tạo trên server và chuyển đến cổng MoMo. Ứng dụng không tự tạo lịch sử hay kết quả thanh toán.</string>
 </resources>

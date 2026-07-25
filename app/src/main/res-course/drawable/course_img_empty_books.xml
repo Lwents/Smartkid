@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Book behind -->
+    <path
+        android:fillColor="@color/smartkid_secondary_end"
+        android:pathData="M62,58 h76 a6,6 0 0 1 6,6 v10 h-88 v-10 a6,6 0 0 1 6,-6 Z" />
+    <path
+        android:fillColor="@color/smartkid_secondary"
+        android:pathData="M56,74 h88 v8 h-88 Z" />
+
+    <!-- Open book pages -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M100,96 C86,86 68,86 54,90 v56 C68,142 86,142 100,152 C114,142 132,142 146,146 v-56 C132,86 114,86 100,96 Z" />
+    <!-- Left page lines -->
+    <path
+        android:strokeColor="@color/smartkid_avatar"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M64,104 h26 M64,114 h26 M64,124 h22" />
+    <!-- Right page lines -->
+    <path
+        android:strokeColor="@color/smartkid_avatar"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M110,104 h26 M110,114 h26 M110,124 h22" />
+    <!-- Center spine -->
+    <path
+        android:strokeColor="@color/smartkid_primary"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M100,96 V152" />
+
+    <!-- Bookmark -->
+    <path
+        android:fillColor="@color/smartkid_accent"
+        android:pathData="M96,142 h10 v18 l-5,-5 l-5,5 Z" />
+
+    <!-- Sparkles -->
+    <path
+        android:fillColor="@color/smartkid_accent"
+        android:pathData="M150,60 l3,7 l7,3 l-7,3 l-3,7 l-3,-7 l-7,-3 l7,-3 Z" />
+    <path
+        android:fillColor="@color/smartkid_secondary"
+        android:pathData="M44,70 l2,5 l5,2 l-5,2 l-2,5 l-2,-5 l-5,-2 l5,-2 Z" />
+    <path
+        android:fillColor="@color/smartkid_primary"
+        android:pathData="M158,120 l2,5 l5,2 l-5,2 l-2,5 l-2,-5 l-5,-2 l5,-2 Z" />
+</vector>

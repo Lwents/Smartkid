@@ -20,7 +20,6 @@
     <string name="management_course_title">Tên khóa học</string>
     <string name="management_course_subject">Môn học</string>
     <string name="management_course_grade">Khối lớp</string>
-    <string name="management_course_price">Giá khóa học (VNĐ, nhập 0 nếu miễn phí)</string>
     <string name="management_grade_one">Lớp 1</string>
     <string name="management_grade_two">Lớp 2</string>
     <string name="management_grade_three">Lớp 3</string>

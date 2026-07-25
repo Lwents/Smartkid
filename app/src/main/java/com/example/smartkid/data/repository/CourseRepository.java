@@ -382,7 +382,6 @@ public class CourseRepository {
                 SafeJson.string(object, "", "teacherName", "teacher_name"),
                 SafeJson.integer(object, 0, "lessonsCount", "lessons_count"),
                 SafeJson.integer(object, 0, "progress"),
-                SafeJson.decimal(object, 0, "price"),
                 SafeJson.string(object, "", "thumbnail", "thumbnail_url"),
                 description,
                 SafeJson.bool(object, true, "isEnrolled", "is_enrolled")

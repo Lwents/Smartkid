@@ -10,13 +10,12 @@ public class Course {
     private final String teacherName;
     private final int lessonsCount;
     private final int progress;
-    private final double price;
     private final String thumbnailUrl;
     private final String description;
     private final boolean enrolled;
 
     public Course(String id, String title, String grade, String subject, String teacherName,
-                  int lessonsCount, int progress, double price, String thumbnailUrl,
+                  int lessonsCount, int progress, String thumbnailUrl,
                   String description, boolean enrolled) {
         this.id = safe(id);
         this.title = safe(title).isEmpty() ? "Khóa học chưa đặt tên" : safe(title);
@@ -25,7 +24,6 @@ public class Course {
         this.teacherName = safe(teacherName);
         this.lessonsCount = Math.max(0, lessonsCount);
         this.progress = BusinessRules.clampProgress(progress);
-        this.price = Math.max(0, price);
         this.thumbnailUrl = safe(thumbnailUrl);
         this.description = safe(description);
         this.enrolled = enrolled;
@@ -57,10 +55,6 @@ public class Course {
 
     public int getProgress() {
         return progress;
-    }
-
-    public double getPrice() {
-        return price;
     }
 
     public String getThumbnailUrl() {

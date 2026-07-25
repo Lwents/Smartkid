@@ -26,9 +26,7 @@ import com.example.smartkid.feature.shared.auth.LoginActivity;
 import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.feature.student.course.CatalogActivity;
 import com.example.smartkid.feature.shared.notification.FeatureListActivity;
-import com.example.smartkid.feature.student.payment.PaymentActivity;
 import com.example.smartkid.feature.student.ai.AITutorActivity;
-import com.example.smartkid.feature.student.payment.CartActivity;
 import com.example.smartkid.feature.student.ai.LearningAnalysisActivity;
 import com.example.smartkid.feature.shared.profile.ChangePasswordActivity;
 import com.example.smartkid.feature.shared.profile.ProfileEditActivity;
@@ -114,14 +112,6 @@ public class StudentProfileFragment extends Fragment {
         View buttonCerts = view.findViewById(R.id.buttonCertificates);
         if (buttonCerts != null) {
             buttonCerts.setOnClickListener(clicked -> openFeature(FeatureListActivity.MODE_CERTIFICATES));
-        }
-        View buttonPay = view.findViewById(R.id.buttonPayments);
-        if (buttonPay != null) {
-            buttonPay.setOnClickListener(clicked -> openActivity(PaymentActivity.class));
-        }
-        View buttonCart = view.findViewById(R.id.buttonCart);
-        if (buttonCart != null) {
-            buttonCart.setOnClickListener(clicked -> openActivity(CartActivity.class));
         }
         View buttonNotif = view.findViewById(R.id.buttonNotifications);
         if (buttonNotif != null) {

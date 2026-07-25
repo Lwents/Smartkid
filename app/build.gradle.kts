@@ -12,7 +12,8 @@ val localProperties = Properties().apply {
 }
 
 // VPS công khai — luôn dùng làm phương án dự phòng khi không có backend chạy trên máy.
-val vpsApiBaseUrl = "http://160.250.181.242:8000/api/"
+// Đi qua nginx (cổng 80), không gọi thẳng gunicorn cổng 8000.
+val vpsApiBaseUrl = "http://160.250.181.242/api/"
 // URL local ưu tiên: lấy từ -PAPI_BASE_URL hoặc local.properties, mặc định là loopback của
 // emulator. App sẽ tự probe URL này lúc khởi động; nếu không kết nối được thì chuyển sang VPS.
 val localApiBaseUrl = providers.gradleProperty("API_BASE_URL").orNull
@@ -91,6 +92,7 @@ dependencies {
     implementation(libs.volley)
     implementation(libs.picasso)
     implementation(libs.viewpager2)
+    implementation(libs.youtube.player)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)

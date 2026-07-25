@@ -19,9 +19,6 @@ import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.CourseRepository;
 import com.example.smartkid.common.ui.BaseActivity;
-import com.example.smartkid.feature.student.payment.PaymentActivity;
-import com.example.smartkid.feature.student.payment.CartActivity;
-import com.example.smartkid.data.local.CartManager;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.squareup.picasso.Picasso;
 
@@ -164,9 +161,6 @@ public class CourseDetailActivity extends BaseActivity {
         }
         if (course.isEnrolled()) {
             startButton.setText(R.string.start_learning);
-        } else if (course.getPrice() > 0) {
-            startButton.setText(getString(R.string.buy_course_price,
-                    String.format(java.util.Locale.getDefault(), "%,.0f", course.getPrice())));
         } else {
             startButton.setText(R.string.enroll_free);
         }
@@ -180,8 +174,6 @@ public class CourseDetailActivity extends BaseActivity {
         Course course = courseDetail.getCourse();
         if (course.isEnrolled()) {
             openFirstLesson();
-        } else if (course.getPrice() > 0) {
-            addCourseToCart(course);
         } else {
             enrollFreeCourse();
         }
@@ -206,18 +198,6 @@ public class CourseDetailActivity extends BaseActivity {
         });
     }
 
-    private void addCourseToCart(Course course) {
-        try {
-            boolean added = new CartManager(this).add(course);
-            showShortMessage(added ? "Đã thêm khóa học vào giỏ hàng"
-                    : "Khóa học đã có trong giỏ hàng");
-            startActivity(new Intent(this, CartActivity.class));
-        } catch (Exception exception) {
-            AppLogger.error(this, "CourseDetailActivity", "Không thể thêm vào giỏ", exception);
-            showErrorDialog("Không thể mở giỏ hàng");
-        }
-    }
-
     private void openFirstLesson() {
         if (courseDetail == null || courseDetail.getLessons().isEmpty()) {
             showShortMessage("Khóa học chưa có bài học");
@@ -228,7 +208,7 @@ public class CourseDetailActivity extends BaseActivity {
 
     private void openLesson(Lesson lesson) {
         if (courseDetail != null && !courseDetail.getCourse().isEnrolled()) {
-            showShortMessage("Bạn cần đăng ký hoặc thanh toán khóa học trước");
+            showShortMessage("Bạn cần đăng ký khóa học trước");
             return;
         }
         if (lesson == null || lesson.getId().isEmpty()) {

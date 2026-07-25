@@ -57,7 +57,6 @@ public class DashboardRepository {
                 SafeJson.string(object, "", "teacherName", "teacher_name"),
                 SafeJson.integer(object, 0, "lessonsCount", "lessons_count"),
                 SafeJson.integer(object, 0, "progress"),
-                SafeJson.decimal(object, 0, "price"),
                 SafeJson.string(object, "", "thumbnail", "thumbnail_url"),
                 SafeJson.string(object, "", "description", "introduction"),
                 true

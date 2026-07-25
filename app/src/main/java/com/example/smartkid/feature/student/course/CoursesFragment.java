@@ -32,9 +32,13 @@ public class CoursesFragment extends Fragment {
     private EditText searchInput;
     private Button sortButton;
     private Button refreshButton;
+    private View browseCatalogButton;
+    private Button emptyBrowseCatalogButton;
     private ListView listView;
+    private View emptyState;
     private TextView emptyText;
-    private TextView noticeText;
+    private View noticeCard;
+    private TextView noticeBody;
     private CourseAdapter adapter;
     private CourseRepository repository;
 
@@ -54,11 +58,14 @@ public class CoursesFragment extends Fragment {
             bindViews(view);
             adapter = new CourseAdapter(requireContext());
             listView.setAdapter(adapter);
-            listView.setEmptyView(emptyText);
+            listView.setEmptyView(emptyState);
             listView.setOnItemClickListener((parent, row, position, id) ->
                     openCourse(adapter.getItem(position)));
             sortButton.setOnClickListener(clicked -> toggleSort());
             refreshButton.setOnClickListener(clicked -> safeLoadCourses());
+            View.OnClickListener openCatalog = clicked -> openCatalog();
+            if (browseCatalogButton != null) browseCatalogButton.setOnClickListener(openCatalog);
+            if (emptyBrowseCatalogButton != null) emptyBrowseCatalogButton.setOnClickListener(openCatalog);
             searchInput.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence text, int start, int count, int after) {
@@ -79,11 +86,16 @@ public class CoursesFragment extends Fragment {
                     // Không cần xử lý sau khi thay đổi.
                 }
             });
-            safeLoadCourses();
         } catch (Exception exception) {
             AppLogger.error(getContext(), "CoursesFragment", "Không thể tạo danh sách khóa học", exception);
             showErrorState("Không thể khởi tạo danh sách khóa học");
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (repository != null && adapter != null) safeLoadCourses();
     }
 
     @Override
@@ -100,8 +112,16 @@ public class CoursesFragment extends Fragment {
         sortButton = view.findViewById(R.id.buttonSortCourses);
         refreshButton = view.findViewById(R.id.buttonRefreshCourses);
         listView = view.findViewById(R.id.listCourses);
+        emptyState = view.findViewById(R.id.emptyCoursesState);
         emptyText = view.findViewById(R.id.textCoursesEmpty);
-        noticeText = view.findViewById(R.id.textCourseNotice);
+        noticeCard = view.findViewById(R.id.textCourseNotice);
+        noticeBody = view.findViewById(R.id.textCourseNoticeBody);
+        browseCatalogButton = view.findViewById(R.id.buttonBrowseCatalog);
+        emptyBrowseCatalogButton = view.findViewById(R.id.buttonEmptyBrowseCatalog);
+        View dismissNotice = view.findViewById(R.id.buttonDismissNotice);
+        if (dismissNotice != null) {
+            dismissNotice.setOnClickListener(clicked -> noticeCard.setVisibility(View.GONE));
+        }
     }
 
     private void safeLoadCourses() {
@@ -126,10 +146,10 @@ public class CoursesFragment extends Fragment {
                 emptyText.setText(result.getCourses().isEmpty()
                         ? R.string.no_courses : R.string.no_matching_courses);
                 if (result.getNotice().isEmpty()) {
-                    noticeText.setVisibility(View.GONE);
+                    noticeCard.setVisibility(View.GONE);
                 } else {
-                    noticeText.setText(result.getNotice());
-                    noticeText.setVisibility(View.VISIBLE);
+                    noticeBody.setText(result.getNotice());
+                    noticeCard.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -154,6 +174,15 @@ public class CoursesFragment extends Fragment {
             sortButton.setText(ascending ? R.string.sort_az : R.string.sort_za);
         } catch (Exception exception) {
             AppLogger.error(getContext(), "CoursesFragment", "Không thể sắp xếp", exception);
+        }
+    }
+
+    private void openCatalog() {
+        try {
+            startActivity(new Intent(requireContext(), CatalogActivity.class));
+        } catch (Exception exception) {
+            AppLogger.error(getContext(), "CoursesFragment", "Không thể mở danh mục", exception);
+            showErrorState("Không thể mở danh mục khóa học");
         }
     }
 
@@ -187,9 +216,9 @@ public class CoursesFragment extends Fragment {
             emptyText.setText(message);
             emptyText.setVisibility(View.VISIBLE);
         }
-        if (noticeText != null) {
-            noticeText.setText(message);
-            noticeText.setVisibility(View.VISIBLE);
+        if (noticeBody != null && noticeCard != null) {
+            noticeBody.setText(message);
+            noticeCard.setVisibility(View.VISIBLE);
         }
     }
 }

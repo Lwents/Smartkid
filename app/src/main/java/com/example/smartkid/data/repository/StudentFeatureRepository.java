@@ -13,10 +13,8 @@ import com.example.smartkid.data.remote.ApiError;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /** Các chức năng bổ trợ trong cổng học viên. */
 public class StudentFeatureRepository {
@@ -68,39 +66,6 @@ public class StudentFeatureRepository {
             AppLogger.error(appContext, "StudentFeatureRepository", "Không thể tạo lộ trình", exception);
             callback.onError(new ApiError(0, "Không thể chuẩn bị lộ trình", false));
         }
-    }
-
-    public void loadPayments(ApiCallback<List<FeatureItem>> callback) {
-        apiClient.get("payments/history/", true, new ApiCallback<JSONObject>() {
-            @Override
-            public void onSuccess(JSONObject data) {
-                try {
-                    JSONArray items = SafeJson.array(data, "results", "items");
-                    List<FeatureItem> result = new ArrayList<>();
-                    NumberFormat currency = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-                    for (int index = 0; index < items.length(); index++) {
-                        JSONObject item = items.optJSONObject(index);
-                        if (item == null) continue;
-                        JSONObject plan = item.optJSONObject("plan");
-                        JSONObject metadata = item.optJSONObject("metadata");
-                        String planName = SafeJson.string(item, "", "plan_name");
-                        if (planName.isEmpty()) planName = SafeJson.string(plan, "Thanh toán tuỳ chỉnh", "name");
-                        String gateway = SafeJson.string(item, "", "gateway");
-                        if (gateway.isEmpty()) gateway = SafeJson.string(metadata, "MoMo", "gateway");
-                        result.add(new FeatureItem(
-                                SafeJson.string(item, "", "id"), planName,
-                                currency.format(SafeJson.decimal(item, 0, "amount")),
-                                SafeJson.string(item, "", "paid_at", "created_at"),
-                                statusVietnamese(SafeJson.string(item, "", "status")), item));
-                    }
-                    callback.onSuccess(result);
-                } catch (Exception exception) {
-                    parseFailure("thanh toán", exception, callback);
-                }
-            }
-
-            @Override public void onError(ApiError error) { callback.onError(error); }
-        });
     }
 
     public void loadNotifications(ApiCallback<List<FeatureItem>> callback) {
@@ -188,38 +153,6 @@ public class StudentFeatureRepository {
         } catch (Exception exception) {
             AppLogger.error(appContext, "StudentFeatureRepository", "Không thể đổi mật khẩu", exception);
             callback.onError(new ApiError(0, "Không thể chuẩn bị yêu cầu đổi mật khẩu", false));
-        }
-    }
-
-    public void initiateMomo(double amount, String planId, String description,
-                             String courseId, String courseTitle,
-                             ApiCallback<JSONObject> callback) {
-        JSONArray courseIds = new JSONArray();
-        JSONArray courseTitles = new JSONArray();
-        if (courseId != null && !courseId.trim().isEmpty()) {
-            courseIds.put(courseId.trim());
-            courseTitles.put(safe(courseTitle));
-        }
-        initiateMomo(amount, planId, description, courseIds, courseTitles, callback);
-    }
-
-    public void initiateMomo(double amount, String planId, String description,
-                             JSONArray courseIds, JSONArray courseTitles,
-                             ApiCallback<JSONObject> callback) {
-        try {
-            JSONObject body = new JSONObject();
-            if (planId != null && !planId.trim().isEmpty()) body.put("plan_id", planId.trim());
-            else body.put("amount", amount);
-            body.put("description", safe(description).isEmpty() ? "Nạp tiền SmartKid" : description.trim());
-            body.put("flow", "pay_with_method");
-            if (courseIds != null && courseIds.length() > 0) {
-                body.put("course_ids", courseIds);
-                body.put("course_titles", courseTitles == null ? new JSONArray() : courseTitles);
-            }
-            apiClient.post("payments/momo/initiate/", body, true, callback);
-        } catch (Exception exception) {
-            AppLogger.error(appContext, "StudentFeatureRepository", "Không thể khởi tạo MoMo", exception);
-            callback.onError(new ApiError(0, "Không thể chuẩn bị giao dịch", false));
         }
     }
 
@@ -506,14 +439,6 @@ public class StudentFeatureRepository {
         AppLogger.error(appContext, "StudentFeatureRepository",
                 "Không thể " + action, exception);
         callback.onError(new ApiError(0, "Không thể chuẩn bị dữ liệu để " + action, false));
-    }
-
-    private static String statusVietnamese(String value) {
-        if ("paid".equalsIgnoreCase(value) || "success".equalsIgnoreCase(value)) return "Thành công";
-        if ("pending".equalsIgnoreCase(value)) return "Đang xử lý";
-        if ("failed".equalsIgnoreCase(value)) return "Thất bại";
-        if ("refunded".equalsIgnoreCase(value)) return "Đã hoàn tiền";
-        return value;
     }
 
     private static String safe(String value) { return value == null ? "" : value.trim(); }

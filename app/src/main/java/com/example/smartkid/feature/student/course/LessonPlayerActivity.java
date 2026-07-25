@@ -1,10 +1,8 @@
 package com.example.smartkid.feature.student.course;
 
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +30,10 @@ import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.feature.student.ai.AITutorActivity;
 import com.example.smartkid.feature.student.course.LessonDiscussionActivity;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +42,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
-public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.OnInitListener {
+public class LessonPlayerActivity extends BaseActivity {
     private MaterialToolbar toolbar;
     private ProgressBar loadingView;
     private TextView typeText;
@@ -49,14 +51,12 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
     private VideoView videoView;
     private WebView webVideo;
     private View webVideoContainer;
+    private YouTubePlayerView youtubePlayerView;
     private View exercisesCard;
     private LinearLayout exercisesContainer;
     private Button openExternalButton;
-    private Button speakButton;
     private Button completeButton;
     private CourseRepository repository;
-    private TextToSpeech textToSpeech;
-    private boolean ttsReady;
     private LessonContent lessonContent;
     private String courseId;
     private String lessonId;
@@ -78,11 +78,9 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
             String title = getIntent().getStringExtra(AppConstants.EXTRA_LESSON_TITLE);
             toolbar.setTitle(title == null ? getString(R.string.lesson_content) : title);
             openExternalButton.setOnClickListener(view -> openExternalContent());
-            speakButton.setOnClickListener(view -> speakLesson());
             completeButton.setOnClickListener(view -> markCompleted(false));
             findViewById(R.id.buttonLessonAiTutor).setOnClickListener(view -> openAiTutor());
             findViewById(R.id.buttonLessonDiscussion).setOnClickListener(view -> openDiscussion());
-            textToSpeech = new TextToSpeech(this, this);
             loadLesson();
         } catch (Exception exception) {
             AppLogger.error(this, "LessonPlayerActivity", "Không thể tạo trình phát bài học", exception);
@@ -109,9 +107,8 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
                 webVideo.stopLoading();
                 webVideo.destroy();
             }
-            if (textToSpeech != null) {
-                textToSpeech.stop();
-                textToSpeech.shutdown();
+            if (youtubePlayerView != null) {
+                youtubePlayerView.release();
             }
             if (repository != null) {
                 repository.close();
@@ -120,25 +117,6 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
             AppLogger.error(this, "LessonPlayerActivity", "Không thể giải phóng multimedia", exception);
         }
         super.onDestroy();
-    }
-
-    @Override
-    public void onInit(int status) {
-        try {
-            if (status == TextToSpeech.SUCCESS && textToSpeech != null) {
-                int result = textToSpeech.setLanguage(new Locale("vi", "VN"));
-                ttsReady = result != TextToSpeech.LANG_MISSING_DATA
-                        && result != TextToSpeech.LANG_NOT_SUPPORTED;
-            } else {
-                ttsReady = false;
-            }
-            if (speakButton != null) {
-                speakButton.setEnabled(ttsReady && lessonContent != null);
-            }
-        } catch (Exception exception) {
-            AppLogger.error(this, "LessonPlayerActivity", "Không thể khởi tạo đọc văn bản", exception);
-            ttsReady = false;
-        }
     }
 
     private void bindViews() {
@@ -150,10 +128,11 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
         videoView = findViewById(R.id.videoLesson);
         webVideo = findViewById(R.id.webLessonVideo);
         webVideoContainer = findViewById(R.id.containerLessonWebVideo);
+        youtubePlayerView = findViewById(R.id.youtubeLessonPlayer);
+        getLifecycle().addObserver(youtubePlayerView);
         exercisesCard = findViewById(R.id.cardLessonExercises);
         exercisesContainer = findViewById(R.id.containerLessonExercises);
         openExternalButton = findViewById(R.id.buttonOpenExternal);
-        speakButton = findViewById(R.id.buttonSpeakLesson);
         completeButton = findViewById(R.id.buttonCompleteLesson);
     }
 
@@ -220,17 +199,46 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
         statusText.setText(content.isCompleted()
                 ? R.string.lesson_completed : R.string.lesson_not_completed);
         completeButton.setEnabled(!content.isCompleted());
-        speakButton.setEnabled(ttsReady && !content.getTextContent().isEmpty());
 
         String externalUrl = preferredExternalUrl(content);
         openExternalButton.setVisibility(externalUrl.isEmpty() ? View.GONE : View.VISIBLE);
         videoView.setVisibility(View.GONE);
         webVideo.setVisibility(View.GONE);
         webVideoContainer.setVisibility(View.GONE);
+        youtubePlayerView.setVisibility(View.GONE);
 
-        if (!content.getVideoUrl().isEmpty()) {
-            if (isWebEmbed(content.getVideoUrl())) prepareEmbeddedVideo(content.getVideoUrl());
-            else prepareVideo(content.getVideoUrl());
+        String videoUrl = content.getVideoUrl();
+        if (videoUrl.isEmpty()) {
+            return;
+        }
+        String youtubeId = youtubeVideoId(videoUrl);
+        if (!youtubeId.isEmpty()) {
+            prepareYoutube(youtubeId);
+        } else if (isWebEmbed(videoUrl)) {
+            prepareEmbeddedVideo(videoUrl);
+        } else {
+            prepareVideo(videoUrl);
+        }
+    }
+
+    private void prepareYoutube(String videoId) {
+        try {
+            youtubePlayerView.setVisibility(View.VISIBLE);
+            IFramePlayerOptions options = new IFramePlayerOptions.Builder()
+                    .controls(1)
+                    .rel(0)
+                    .build();
+            youtubePlayerView.initialize(new AbstractYouTubePlayerListener() {
+                @Override
+                public void onReady(YouTubePlayer youTubePlayer) {
+                    youTubePlayer.cueVideo(videoId, 0f);
+                }
+            }, options);
+        } catch (Exception exception) {
+            AppLogger.error(this, "LessonPlayerActivity",
+                    "Không thể mở trình phát YouTube", exception);
+            youtubePlayerView.setVisibility(View.GONE);
+            openExternalButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -245,7 +253,11 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
             webVideo.setWebViewClient(new WebViewClient());
             webVideoContainer.setVisibility(View.VISIBLE);
             webVideo.setVisibility(View.VISIBLE);
-            webVideo.loadUrl(toEmbedUrl(videoUrl));
+            String embedUrl = toEmbedUrl(videoUrl);
+            String host = embedUrl.contains("vimeo.com")
+                    ? "https://player.vimeo.com" : "https://www.youtube.com";
+            webVideo.loadDataWithBaseURL(host, embedHtml(embedUrl),
+                    "text/html", "utf-8", null);
         } catch (Exception exception) {
             AppLogger.error(this, "LessonPlayerActivity",
                     "Không thể nhúng video web", exception);
@@ -306,25 +318,6 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
         } catch (Exception exception) {
             AppLogger.error(this, "LessonPlayerActivity", "Không thể mở nội dung ngoài", exception);
             showErrorDialog("Liên kết nội dung không hợp lệ");
-        }
-    }
-
-    private void speakLesson() {
-        if (!ttsReady || textToSpeech == null || lessonContent == null) {
-            showShortMessage("Chức năng đọc văn bản chưa sẵn sàng");
-            return;
-        }
-        String text = lessonContent.getTextContent();
-        if (text.isEmpty()) {
-            showShortMessage("Bài học không có văn bản để đọc");
-            return;
-        }
-        try {
-            textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null,
-                    "smartkid_lesson_" + lessonContent.getId());
-        } catch (Exception exception) {
-            AppLogger.error(this, "LessonPlayerActivity", "Không thể đọc bài học", exception);
-            showErrorDialog("Thiết bị không thể đọc nội dung này");
         }
     }
 
@@ -404,6 +397,36 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
         return content.getVideoUrl();
     }
 
+    private String youtubeVideoId(String value) {
+        String source = value == null ? "" : value.trim();
+        if (source.isEmpty()) return "";
+        try {
+            Uri uri = Uri.parse(source);
+            String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
+            if (host.contains("youtu.be")) {
+                String id = uri.getLastPathSegment();
+                return id == null ? "" : id;
+            }
+            if (host.contains("youtube.com")) {
+                String path = uri.getPath() == null ? "" : uri.getPath();
+                if (path.contains("/embed/") || path.contains("/v/")) {
+                    String id = uri.getLastPathSegment();
+                    return id == null ? "" : id;
+                }
+                String id = uri.getQueryParameter("v");
+                if ((id == null || id.isEmpty()) && uri.getPathSegments().size() > 1
+                        && "shorts".equals(uri.getPathSegments().get(0))) {
+                    id = uri.getPathSegments().get(1);
+                }
+                return id == null ? "" : id;
+            }
+        } catch (Exception exception) {
+            AppLogger.error(this, "LessonPlayerActivity",
+                    "Không thể tách mã video YouTube", exception);
+        }
+        return "";
+    }
+
     private boolean isWebEmbed(String value) {
         String normalized = value == null ? "" : value.toLowerCase(Locale.ROOT);
         return normalized.contains("youtube.com") || normalized.contains("youtu.be")
@@ -444,6 +467,17 @@ public class LessonPlayerActivity extends BaseActivity implements TextToSpeech.O
     private String youtubeEmbed(String id) {
         return "https://www.youtube.com/embed/" + id
                 + "?playsinline=1&rel=0&modestbranding=1";
+    }
+
+    private String embedHtml(String embedUrl) {
+        return "<!DOCTYPE html><html><head>"
+                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+                + "<style>*{margin:0;padding:0}html,body{background:#000;height:100%;overflow:hidden}"
+                + ".wrap{position:relative;width:100%;height:100%}"
+                + ".wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}</style>"
+                + "</head><body><div class=\"wrap\"><iframe src=\"" + embedUrl + "\" "
+                + "allow=\"accelerometer;autoplay;encrypted-media;gyroscope;picture-in-picture\" "
+                + "allowfullscreen></iframe></div></body></html>";
     }
 
     private void loadExercises() {

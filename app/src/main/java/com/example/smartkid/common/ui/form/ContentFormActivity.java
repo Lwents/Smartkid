@@ -313,9 +313,6 @@ public abstract class ContentFormActivity extends BaseActivity {
                     new String[]{"Toán", "Tiếng Việt", "Tiếng Anh", "Khoa học", "Lịch sử"},
                     new String[]{"math", "vietnamese", "english", "science", "history"});
             addGradeSelector();
-            addInput("price", getString(R.string.management_course_price),
-                    InputType.TYPE_CLASS_NUMBER, false);
-            inputs.get("price").setText("0");
 
             addSection(R.string.management_course_content_section,
                     R.string.management_course_content_description);
@@ -1409,7 +1406,6 @@ public abstract class ContentFormActivity extends BaseActivity {
             body.put("title", title);
             body.put("subject_slug", spinnerValue("subject_slug"));
             body.put("grade", selectedGrade);
-            body.put("price", (long) decimal("price", 0, 0, 9_999_999_999d));
             body.put("description", value("description"));
             body.put("introduction", value("introduction"));
             if ("youtube".equals(videoSource)) {
