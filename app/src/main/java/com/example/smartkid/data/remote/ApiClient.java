@@ -525,8 +525,8 @@ public final class ApiClient {
 
     private String buildUrl(String endpoint) {
         String normalizedEndpoint = endpoint.startsWith("/") ? endpoint.substring(1) : endpoint;
-        String baseUrl = AppConstants.API_BASE_URL.endsWith("/")
-                ? AppConstants.API_BASE_URL : AppConstants.API_BASE_URL + "/";
+        String resolved = AppConstants.getApiBaseUrl();
+        String baseUrl = resolved.endsWith("/") ? resolved : resolved + "/";
         return baseUrl + normalizedEndpoint;
     }
 

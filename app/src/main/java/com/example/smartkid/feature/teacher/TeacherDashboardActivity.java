@@ -1,6 +1,7 @@
 package com.example.smartkid.feature.teacher;
 
 import android.animation.TimeInterpolator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,8 +22,13 @@ import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.model.User;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
-import com.example.smartkid.feature.admin.ui.AdminActivityChartView;
-import com.example.smartkid.feature.management.RoleDashboardActivity;
+import com.example.smartkid.common.navigation.UserRole;
+import com.example.smartkid.common.ui.FeatureSpec;
+import com.example.smartkid.common.ui.RoleDashboardActivity;
+import com.example.smartkid.common.ui.chart.ActivityChartView;
+import com.example.smartkid.common.ui.form.ExerciseScope;
+import com.example.smartkid.feature.teacher.course.TeacherCourseCreateActivity;
+import com.example.smartkid.feature.teacher.exercise.TeacherExerciseEditorActivity;
 import com.example.smartkid.feature.teacher.data.TeacherDashboardRepository;
 import com.example.smartkid.feature.teacher.model.TeacherDashboardData;
 
@@ -46,7 +52,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
     private TextView statusText;
     private LinearLayout coursesContainer;
     private NestedScrollView dashboardScroll;
-    private AdminActivityChartView activityChart;
+    private ActivityChartView activityChart;
     private TextView chartEmpty;
     private TextView[] chartTabs;
     private ViewFlipper pageFlipper;
@@ -60,7 +66,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!requireRole("teacher", "instructor")) return;
+        if (!requireRole(UserRole.TEACHER)) return;
         try {
             setContentView(R.layout.teacher_activity_dashboard);
             LiquidGlassUi.useStatusBarBackdrop(this, R.id.teacherDashboardRoot,
@@ -364,6 +370,52 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         String first = parts[0].substring(0, 1);
         String last = parts.length > 1 ? parts[parts.length - 1].substring(0, 1) : "";
         return (first + last).toUpperCase(new Locale("vi", "VN"));
+    }
+
+    private void openManagementFeature(String key) {
+        FeatureSpec spec = TeacherManagementSpec.get(key);
+        if (spec == null || !spec.isAllowedForRole(currentRole())) {
+            showErrorDialog("Tài khoản không có quyền mở chức năng này");
+            return;
+        }
+        if (!spec.isAvailable()) {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle(spec.getTitle())
+                    .setMessage(spec.getUnavailableReason()
+                            + "\n\nỨng dụng không tạo dữ liệu giả khi backend chưa sẵn sàng.")
+                    .setPositiveButton("Đã hiểu", null)
+                    .show();
+            return;
+        }
+        try {
+            Intent intent = new Intent(this, TeacherManagementActivity.class);
+            intent.putExtra(TeacherManagementActivity.EXTRA_SPEC_KEY, key);
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "TeacherDashboardActivity", "Không thể mở chức năng", exception);
+            showErrorDialog("Không thể mở chức năng quản lý");
+        }
+    }
+
+    private void openCreate(String key) {
+        if (!currentRole().isTeacher()) {
+            showErrorDialog("Tài khoản không có quyền tạo dữ liệu này");
+            return;
+        }
+        try {
+            Intent intent;
+            if ("teacher_exams".equals(key)) {
+                intent = new Intent(this, TeacherExerciseEditorActivity.class);
+                intent.putExtra(TeacherExerciseEditorActivity.EXTRA_SCOPE,
+                        ExerciseScope.STANDALONE_EXAM.name());
+            } else {
+                intent = new Intent(this, TeacherCourseCreateActivity.class);
+            }
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "TeacherDashboardActivity", "Không thể mở biểu mẫu", exception);
+            showErrorDialog("Không thể mở biểu mẫu tạo mới");
+        }
     }
 
     private float dp(float value) {

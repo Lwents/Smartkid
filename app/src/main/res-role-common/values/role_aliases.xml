@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Neutral, role-agnostic aliases for design tokens that are genuinely shared across the
+  Teacher and Admin experiences (and the shared content-authoring form engine in
+  common.ui.form). They currently point at the historical admin_* definitions so that no
+  colour or asset value changes in this pass.
+
+  TODO(role-tokens): move the underlying values out of res-admin into res-role-common under
+  these neutral names and delete the admin_* originals once every call-site has migrated to
+  the role_* / common_* names. Tracked in docs/android_role_architecture.md.
+-->
+<resources>
+    <!-- Colours shared by role dashboards and the content-authoring form. -->
+    <color name="role_text_primary">@color/admin_text_primary</color>
+    <color name="role_text_secondary">@color/admin_text_secondary</color>
+    <color name="role_primary">@color/admin_primary</color>
+    <color name="role_primary_light">@color/admin_primary_light</color>
+
+    <!-- Drawable aliases (a values alias does not duplicate the asset). -->
+    <item name="role_bg_screen" type="drawable">@drawable/admin_bg_screen</item>
+    <item name="role_bg_chart_tabs" type="drawable">@drawable/admin_bg_chart_tabs</item>
+    <item name="role_bg_chart_tab_selected" type="drawable">@drawable/admin_bg_chart_tab_selected</item>
+    <item name="role_ic_course_filled" type="drawable">@drawable/admin_ic_course</item>
+    <item name="role_ic_user_add_filled" type="drawable">@drawable/admin_ic_user_add</item>
+</resources>

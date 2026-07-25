@@ -276,7 +276,7 @@
                         android:layout_height="188dp"
                         android:layout_marginTop="8dp">
 
-                        <com.example.smartkid.feature.admin.ui.AdminActivityChartView
+                        <com.example.smartkid.common.ui.chart.ActivityChartView
                             android:id="@+id/teacherActivityChart"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent" />

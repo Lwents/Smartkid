@@ -109,7 +109,7 @@ public class ManagementRepository {
                 final String nextEndpoint;
                 try {
                     nextEndpoint = resolveNextEndpoint(
-                            endpoint, rawNext, AppConstants.API_BASE_URL);
+                            endpoint, rawNext, AppConstants.getApiBaseUrl());
                 } catch (Exception exception) {
                     AppLogger.error(appContext, "ManagementRepository",
                             "Đường dẫn trang tiếp theo không hợp lệ", exception);

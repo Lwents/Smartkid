@@ -14,7 +14,7 @@ import androidx.fragment.app.FragmentManager;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.local.SessionManager;
 import com.example.smartkid.data.remote.ApiError;
-import com.example.smartkid.feature.auth.LoginActivity;
+import com.example.smartkid.feature.shared.auth.LoginActivity;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public abstract class BaseActivity extends AppCompatActivity {

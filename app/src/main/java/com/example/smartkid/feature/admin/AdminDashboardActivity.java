@@ -18,7 +18,10 @@ import android.widget.ViewFlipper;
 
 import androidx.core.widget.NestedScrollView;
 
+import android.content.Intent;
+
 import com.example.smartkid.R;
+import com.example.smartkid.common.ui.FeatureSpec;
 import com.example.smartkid.common.ui.LiquidGlassUi;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.model.User;
@@ -26,8 +29,9 @@ import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.feature.admin.data.AdminDashboardRepository;
 import com.example.smartkid.feature.admin.model.AdminDashboardData;
-import com.example.smartkid.feature.admin.ui.AdminActivityChartView;
-import com.example.smartkid.feature.management.RoleDashboardActivity;
+import com.example.smartkid.common.ui.chart.ActivityChartView;
+import com.example.smartkid.common.navigation.UserRole;
+import com.example.smartkid.common.ui.RoleDashboardActivity;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
@@ -61,7 +65,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     private FrameLayout bottomNavigation;
     private View navigationIndicator;
     private TextView[] navItems;
-    private AdminActivityChartView activityChart;
+    private ActivityChartView activityChart;
     private ProgressBar chartProgress;
     private TextView chartPeriod;
     private TextView chartEmpty;
@@ -72,7 +76,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!requireRole("admin")) return;
+        if (!requireRole(UserRole.ADMIN)) return;
         try {
             setContentView(R.layout.admin_activity_dashboard);
             LiquidGlassUi.useStatusBarBackdrop(this, R.id.adminDashboardRoot,
@@ -512,6 +516,31 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
 
     private void bindFeature(int viewId, String key) {
         findViewById(viewId).setOnClickListener(view -> openManagementFeature(key));
+    }
+
+    private void openManagementFeature(String key) {
+        FeatureSpec spec = AdminManagementSpec.get(key);
+        if (spec == null || !spec.isAllowedForRole(currentRole())) {
+            showErrorDialog("Tài khoản không có quyền mở chức năng này");
+            return;
+        }
+        if (!spec.isAvailable()) {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle(spec.getTitle())
+                    .setMessage(spec.getUnavailableReason()
+                            + "\n\nỨng dụng không tạo dữ liệu giả khi backend chưa sẵn sàng.")
+                    .setPositiveButton("Đã hiểu", null)
+                    .show();
+            return;
+        }
+        try {
+            Intent intent = new Intent(this, AdminManagementActivity.class);
+            intent.putExtra(AdminManagementActivity.EXTRA_SPEC_KEY, key);
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "AdminDashboardActivity", "Không thể mở chức năng", exception);
+            showErrorDialog("Không thể mở chức năng quản lý");
+        }
     }
 
     private void scrollTo(View target) {

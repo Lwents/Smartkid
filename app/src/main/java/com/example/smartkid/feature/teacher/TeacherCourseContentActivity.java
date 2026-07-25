@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.smartkid.R;
+import com.example.smartkid.common.navigation.UserRole;
 import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.common.ui.LiquidGlassUi;
 import com.example.smartkid.common.util.AppLogger;
@@ -21,7 +22,11 @@ import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.ManagementRepository;
-import com.example.smartkid.feature.management.ManagementCreateActivity;
+import com.example.smartkid.common.ui.form.ContentFormActivity;
+import com.example.smartkid.common.ui.form.ExerciseScope;
+import com.example.smartkid.feature.teacher.course.TeacherLessonCreateActivity;
+import com.example.smartkid.feature.teacher.course.TeacherModuleCreateActivity;
+import com.example.smartkid.feature.teacher.exercise.TeacherExerciseEditorActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 
@@ -88,9 +93,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
     }
 
     private boolean isTeacher() {
-        String role = new SessionManager(this).getUser().getRole();
-        String normalized = safe(role).toLowerCase(Locale.ROOT);
-        return "teacher".equals(normalized) || "instructor".equals(normalized);
+        return UserRole.fromString(new SessionManager(this).getUser().getRole()).isTeacher();
     }
 
     private void bindViews() {
@@ -349,14 +352,22 @@ public final class TeacherCourseContentActivity extends BaseActivity {
     private boolean openCreate(String kind, String parentId, String linkedCourseId,
                                String parentTitle, int position, String editId) {
         try {
-            Intent intent = new Intent(this, ManagementCreateActivity.class);
-            intent.putExtra(ManagementCreateActivity.EXTRA_KIND, kind);
-            intent.putExtra(ManagementCreateActivity.EXTRA_PARENT_ID, parentId);
-            intent.putExtra(ManagementCreateActivity.EXTRA_PARENT_TITLE, parentTitle);
-            intent.putExtra(ManagementCreateActivity.EXTRA_COURSE_ID, linkedCourseId);
-            intent.putExtra(ManagementCreateActivity.EXTRA_POSITION, position);
+            Intent intent;
+            if ("teacher_modules".equals(kind)) {
+                intent = new Intent(this, TeacherModuleCreateActivity.class);
+            } else if ("teacher_lessons".equals(kind)) {
+                intent = new Intent(this, TeacherLessonCreateActivity.class);
+            } else {
+                intent = new Intent(this, TeacherExerciseEditorActivity.class);
+                intent.putExtra(TeacherExerciseEditorActivity.EXTRA_SCOPE,
+                        ExerciseScope.LESSON_EXERCISE.name());
+            }
+            intent.putExtra(ContentFormActivity.EXTRA_PARENT_ID, parentId);
+            intent.putExtra(ContentFormActivity.EXTRA_PARENT_TITLE, parentTitle);
+            intent.putExtra(ContentFormActivity.EXTRA_COURSE_ID, linkedCourseId);
+            intent.putExtra(ContentFormActivity.EXTRA_POSITION, position);
             if (!safe(editId).isEmpty()) {
-                intent.putExtra(ManagementCreateActivity.EXTRA_EDIT_ID, editId);
+                intent.putExtra(ContentFormActivity.EXTRA_EDIT_ID, editId);
             }
             startActivity(intent);
             return true;

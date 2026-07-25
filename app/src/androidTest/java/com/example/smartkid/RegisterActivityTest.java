@@ -15,7 +15,7 @@ import android.content.Intent;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.example.smartkid.feature.auth.RegisterActivity;
+import com.example.smartkid.feature.shared.auth.RegisterActivity;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

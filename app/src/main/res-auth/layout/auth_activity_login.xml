@@ -157,15 +157,5 @@
             android:layout_height="52dp"
             android:layout_marginTop="16dp"
             android:text="@string/open_register" />
-
-        <TextView
-            android:background="@null"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:gravity="center"
-            android:text="@string/login_server_note"
-            android:textColor="@color/smartkid_text_secondary"
-            android:textSize="12sp" />
     </LinearLayout>
 </ScrollView>

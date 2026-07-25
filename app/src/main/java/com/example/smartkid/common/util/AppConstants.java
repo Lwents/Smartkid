@@ -3,7 +3,26 @@ package com.example.smartkid.common.util;
 import com.example.smartkid.BuildConfig;
 
 public final class AppConstants {
-    public static final String API_BASE_URL = BuildConfig.API_BASE_URL;
+    /** URL local ưu tiên (backend chạy trên máy dev / emulator). */
+    public static final String API_LOCAL_URL = BuildConfig.API_BASE_URL;
+    /** URL VPS công khai — dùng khi không kết nối được backend local. */
+    public static final String API_FALLBACK_URL = BuildConfig.API_FALLBACK_URL;
+
+    /**
+     * URL thực sự đang dùng, được {@code ApiEnvironment} chốt lúc khởi động sau khi probe local.
+     * Mặc định trỏ VPS để mọi request trước khi probe xong vẫn có nơi đi.
+     */
+    private static volatile String resolvedBaseUrl = API_FALLBACK_URL;
+
+    public static String getApiBaseUrl() {
+        return resolvedBaseUrl;
+    }
+
+    public static void setApiBaseUrl(String url) {
+        if (url != null && !url.trim().isEmpty()) {
+            resolvedBaseUrl = url.trim();
+        }
+    }
 
     public static final String LOGIN_ENDPOINT = "account/login/";
     public static final String REGISTER_ENDPOINT = "account/register/";

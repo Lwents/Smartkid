@@ -11,10 +11,13 @@ val localProperties = Properties().apply {
     }
 }
 
-val defaultApiBaseUrl = "http://160.250.181.242:8000/api/"
-val apiBaseUrl = providers.gradleProperty("API_BASE_URL").orNull
+// VPS công khai — luôn dùng làm phương án dự phòng khi không có backend chạy trên máy.
+val vpsApiBaseUrl = "http://160.250.181.242:8000/api/"
+// URL local ưu tiên: lấy từ -PAPI_BASE_URL hoặc local.properties, mặc định là loopback của
+// emulator. App sẽ tự probe URL này lúc khởi động; nếu không kết nối được thì chuyển sang VPS.
+val localApiBaseUrl = providers.gradleProperty("API_BASE_URL").orNull
     ?: localProperties.getProperty("API_BASE_URL")
-    ?: defaultApiBaseUrl
+    ?: "http://10.0.2.2:8000/api/"
 
 android {
     namespace = "com.example.smartkid"
@@ -35,7 +38,12 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"${apiBaseUrl.trimEnd('/')}/\""
+            "\"${localApiBaseUrl.trimEnd('/')}/\""
+        )
+        buildConfigField(
+            "String",
+            "API_FALLBACK_URL",
+            "\"${vpsApiBaseUrl.trimEnd('/')}/\""
         )
     }
 
@@ -59,16 +67,17 @@ android {
             res.srcDirs(
                 "src/main/res",
                 "src/main/res-auth",
-                "src/main/res-home",
+                "src/main/res-profile",
+                "src/main/res-notification",
+                "src/main/res-student-home",
                 "src/main/res-course",
                 "src/main/res-exam",
                 "src/main/res-ai",
-                "src/main/res-profile",
                 "src/main/res-payment",
-                "src/main/res-notification",
-                "src/main/res-management",
-                "src/main/res-admin",
-                "src/main/res-teacher"
+                "src/main/res-role-common",
+                "src/main/res-content-authoring",
+                "src/main/res-teacher",
+                "src/main/res-admin"
             )
         }
     }

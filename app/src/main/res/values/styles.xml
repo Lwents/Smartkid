@@ -20,7 +20,8 @@
         <item name="rippleColor">@color/glass_stroke</item>
     </style>
 
-    <style name="Widget.Smartkid.AdminGlassCard" parent="Widget.Material3.CardView.Elevated">
+    <!-- Neutral role-shared card/tab/title styles. Used by both Teacher and Admin surfaces. -->
+    <style name="Widget.Smartkid.RoleCard" parent="Widget.Material3.CardView.Elevated">
         <item name="cardBackgroundColor">@color/admin_glass</item>
         <item name="cardCornerRadius">22dp</item>
         <item name="cardElevation">4dp</item>
@@ -29,20 +30,29 @@
         <item name="android:clickable">false</item>
     </style>
 
-    <style name="Widget.Smartkid.AdminGlassCard.Interactive" parent="Widget.Smartkid.AdminGlassCard">
+    <style name="Widget.Smartkid.RoleCard.Interactive" parent="Widget.Smartkid.RoleCard">
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <item name="rippleColor">@color/admin_primary_light</item>
     </style>
 
-    <style name="TextAppearance.Smartkid.AdminSectionTitle" parent="TextAppearance.Material3.TitleLarge">
+    <!-- Compatibility alias. TODO(role-refactor): migrate remaining layouts to Widget.Smartkid.RoleCard and remove. -->
+    <style name="Widget.Smartkid.AdminGlassCard" parent="Widget.Smartkid.RoleCard" />
+
+    <!-- Compatibility alias. TODO(role-refactor): migrate remaining layouts to Widget.Smartkid.RoleCard.Interactive and remove. -->
+    <style name="Widget.Smartkid.AdminGlassCard.Interactive" parent="Widget.Smartkid.RoleCard.Interactive" />
+
+    <style name="TextAppearance.Smartkid.RoleSectionTitle" parent="TextAppearance.Material3.TitleLarge">
         <item name="android:textColor">@color/admin_text_primary</item>
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
-    <style name="Widget.Smartkid.AdminChartTab" parent="">
+    <!-- Compatibility alias. TODO(role-refactor): migrate remaining layouts to TextAppearance.Smartkid.RoleSectionTitle and remove. -->
+    <style name="TextAppearance.Smartkid.AdminSectionTitle" parent="TextAppearance.Smartkid.RoleSectionTitle" />
+
+    <style name="Widget.Smartkid.RoleChartTab" parent="">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_weight">1</item>
@@ -54,6 +64,9 @@
         <item name="android:textColor">@color/admin_text_secondary</item>
         <item name="android:textSize">11.5sp</item>
     </style>
+
+    <!-- Compatibility alias. TODO(role-refactor): migrate remaining layouts to Widget.Smartkid.RoleChartTab and remove. -->
+    <style name="Widget.Smartkid.AdminChartTab" parent="Widget.Smartkid.RoleChartTab" />
 
     <style name="Widget.Smartkid.GlassButton" parent="Widget.Material3.Button">
         <item name="android:minHeight">@dimen/button_height</item>
