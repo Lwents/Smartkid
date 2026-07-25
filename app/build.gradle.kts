@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.picasso)
     implementation(libs.viewpager2)
     implementation(libs.youtube.player)
+    implementation(libs.swiperefresh)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)

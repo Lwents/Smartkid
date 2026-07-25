@@ -50,27 +50,32 @@
         android:indeterminate="true"
         android:visibility="gone" />
 
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refreshFeatureList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp">
-        <ListView
-            android:id="@+id/listFeatures"
+        android:layout_weight="1">
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="9dp"
-            android:paddingBottom="14dp" />
-        <TextView
-            android:background="@null"
-            android:id="@+id/textFeatureListEmpty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:padding="24dp"
-            android:textColor="@color/smartkid_text_secondary" />
-    </FrameLayout>
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+            <ListView
+                android:id="@+id/listFeatures"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="9dp"
+                android:paddingBottom="14dp" />
+            <TextView
+                android:background="@null"
+                android:id="@+id/textFeatureListEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:padding="24dp"
+                android:textColor="@color/smartkid_text_secondary" />
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

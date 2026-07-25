@@ -157,10 +157,14 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refreshCourseDetail"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="1">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingBottom="12dp">
@@ -182,4 +186,5 @@
             android:textColor="@color/smartkid_text_secondary"
             android:textSize="14sp" />
     </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

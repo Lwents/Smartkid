@@ -54,10 +54,14 @@
         android:indeterminate="true"
         android:visibility="gone" />
 
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refreshCatalog"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="1">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:paddingStart="14dp"
         android:paddingEnd="14dp">
         <ListView
@@ -78,4 +82,5 @@
             android:text="@string/no_catalog_courses"
             android:textColor="@color/smartkid_text_secondary" />
     </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
@@ -42,7 +43,7 @@ public class StudentProfileFragment extends Fragment {
     private TextView statusText;
     private ProgressBar progressBar;
     private TextView studentCodeText;
-    private View refreshButton;
+    private SwipeRefreshLayout refreshLayout;
     private View logoutButton;
     private AuthRepository repository;
 
@@ -62,7 +63,7 @@ public class StudentProfileFragment extends Fragment {
             bindViews(view);
             bindUser(repository.getSessionManager().getUser());
             serverText.setText(getString(R.string.server_format, AppConstants.getApiBaseUrl()));
-            refreshButton.setOnClickListener(clicked -> safelyLoadProfile());
+            refreshLayout.setOnRefreshListener(this::safelyLoadProfile);
             logoutButton.setOnClickListener(clicked -> confirmLogout());
             bindFeatureNavigation(view);
             safelyLoadProfile();
@@ -152,7 +153,7 @@ public class StudentProfileFragment extends Fragment {
         serverText = view.findViewById(R.id.textProfileServer);
         statusText = view.findViewById(R.id.textProfileStatus);
         progressBar = view.findViewById(R.id.progressProfile);
-        refreshButton = view.findViewById(R.id.buttonRefreshProfile);
+        refreshLayout = view.findViewById(R.id.refreshProfile);
         logoutButton = view.findViewById(R.id.buttonLogout);
 
         if (avatarText == null || fullNameText == null || usernameText == null
@@ -295,11 +296,12 @@ public class StudentProfileFragment extends Fragment {
     }
 
     private void setLoading(boolean loading) {
-        if (progressBar != null) {
-            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
         }
-        if (refreshButton != null) {
-            refreshButton.setEnabled(!loading);
+        boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
+        if (progressBar != null) {
+            progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         }
         if (logoutButton != null) {
             logoutButton.setEnabled(!loading);

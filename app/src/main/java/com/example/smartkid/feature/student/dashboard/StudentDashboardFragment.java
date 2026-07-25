@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
@@ -40,6 +41,7 @@ public class StudentDashboardFragment extends Fragment {
     private TextView resumeProgressText;
     private Button resumeButton;
     private Button retryButton;
+    private SwipeRefreshLayout refreshLayout;
     private DashboardRepository repository;
     private Course resumeCourse;
 
@@ -63,6 +65,7 @@ public class StudentDashboardFragment extends Fragment {
                     displayName.isEmpty() ? "bạn" : displayName));
             retryButton.setOnClickListener(clicked -> safeLoadDashboard());
             resumeButton.setOnClickListener(clicked -> openResumeCourse());
+            refreshLayout.setOnRefreshListener(this::safeLoadDashboard);
             bindQuickActions(view);
             safeLoadDashboard();
         } catch (Exception exception) {
@@ -75,6 +78,7 @@ public class StudentDashboardFragment extends Fragment {
         loadingView = view.findViewById(R.id.progressDashboard);
         contentView = view.findViewById(R.id.dashboardContent);
         errorView = view.findViewById(R.id.dashboardError);
+        refreshLayout = view.findViewById(R.id.dashboardRefresh);
         welcomeText = view.findViewById(R.id.textWelcome);
         courseCountText = view.findViewById(R.id.textCourseCount);
         examCountText = view.findViewById(R.id.textExamCount);
@@ -198,10 +202,14 @@ public class StudentDashboardFragment extends Fragment {
     }
 
     private void setLoading(boolean loading) {
-        if (loadingView != null) {
-            loadingView.setVisibility(loading ? View.VISIBLE : View.GONE);
+        boolean swipeRefreshing = refreshLayout != null && refreshLayout.isRefreshing();
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
         }
-        if (loading && contentView != null) {
+        if (loadingView != null) {
+            loadingView.setVisibility(loading && !swipeRefreshing ? View.VISIBLE : View.GONE);
+        }
+        if (loading && !swipeRefreshing && contentView != null) {
             contentView.setVisibility(View.GONE);
         }
         if (loading && errorView != null) {

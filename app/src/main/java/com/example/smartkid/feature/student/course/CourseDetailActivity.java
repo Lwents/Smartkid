@@ -22,6 +22,8 @@ import com.example.smartkid.common.ui.BaseActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.squareup.picasso.Picasso;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 public class CourseDetailActivity extends BaseActivity {
     private MaterialToolbar toolbar;
     private ImageView thumbnail;
@@ -36,6 +38,7 @@ public class CourseDetailActivity extends BaseActivity {
     private Button startButton;
     private Button retryButton;
     private ListView lessonList;
+    private SwipeRefreshLayout refreshLayout;
     private LessonAdapter lessonAdapter;
     private CourseRepository repository;
     private CourseDetail courseDetail;
@@ -93,6 +96,10 @@ public class CourseDetailActivity extends BaseActivity {
         startButton = findViewById(R.id.buttonStartLearning);
         retryButton = findViewById(R.id.buttonRetryCourseDetail);
         lessonList = findViewById(R.id.listLessons);
+        refreshLayout = findViewById(R.id.refreshCourseDetail);
+        if (refreshLayout != null) {
+            refreshLayout.setOnRefreshListener(this::safeLoadDetail);
+        }
     }
 
     private void safeLoadDetail() {
@@ -228,7 +235,11 @@ public class CourseDetailActivity extends BaseActivity {
     }
 
     private void setLoading(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
+        }
+        boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
+        progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         startButton.setEnabled(!loading && courseDetail != null
                 && (!courseDetail.getCourse().isEnrolled()
                 || !courseDetail.getLessons().isEmpty()));

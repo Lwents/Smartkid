@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppLogger;
@@ -30,7 +31,7 @@ import java.util.List;
 public class ExamsFragment extends Fragment {
     private ProgressBar progressBar;
     private TextView emptyText;
-    private View refreshButton;
+    private SwipeRefreshLayout refreshLayout;
     private FeatureItemAdapter adapter;
     private ExamRepository repository;
 
@@ -48,10 +49,10 @@ public class ExamsFragment extends Fragment {
             repository = new ExamRepository(requireContext());
             progressBar = view.findViewById(R.id.progressFragmentFeatures);
             emptyText = view.findViewById(R.id.textFragmentFeaturesEmpty);
-            refreshButton = view.findViewById(R.id.buttonFragmentFeaturesRefresh);
+            refreshLayout = view.findViewById(R.id.refreshFragmentFeatures);
             TextInputEditText search = view.findViewById(R.id.inputFragmentFeatureSearch);
             ListView list = view.findViewById(R.id.listFragmentFeatures);
-            if (progressBar == null || emptyText == null || refreshButton == null
+            if (progressBar == null || emptyText == null || refreshLayout == null
                     || search == null || list == null) {
                 throw new IllegalStateException("Giao diện bài kiểm tra chưa đầy đủ");
             }
@@ -61,7 +62,7 @@ public class ExamsFragment extends Fragment {
             list.setEmptyView(emptyText);
             list.setOnItemClickListener((parent, row, position, id) ->
                     openExam(adapter.getItem(position)));
-            refreshButton.setOnClickListener(clicked -> loadSafely());
+            refreshLayout.setOnRefreshListener(this::loadSafely);
             search.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
                 @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -115,8 +116,11 @@ public class ExamsFragment extends Fragment {
     }
 
     private void setLoading(boolean loading) {
-        if (progressBar != null) progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
-        if (refreshButton != null) refreshButton.setEnabled(!loading);
+        if (!loading && refreshLayout != null) refreshLayout.setRefreshing(false);
+        boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
+        if (progressBar != null) {
+            progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
+        }
     }
 
     private boolean isUsable() { return isAdded() && getView() != null; }

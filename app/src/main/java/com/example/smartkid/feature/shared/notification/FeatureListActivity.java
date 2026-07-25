@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
@@ -46,6 +47,7 @@ public class FeatureListActivity extends BaseActivity {
     private ProgressBar progressBar;
     private TextView emptyText;
     private Button actionButton;
+    private SwipeRefreshLayout refreshLayout;
     private FeatureItemAdapter adapter;
     private StudentFeatureRepository featureRepository;
     private ExamRepository examRepository;
@@ -77,13 +79,15 @@ public class FeatureListActivity extends BaseActivity {
         progressBar = findViewById(R.id.progressFeatureList);
         emptyText = findViewById(R.id.textFeatureListEmpty);
         actionButton = findViewById(R.id.buttonFeatureAction);
+        refreshLayout = findViewById(R.id.refreshFeatureList);
         TextInputEditText searchInput = findViewById(R.id.inputFeatureSearch);
         ListView listView = findViewById(R.id.listFeatures);
         if (toolbar == null || progressBar == null || emptyText == null || actionButton == null
-                || searchInput == null || listView == null) {
+                || refreshLayout == null || searchInput == null || listView == null) {
             throw new IllegalStateException("Giao diện danh sách thiếu thành phần bắt buộc");
         }
         toolbar.setNavigationOnClickListener(view -> finish());
+        refreshLayout.setOnRefreshListener(this::loadSafely);
         adapter = new FeatureItemAdapter(this);
         listView.setAdapter(adapter);
         listView.setEmptyView(emptyText);
@@ -243,6 +247,13 @@ public class FeatureListActivity extends BaseActivity {
     }
 
     private void setLoading(boolean loading) {
+        if (loading && refreshLayout != null && refreshLayout.isRefreshing()) {
+            actionButton.setEnabled(false);
+            return;
+        }
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
+        }
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         actionButton.setEnabled(!loading);
     }

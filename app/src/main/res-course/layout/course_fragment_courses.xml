@@ -87,36 +87,6 @@
             app:tint="@color/on_primary" />
     </LinearLayout>
 
-    <!-- Hàng sắp xếp + làm mới -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:orientation="horizontal">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonSortCourses"
-            style="@style/Widget.Smartkid.CourseToolCard"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="6dp"
-            android:layout_weight="1"
-            android:text="@string/sort_az"
-            app:icon="@drawable/course_ic_sort"
-            app:iconGravity="textStart" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonRefreshCourses"
-            style="@style/Widget.Smartkid.CourseToolCard"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:layout_weight="1"
-            android:text="@string/refresh"
-            app:icon="@drawable/course_ic_refresh"
-            app:iconGravity="textStart" />
-    </LinearLayout>
-
     <!-- Thẻ nhắc khi tìm không ra -->
     <LinearLayout
         android:id="@+id/textCourseNotice"
@@ -191,11 +161,16 @@
         android:indeterminate="true"
         android:visibility="gone" />
 
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refreshCourses"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
         android:layout_weight="1">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <ListView
             android:id="@+id/listCourses"
@@ -256,4 +231,5 @@
             </LinearLayout>
         </ScrollView>
     </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

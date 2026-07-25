@@ -32,10 +32,14 @@
         android:textColor="@color/smartkid_text_secondary"
         android:textSize="13sp"
         android:visibility="gone" />
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refreshLessonDiscussion"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
         <ListView
             android:id="@+id/listLessonQuestions"
             android:layout_width="match_parent"
@@ -54,6 +58,7 @@
             android:text="@string/no_discussion_questions"
             android:textColor="@color/smartkid_text_secondary" />
     </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.Smartkid.GlassInput"
         android:layout_width="match_parent"

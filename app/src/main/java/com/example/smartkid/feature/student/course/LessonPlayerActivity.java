@@ -30,6 +30,7 @@ import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.feature.student.ai.AITutorActivity;
 import com.example.smartkid.feature.student.course.LessonDiscussionActivity;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener;
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions;
@@ -232,6 +233,14 @@ public class LessonPlayerActivity extends BaseActivity {
                 @Override
                 public void onReady(YouTubePlayer youTubePlayer) {
                     youTubePlayer.cueVideo(videoId, 0f);
+                }
+
+                @Override
+                public void onError(YouTubePlayer youTubePlayer,
+                                    PlayerConstants.PlayerError error) {
+                    youtubePlayerView.setVisibility(View.GONE);
+                    statusText.setText(R.string.video_embed_blocked);
+                    openExternalButton.setVisibility(View.VISIBLE);
                 }
             }, options);
         } catch (Exception exception) {

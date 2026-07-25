@@ -39,10 +39,14 @@
         android:paddingEnd="16dp"
         android:paddingBottom="8dp"
         android:textColor="@color/smartkid_text_secondary" />
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/refreshLearningAnalysis"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
         <ListView
             android:id="@+id/listLearningSuggestions"
             android:layout_width="match_parent"
@@ -61,6 +65,7 @@
             android:text="@string/no_suggested_lessons"
             android:textColor="@color/smartkid_text_secondary" />
     </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -78,12 +83,5 @@
             android:layout_height="50dp"
             android:layout_marginTop="6dp"
             android:text="@string/restore_streak" />
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonLearningAnalysisRefresh"
-            style="@style/Widget.Smartkid.GlassButton.Outlined"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="6dp"
-            android:text="@string/refresh" />
     </LinearLayout>
 </LinearLayout>

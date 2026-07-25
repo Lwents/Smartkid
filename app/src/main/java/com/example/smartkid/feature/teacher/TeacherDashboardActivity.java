@@ -52,6 +52,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
     private TextView statusText;
     private LinearLayout coursesContainer;
     private NestedScrollView dashboardScroll;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout[] refreshLayouts;
     private ActivityChartView activityChart;
     private TextView chartEmpty;
     private TextView[] chartTabs;
@@ -131,6 +132,14 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
 
     private void bindActions() {
         findViewById(R.id.buttonTeacherRefresh).setOnClickListener(view -> loadDashboard());
+        refreshLayouts = new androidx.swiperefreshlayout.widget.SwipeRefreshLayout[]{
+                findViewById(R.id.refreshTeacherOverview),
+                findViewById(R.id.refreshTeacherCourses),
+                findViewById(R.id.refreshTeacherExams),
+                findViewById(R.id.refreshTeacherStudents)};
+        for (androidx.swiperefreshlayout.widget.SwipeRefreshLayout layout : refreshLayouts) {
+            if (layout != null) layout.setOnRefreshListener(this::loadDashboard);
+        }
         findViewById(R.id.buttonTeacherNotifications).setOnClickListener(view ->
                 openManagementFeature("teacher_notifications"));
         findViewById(R.id.buttonTeacherCreateCourse).setOnClickListener(view ->
@@ -350,7 +359,15 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
     }
 
     private void setLoading(boolean loading, String message) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        boolean swiping = false;
+        if (refreshLayouts != null) {
+            for (androidx.swiperefreshlayout.widget.SwipeRefreshLayout layout : refreshLayouts) {
+                if (layout == null) continue;
+                if (!loading) layout.setRefreshing(false);
+                else if (layout.isRefreshing()) swiping = true;
+            }
+        }
+        progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         statusText.setText(message);
         statusText.setVisibility(message == null || message.isEmpty() ? View.GONE : View.VISIBLE);
     }

@@ -10,6 +10,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
 import com.example.smartkid.common.util.AppLogger;
@@ -29,6 +31,7 @@ public class CatalogActivity extends BaseActivity {
     private Button searchButton;
     private ProgressBar progressBar;
     private TextView emptyText;
+    private SwipeRefreshLayout refreshLayout;
     private CourseAdapter adapter;
     private CourseRepository repository;
 
@@ -43,12 +46,15 @@ public class CatalogActivity extends BaseActivity {
             searchButton = findViewById(R.id.buttonCatalogSearch);
             progressBar = findViewById(R.id.progressCatalog);
             emptyText = findViewById(R.id.textCatalogEmpty);
+            refreshLayout = findViewById(R.id.refreshCatalog);
             ListView listView = findViewById(R.id.listCatalog);
             if (toolbar == null || searchInput == null || searchButton == null
-                    || progressBar == null || emptyText == null || listView == null) {
+                    || progressBar == null || emptyText == null || refreshLayout == null
+                    || listView == null) {
                 throw new IllegalStateException("Giao diện danh mục chưa đầy đủ");
             }
             toolbar.setNavigationOnClickListener(view -> finish());
+            refreshLayout.setOnRefreshListener(this::loadSafely);
             adapter = new CourseAdapter(this);
             listView.setAdapter(adapter);
             listView.setEmptyView(emptyText);
@@ -113,7 +119,11 @@ public class CatalogActivity extends BaseActivity {
     }
 
     private void setLoading(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
+        }
+        boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
+        progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         searchButton.setEnabled(!loading);
     }
 

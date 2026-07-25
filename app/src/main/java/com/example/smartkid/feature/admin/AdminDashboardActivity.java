@@ -70,6 +70,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     private TextView chartPeriod;
     private TextView chartEmpty;
     private TextView[] chartTabs;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout[] refreshLayouts;
     private int selectedPage;
     private float swipeStartX;
 
@@ -124,6 +125,14 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 || pageFlipper == null || bottomNavigation == null
                 || navigationIndicator == null || activityChart == null) {
             throw new IllegalStateException("Dashboard quản trị thiếu thành phần bắt buộc");
+        }
+        refreshLayouts = new androidx.swiperefreshlayout.widget.SwipeRefreshLayout[]{
+                findViewById(R.id.refreshAdminDashboard),
+                findViewById(R.id.refreshAdminUsers),
+                findViewById(R.id.refreshAdminContent),
+                findViewById(R.id.refreshAdminSettings)};
+        for (androidx.swiperefreshlayout.widget.SwipeRefreshLayout layout : refreshLayouts) {
+            if (layout != null) layout.setOnRefreshListener(this::loadDashboard);
         }
     }
 
@@ -549,7 +558,15 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     }
 
     private void setLoading(boolean loading, String message) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        boolean swiping = false;
+        if (refreshLayouts != null) {
+            for (androidx.swiperefreshlayout.widget.SwipeRefreshLayout layout : refreshLayouts) {
+                if (layout == null) continue;
+                if (loading && layout.isRefreshing()) swiping = true;
+                if (!loading) layout.setRefreshing(false);
+            }
+        }
+        progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         statusText.setText(message == null ? "" : message);
         statusText.setVisibility(message == null || message.isEmpty() ? View.GONE : View.VISIBLE);
     }

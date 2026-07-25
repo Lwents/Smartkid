@@ -16,6 +16,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.example.smartkid.R;
@@ -50,6 +51,7 @@ public class TeacherManagementActivity extends BaseActivity {
     private ProgressBar progressBar;
     private TextView emptyText;
     private View refreshButton;
+    private SwipeRefreshLayout refreshLayout;
 
     @Override
     public void finish() {
@@ -81,14 +83,16 @@ public class TeacherManagementActivity extends BaseActivity {
             progressBar = findViewById(R.id.progressFeatureList);
             emptyText = findViewById(R.id.textFeatureListEmpty);
             refreshButton = findViewById(R.id.buttonFeatureAction);
+            refreshLayout = findViewById(R.id.refreshFeatureList);
             TextInputEditText search = findViewById(R.id.inputFeatureSearch);
             ListView list = findViewById(R.id.listFeatures);
             if (toolbar == null || progressBar == null || emptyText == null || refreshButton == null
-                    || search == null || list == null) {
+                    || refreshLayout == null || search == null || list == null) {
                 throw new IllegalStateException("Giao diện quản lý chưa đầy đủ");
             }
             toolbar.setTitle(spec.getTitle());
             toolbar.setNavigationOnClickListener(view -> finish());
+            refreshLayout.setOnRefreshListener(this::loadSafely);
             configurePrimaryAction(toolbar);
             emptyText.setText(R.string.no_server_data);
             adapter = new FeatureItemAdapter(this);
@@ -650,7 +654,11 @@ public class TeacherManagementActivity extends BaseActivity {
     }
 
     private void setLoading(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
+        }
+        boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
+        progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         refreshButton.setEnabled(!loading);
     }
 

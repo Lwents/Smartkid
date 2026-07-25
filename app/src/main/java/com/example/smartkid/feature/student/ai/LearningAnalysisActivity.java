@@ -8,6 +8,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
@@ -37,6 +38,7 @@ public class LearningAnalysisActivity extends BaseActivity {
     private TextView statusText;
     private View assessmentButton;
     private View restoreButton;
+    private SwipeRefreshLayout refreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +59,7 @@ public class LearningAnalysisActivity extends BaseActivity {
             list.setEmptyView(empty);
             list.setOnItemClickListener((parent, row, position, id) ->
                     openSuggestion(adapter.getItem(position)));
-            findViewById(R.id.buttonLearningAnalysisRefresh).setOnClickListener(view -> loadSafely());
+            refreshLayout.setOnRefreshListener(this::loadSafely);
             assessmentButton.setOnClickListener(view -> chooseAssessmentCourse());
             restoreButton.setOnClickListener(view -> confirmRestore());
             loadSafely();
@@ -73,8 +75,10 @@ public class LearningAnalysisActivity extends BaseActivity {
         statusText = findViewById(R.id.textLearningAnalysisStatus);
         assessmentButton = findViewById(R.id.buttonStartAssessment);
         restoreButton = findViewById(R.id.buttonRestoreStreak);
+        refreshLayout = findViewById(R.id.refreshLearningAnalysis);
         if (progressBar == null || summaryText == null || statusText == null
-                || assessmentButton == null || restoreButton == null) {
+                || assessmentButton == null || restoreButton == null
+                || refreshLayout == null) {
             throw new IllegalStateException("Giao diện phân tích thiếu thành phần bắt buộc");
         }
     }
@@ -229,7 +233,11 @@ public class LearningAnalysisActivity extends BaseActivity {
     }
 
     private void setLoading(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
+        }
+        boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
+        progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         assessmentButton.setEnabled(!loading);
         restoreButton.setEnabled(!loading);
     }

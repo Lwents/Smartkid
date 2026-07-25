@@ -16,6 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
@@ -29,9 +30,8 @@ import com.example.smartkid.common.ui.BaseActivity;
 
 public class CoursesFragment extends Fragment {
     private ProgressBar progressBar;
+    private SwipeRefreshLayout refreshLayout;
     private EditText searchInput;
-    private Button sortButton;
-    private Button refreshButton;
     private View browseCatalogButton;
     private Button emptyBrowseCatalogButton;
     private ListView listView;
@@ -61,8 +61,7 @@ public class CoursesFragment extends Fragment {
             listView.setEmptyView(emptyState);
             listView.setOnItemClickListener((parent, row, position, id) ->
                     openCourse(adapter.getItem(position)));
-            sortButton.setOnClickListener(clicked -> toggleSort());
-            refreshButton.setOnClickListener(clicked -> safeLoadCourses());
+            refreshLayout.setOnRefreshListener(this::safeLoadCourses);
             View.OnClickListener openCatalog = clicked -> openCatalog();
             if (browseCatalogButton != null) browseCatalogButton.setOnClickListener(openCatalog);
             if (emptyBrowseCatalogButton != null) emptyBrowseCatalogButton.setOnClickListener(openCatalog);
@@ -109,8 +108,7 @@ public class CoursesFragment extends Fragment {
     private void bindViews(View view) {
         progressBar = view.findViewById(R.id.progressCourses);
         searchInput = view.findViewById(R.id.inputSearchCourse);
-        sortButton = view.findViewById(R.id.buttonSortCourses);
-        refreshButton = view.findViewById(R.id.buttonRefreshCourses);
+        refreshLayout = view.findViewById(R.id.refreshCourses);
         listView = view.findViewById(R.id.listCourses);
         emptyState = view.findViewById(R.id.emptyCoursesState);
         emptyText = view.findViewById(R.id.textCoursesEmpty);
@@ -168,15 +166,6 @@ public class CoursesFragment extends Fragment {
         });
     }
 
-    private void toggleSort() {
-        try {
-            boolean ascending = adapter.toggleSort();
-            sortButton.setText(ascending ? R.string.sort_az : R.string.sort_za);
-        } catch (Exception exception) {
-            AppLogger.error(getContext(), "CoursesFragment", "Không thể sắp xếp", exception);
-        }
-    }
-
     private void openCatalog() {
         try {
             startActivity(new Intent(requireContext(), CatalogActivity.class));
@@ -203,11 +192,12 @@ public class CoursesFragment extends Fragment {
     }
 
     private void setLoading(boolean loading) {
-        if (progressBar != null) {
-            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
         }
-        if (refreshButton != null) {
-            refreshButton.setEnabled(!loading);
+        boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
+        if (progressBar != null) {
+            progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         }
     }
 

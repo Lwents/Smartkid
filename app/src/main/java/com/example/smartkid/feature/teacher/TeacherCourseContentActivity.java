@@ -46,6 +46,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
     private TextView status;
     private TextView empty;
     private LinearLayout modulesContainer;
+    private androidx.swiperefreshlayout.widget.SwipeRefreshLayout refreshLayout;
     private String courseId;
     private String courseTitle;
     private int loadGeneration;
@@ -101,9 +102,12 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         status = findViewById(R.id.textTeacherCourseContentStatus);
         empty = findViewById(R.id.textTeacherCourseContentEmpty);
         modulesContainer = findViewById(R.id.containerTeacherCourseModules);
-        if (progress == null || status == null || empty == null || modulesContainer == null) {
+        refreshLayout = findViewById(R.id.refreshTeacherCourseContent);
+        if (progress == null || status == null || empty == null || modulesContainer == null
+                || refreshLayout == null) {
             throw new IllegalStateException("Màn nội dung khóa học thiếu thành phần bắt buộc");
         }
+        refreshLayout.setOnRefreshListener(this::loadModules);
     }
 
     private void bindHeader() {
@@ -390,7 +394,11 @@ public final class TeacherCourseContentActivity extends BaseActivity {
     }
 
     private void setLoading(boolean loading) {
-        progress.setVisibility(loading ? View.VISIBLE : View.GONE);
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
+        }
+        boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
+        progress.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         findViewById(R.id.buttonTeacherAddModule).setEnabled(!loading);
     }
 

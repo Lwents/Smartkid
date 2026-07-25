@@ -11,6 +11,7 @@ volley = "1.2.1"
 picasso = "2.8"
 viewpager2 = "1.1.0"
 youtubePlayer = "12.1.0"
+swiperefresh = "1.1.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -24,6 +25,7 @@ volley = { group = "com.android.volley", name = "volley", version.ref = "volley"
 picasso = { group = "com.squareup.picasso", name = "picasso", version.ref = "picasso" }
 viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
 youtube-player = { group = "com.pierfrancescosoffritti.androidyoutubeplayer", name = "core", version.ref = "youtubePlayer" }
+swiperefresh = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefresh" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

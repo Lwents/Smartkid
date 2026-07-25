@@ -86,6 +86,7 @@
     <string name="mark_completed">Đánh dấu hoàn thành</string>
     <string name="video_error_code">Không phát được video (mã %1$d/%2$d). Bạn có thể mở bằng ứng dụng ngoài.</string>
     <string name="cannot_play_video">Thiết bị không thể phát video này.</string>
+    <string name="video_embed_blocked">Video này không cho phép phát trong ứng dụng. Bấm \"Mở tài liệu / video\" để xem trên YouTube.</string>
     <string name="progress_saved">Đã lưu tiến độ</string>
     <string name="ai_tutor">AI Tutor</string>
     <string name="ai_question_hint">Hỏi AI về bài học</string>

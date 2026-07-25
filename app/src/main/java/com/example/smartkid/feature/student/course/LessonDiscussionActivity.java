@@ -8,6 +8,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
@@ -37,6 +38,7 @@ public class LessonDiscussionActivity extends BaseActivity {
     private TextView statusText;
     private TextInputEditText questionInput;
     private View sendButton;
+    private SwipeRefreshLayout refreshLayout;
     private String lessonId;
 
     @Override
@@ -79,10 +81,12 @@ public class LessonDiscussionActivity extends BaseActivity {
         statusText = findViewById(R.id.textLessonDiscussionStatus);
         questionInput = findViewById(R.id.inputLessonQuestion);
         sendButton = findViewById(R.id.buttonSendLessonQuestion);
+        refreshLayout = findViewById(R.id.refreshLessonDiscussion);
         if (progressBar == null || emptyText == null || statusText == null
-                || questionInput == null || sendButton == null) {
+                || questionInput == null || sendButton == null || refreshLayout == null) {
             throw new IllegalStateException("Giao diện hỏi đáp thiếu thành phần bắt buộc");
         }
+        refreshLayout.setOnRefreshListener(this::loadSafely);
     }
 
     private void loadSafely() {
@@ -272,7 +276,11 @@ public class LessonDiscussionActivity extends BaseActivity {
     }
 
     private void setLoading(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        if (!loading && refreshLayout != null) {
+            refreshLayout.setRefreshing(false);
+        }
+        boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
+        progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         sendButton.setEnabled(!loading);
         questionInput.setEnabled(!loading);
     }
