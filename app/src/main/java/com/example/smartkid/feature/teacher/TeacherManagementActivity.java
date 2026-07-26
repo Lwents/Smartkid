@@ -243,6 +243,12 @@ public class TeacherManagementActivity extends BaseActivity {
                 .setNegativeButton("Đóng", null);
         if ("lesson_question".equals(SafeJson.string(source, "", "category"))) {
             builder.setPositiveButton("Mở hỏi đáp", (dialog, which) -> openQaScreen());
+            String lessonId = SafeJson.string(metadata, "", "lesson_id");
+            String lessonTitle = SafeJson.string(metadata, "", "lesson_title");
+            if (!lessonId.isEmpty()) {
+                builder.setNeutralButton("Xem bài học", (dialog, which) ->
+                        openLessonPreview(lessonId, lessonTitle));
+            }
         }
         builder.show();
     }
@@ -259,14 +265,75 @@ public class TeacherManagementActivity extends BaseActivity {
         appendInfoLine(info, "Phản hồi", replyCount == 0 ? "Chưa có" : replyCount + " phản hồi");
         String content = SafeJson.string(source, item.getDetail(), "content");
         String message = content.isEmpty() ? info.toString() : content + "\n\n" + info;
-        new AlertDialog.Builder(this)
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle("Câu hỏi của " + SafeJson.string(source, item.getTitle(), "student"))
                 .setMessage(message.trim())
                 .setNegativeButton("Đóng", null)
                 .setPositiveButton("Trả lời học viên", (dialog, which) ->
                         promptText("Trả lời học viên", "Nhập nội dung phản hồi", "Gửi",
-                                value -> performTextAction(item, "Trả lời học viên", value)))
-                .show();
+                                value -> performTextAction(item, "Trả lời học viên", value)));
+        String lessonId = SafeJson.string(source, "", "lesson_id");
+        if (!lessonId.isEmpty()) {
+            builder.setNeutralButton("Xem bài học", (dialog, which) ->
+                    openLessonPreview(lessonId, SafeJson.string(source, "", "lesson_title")));
+        }
+        builder.show();
+    }
+
+    /** Mở video/nội dung bài học để giáo viên xem lại trước khi trả lời học sinh. */
+    private void openLessonPreview(String lessonId, String lessonTitle) {
+        setLoading(true);
+        repository.loadObject("content/lessons/" + lessonId.trim() + "/",
+                new ApiCallback<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject lesson) {
+                        if (!isUsable()) return;
+                        setLoading(false);
+                        showLessonPreview(lesson, lessonTitle);
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        if (!isUsable()) return;
+                        setLoading(false);
+                        handleApiError(error);
+                    }
+                });
+    }
+
+    private void showLessonPreview(JSONObject lesson, String fallbackTitle) {
+        String title = SafeJson.string(lesson, fallbackTitle.isEmpty() ? "Bài học" : fallbackTitle,
+                "title");
+        String videoUrl = SafeJson.string(lesson, "", "video_url", "video_file");
+        String intro = SafeJson.string(lesson, "", "introduction", "description", "text_content");
+        if (videoUrl.isEmpty() && intro.isEmpty()) {
+            showInfoDialog(title, "Bài học chưa có video hay nội dung mô tả.");
+            return;
+        }
+        if (videoUrl.isEmpty()) {
+            showInfoDialog(title, intro);
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(intro.isEmpty() ? "Mở video bài học để xem lại nội dung?" : intro)
+                .setNegativeButton("Đóng", null)
+                .setPositiveButton("Mở video", (dialog, which) -> openUrl(videoUrl));
+        builder.show();
+    }
+
+    private void showInfoDialog(String title, String message) {
+        new AlertDialog.Builder(this).setTitle(title).setMessage(message)
+                .setPositiveButton("Đóng", null).show();
+    }
+
+    private void openUrl(String url) {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)));
+        } catch (Exception exception) {
+            AppLogger.error(this, "TeacherManagementActivity", "Không thể mở liên kết", exception);
+            showErrorDialog("Thiết bị không có ứng dụng mở liên kết này");
+        }
     }
 
     private void appendInfoLine(StringBuilder target, String label, String value) {
