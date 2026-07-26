@@ -19,6 +19,7 @@ import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.common.ui.FeatureItemAdapter;
 import com.example.smartkid.common.ui.FeatureSpec;
 import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.local.SessionManager;
 import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.remote.ApiCallback;
@@ -155,12 +156,9 @@ public class AdminManagementActivity extends BaseActivity {
     private void showItem(FeatureItem item) {
         if (item == null) return;
         try {
-            String json = item.getSource().length() == 0 ? ""
-                    : item.getSource().toString(2);
-            String message = item.getSubtitle() + "\n" + item.getDetail() + "\n"
-                    + item.getStatus() + (json.isEmpty() ? "" : "\n\n" + limit(json));
             AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                    .setTitle(item.getTitle()).setMessage(message.trim())
+                    .setTitle(item.getTitle())
+                    .setMessage(friendlyDetail(item))
                     .setNegativeButton("Đóng", null);
             if ("admin_users".equals(spec.getActionKind()) && !item.getId().isEmpty()) {
                 builder.setPositiveButton("Thao tác", (dialog, which) -> showActions(item));
@@ -169,6 +167,80 @@ public class AdminManagementActivity extends BaseActivity {
         } catch (Exception exception) {
             AppLogger.error(this, "AdminManagementActivity", "Không thể hiện chi tiết", exception);
             showErrorDialog("Không thể đọc chi tiết dữ liệu");
+        }
+    }
+
+    /** Chi tiết dạng "Nhãn: giá trị" thay vì dump JSON thô. */
+    private String friendlyDetail(FeatureItem item) {
+        JSONObject source = item.getSource();
+        StringBuilder detail = new StringBuilder();
+        String specKey = spec == null ? "" : spec.getKey();
+        if ("admin_courses".equals(specKey)) {
+            appendLine(detail, "Giáo viên", SafeJson.string(source, "", "teacherName", "teacherId"));
+            appendLine(detail, "Khối lớp", SafeJson.string(source, "", "grade"));
+            appendLine(detail, "Số bài học", SafeJson.string(source, "", "lessonsCount"));
+            appendLine(detail, "Lượt ghi danh", SafeJson.string(source, "", "enrollments"));
+            appendLine(detail, "Trạng thái", statusLabel(SafeJson.string(source, "", "status")));
+            appendLine(detail, "Ngày tạo", shortTime(SafeJson.string(source, "", "createdAt", "created_on")));
+        } else if ("admin_users".equals(specKey)) {
+            appendLine(detail, "Email", SafeJson.string(source, "", "email"));
+            appendLine(detail, "Vai trò", roleLabel(SafeJson.string(source, "", "role")));
+            appendLine(detail, "Trạng thái", item.getStatus());
+            appendLine(detail, "Ngày tạo", shortTime(SafeJson.string(source, "", "created_on", "createdAt", "date_joined")));
+        } else if (specKey.startsWith("admin_report")) {
+            appendLine(detail, "Giá trị", item.getSubtitle());
+        } else if ("admin_notifications".equals(specKey)) {
+            appendLine(detail, "", SafeJson.string(source, item.getDetail(), "message"));
+            appendLine(detail, "Thời gian", shortTime(SafeJson.string(source, "", "created_at")));
+        } else {
+            appendLine(detail, "", item.getSubtitle());
+            appendLine(detail, "", item.getDetail());
+            appendLine(detail, "", item.getStatus());
+        }
+        return detail.length() == 0
+                ? (item.getSubtitle() + "\n" + item.getDetail()).trim() : detail.toString();
+    }
+
+    private void appendLine(StringBuilder target, String label, String value) {
+        if (value == null || value.trim().isEmpty()) return;
+        if (target.length() > 0) target.append('\n');
+        if (!label.isEmpty()) target.append(label).append(": ");
+        target.append(value.trim());
+    }
+
+    private String statusLabel(String status) {
+        switch (status) {
+            case "published": return "Đã xuất bản";
+            case "draft": return "Bản nháp";
+            case "archived": return "Đã lưu trữ";
+            default: return status;
+        }
+    }
+
+    private String roleLabel(String role) {
+        switch (role) {
+            case "admin": return "Quản trị viên";
+            case "instructor": return "Giáo viên";
+            case "student": return "Học sinh";
+            default: return role;
+        }
+    }
+
+    /** "2026-07-26T10:42:59...+00:00" (UTC) -> "26/07/2026 17:42" theo giờ máy. */
+    private String shortTime(String isoValue) {
+        if (isoValue == null || isoValue.trim().isEmpty()) return "";
+        String raw = isoValue.trim();
+        try {
+            java.text.SimpleDateFormat parser = new java.text.SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US);
+            parser.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            java.util.Date parsed = parser.parse(raw.substring(0, Math.min(19, raw.length())));
+            java.text.SimpleDateFormat printer = new java.text.SimpleDateFormat(
+                    "dd/MM/yyyy HH:mm", java.util.Locale.US);
+            printer.setTimeZone(java.util.TimeZone.getDefault());
+            return parsed == null ? raw : printer.format(parsed);
+        } catch (Exception ignored) {
+            return raw.replace('T', ' ');
         }
     }
 
@@ -215,10 +287,6 @@ public class AdminManagementActivity extends BaseActivity {
             setLoading(false);
             showErrorDialog("Không thể chuẩn bị thao tác quản lý");
         }
-    }
-
-    private String limit(String value) {
-        return value.length() > 3000 ? value.substring(0, 3000) + "…" : value;
     }
 
     private void setLoading(boolean loading) {

@@ -35,6 +35,43 @@ public class ManagementRepository {
             "logs", "notifications", "backups", "sessions", "data", "questions", "feedback"
     };
 
+    /** Nhãn tiếng Việt cho các key kỹ thuật trong báo cáo/cấu hình admin. */
+    private static final String[][] KEY_LABELS = {
+            // Báo cáo người dùng
+            {"dau", "Hoạt động trong ngày (DAU)"},
+            {"mau", "Hoạt động trong tháng (MAU)"},
+            {"newUsers", "Người dùng mới"},
+            {"activeUsers", "Người dùng đang hoạt động"},
+            // Báo cáo học tập
+            {"avgCompletion", "Tỷ lệ hoàn thành trung bình (%)"},
+            {"avgScore", "Điểm trung bình"},
+            {"avgTimeSpentMin", "Thời gian học trung bình (phút)"},
+            // Báo cáo nội dung
+            {"totalPublished", "Bài học đã xuất bản"},
+            {"totalEnrollments", "Tổng lượt ghi danh"},
+            {"avgRating", "Điểm đánh giá trung bình"},
+            // Cấu hình / bảo mật
+            {"brand", "Thương hiệu"},
+            {"domainEmail", "Tên miền và Email"},
+            {"payment", "Thanh toán"},
+            {"integrations", "Tích hợp"},
+            {"twoFA", "Xác thực 2 lớp"},
+            {"rateLimit", "Giới hạn đăng nhập sai"},
+            {"lockout", "Khóa tài khoản tạm thời"},
+            {"rbacNote", "Ghi chú phân quyền"},
+            {"cpu", "CPU"},
+            {"ram", "RAM"},
+            {"disk", "Ổ đĩa"},
+            {"backup", "Sao lưu"},
+    };
+
+    /** Thứ tự hiển thị ưu tiên cho các key báo cáo (key không có trong danh sách xếp sau). */
+    private static final String[] KEY_ORDER = {
+            "activeUsers", "newUsers", "dau", "mau",
+            "totalPublished", "totalEnrollments", "avgRating",
+            "avgCompletion", "avgScore", "avgTimeSpentMin",
+    };
+
     private final Context appContext;
     private final ApiClient apiClient;
 
@@ -279,13 +316,11 @@ public class ManagementRepository {
             appendArray(result, array);
             return result;
         }
-        Iterator<String> keys = object.keys();
-        while (keys.hasNext()) {
-            String key = keys.next();
+        for (String key : orderedKeys(object)) {
             Object value = object.opt(key);
             if (value instanceof JSONObject) {
                 JSONObject child = (JSONObject) value;
-                result.add(itemFromObject(key, child));
+                result.add(new FeatureItem(key, readable(key), summarizeObject(child), "", "", child));
             } else if (value instanceof JSONArray) {
                 appendArray(result, (JSONArray) value);
             } else {
@@ -293,6 +328,38 @@ public class ManagementRepository {
             }
         }
         return result;
+    }
+
+    /** Key đã biết xếp trước theo KEY_ORDER, key lạ giữ nguyên thứ tự server trả về. */
+    private List<String> orderedKeys(JSONObject object) {
+        List<String> original = new ArrayList<>();
+        Iterator<String> iterator = object.keys();
+        while (iterator.hasNext()) original.add(iterator.next());
+        List<String> ordered = new ArrayList<>();
+        for (String known : KEY_ORDER) {
+            if (original.contains(known)) ordered.add(known);
+        }
+        for (String key : original) {
+            if (!ordered.contains(key)) ordered.add(key);
+        }
+        return ordered;
+    }
+
+    /** Tóm tắt object con thành 1 dòng dễ đọc (vd cấu hình: siteName, ngôn ngữ...). */
+    private String summarizeObject(JSONObject child) {
+        StringBuilder summary = new StringBuilder();
+        Iterator<String> keys = child.keys();
+        while (keys.hasNext() && summary.length() < 90) {
+            String key = keys.next();
+            Object value = child.opt(key);
+            if (value instanceof JSONObject || value instanceof JSONArray) continue;
+            if (value == null || value == JSONObject.NULL) continue;
+            String text = String.valueOf(value).trim();
+            if (text.isEmpty()) continue;
+            if (summary.length() > 0) summary.append(" • ");
+            summary.append(readable(key)).append(": ").append(text);
+        }
+        return summary.length() == 0 ? "Nhấn để xem chi tiết" : summary.toString();
     }
 
     private boolean isSystemHealthEndpoint(String endpoint) {
@@ -373,6 +440,24 @@ public class ManagementRepository {
 
     private FeatureItem itemFromObject(String fallbackId, JSONObject item) {
         String id = SafeJson.string(item, fallbackId, "id", "uuid", "user_id", "course_id", "jti");
+        // Nhật ký hoạt động: hành động + người thực hiện + thời gian
+        if (item.has("action") && item.has("userEmail")) {
+            return new FeatureItem(id,
+                    actionLabel(SafeJson.string(item, "", "action")),
+                    SafeJson.string(item, "", "userEmail"),
+                    shortTime(SafeJson.string(item, "", "timestamp")),
+                    SafeJson.string(item, "", "status"), item);
+        }
+        // Phiên đăng nhập: thiết bị + IP/vị trí + hoạt động gần nhất
+        if (item.has("jti") && item.has("device")) {
+            return new FeatureItem(id,
+                    SafeJson.string(item, "Thiết bị", "device"),
+                    SafeJson.string(item, "", "ip")
+                            + (SafeJson.string(item, "", "location").isEmpty() ? ""
+                            : " • " + SafeJson.string(item, "", "location")),
+                    "Hoạt động: " + shortTime(SafeJson.string(item, "", "lastActiveAt")),
+                    "", item);
+        }
         String title = SafeJson.string(item, "", "title", "name", "full_name", "display_name",
                 "username", "studentName", "student", "player_name", "email", "date");
         if (title.isEmpty()) title = "Mục " + id;
@@ -407,6 +492,37 @@ public class ManagementRepository {
 
     private String readable(String key) {
         if (key == null) return "Thông tin";
+        for (String[] pair : KEY_LABELS) {
+            if (pair[0].equals(key)) return pair[1];
+        }
         return key.replace('_', ' ').trim();
+    }
+
+    /** "user.login" -> "Đăng nhập", các action lạ giữ nguyên. */
+    private String actionLabel(String action) {
+        switch (action) {
+            case "user.login": return "Đăng nhập";
+            case "user.signup": return "Đăng ký tài khoản";
+            case "user.logout": return "Đăng xuất";
+            default: return action.isEmpty() ? "Hoạt động" : action;
+        }
+    }
+
+    /** "2026-07-26T10:42:59...+00:00" (UTC) -> "26/07/2026 17:42" theo giờ máy. */
+    private String shortTime(String isoValue) {
+        if (isoValue == null || isoValue.trim().isEmpty()) return "";
+        String raw = isoValue.trim();
+        try {
+            java.text.SimpleDateFormat parser = new java.text.SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+            parser.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            java.util.Date parsed = parser.parse(raw.substring(0, Math.min(19, raw.length())));
+            java.text.SimpleDateFormat printer = new java.text.SimpleDateFormat(
+                    "dd/MM/yyyy HH:mm", Locale.US);
+            printer.setTimeZone(java.util.TimeZone.getDefault());
+            return parsed == null ? raw : printer.format(parsed);
+        } catch (Exception ignored) {
+            return raw.replace('T', ' ');
+        }
     }
 }
