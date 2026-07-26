@@ -204,6 +204,14 @@ public class TeacherManagementActivity extends BaseActivity {
         try {
             String specKey = spec == null ? "" : spec.getKey();
             if ("teacher_notifications".equals(specKey)) {
+                // Thông báo học sinh hỏi bài: vào thẳng màn Hỏi đáp, không cần
+                // qua hộp thoại rồi bấm thêm một lần nữa.
+                String category = SafeJson.string(item.getSource(), "", "category");
+                if (category.startsWith("lesson_question")) {
+                    if (!item.getId().isEmpty()) markNotificationRead(item.getId());
+                    openQaScreen();
+                    return;
+                }
                 showNotificationDetail(item);
                 return;
             }
@@ -211,15 +219,13 @@ public class TeacherManagementActivity extends BaseActivity {
                 showQuestionDetail(item);
                 return;
             }
-            String json = item.getSource().length() == 0 ? ""
-                    : item.getSource().toString(2);
-            String message = item.getSubtitle() + "\n" + item.getDetail() + "\n"
-                    + item.getStatus() + (json.isEmpty() ? "" : "\n\n" + limit(json));
             AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                    .setTitle(item.getTitle()).setMessage(message.trim())
+                    .setTitle(item.getTitle())
+                    .setMessage(friendlyDetail(item, specKey))
                     .setNegativeButton("Đóng", null);
             if (!spec.getActionKind().isEmpty() && !item.getId().isEmpty()) {
-                builder.setPositiveButton("Thao tác", (dialog, which) -> showActions(item));
+                builder.setPositiveButton(actionButtonLabel(specKey),
+                        (dialog, which) -> showActions(item));
             }
             builder.show();
         } catch (Exception exception) {
@@ -228,7 +234,92 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Chi tiết dạng "Nhãn: giá trị" theo từng loại dữ liệu, không dump JSON thô. */
+    private String friendlyDetail(FeatureItem item, String specKey) {
+        JSONObject source = item.getSource();
+        StringBuilder detail = new StringBuilder();
+        if ("teacher_exams".equals(specKey) || "teacher_exam_reports".equals(specKey)) {
+            JSONArray questions = source.optJSONArray("questions");
+            appendInfoLine(detail, "Số câu hỏi",
+                    String.valueOf(questions == null ? 0 : questions.length()));
+            appendInfoLine(detail, "Dạng câu hỏi", questionTypeLabel(
+                    SafeJson.string(source, "", "type")));
+            JSONObject settings = source.optJSONObject("settings");
+            if (settings != null) {
+                int seconds = SafeJson.integer(settings, 0, "duration_seconds",
+                        "time_limit_seconds");
+                if (seconds > 0) appendInfoLine(detail, "Thời gian làm bài",
+                        (seconds / 60) + " phút");
+                double pass = SafeJson.decimal(settings, -1, "pass_score");
+                if (pass >= 0) appendInfoLine(detail, "Điểm đạt", String.valueOf(pass));
+                int attempts = SafeJson.integer(settings, 0, "max_attempts");
+                if (attempts > 0) appendInfoLine(detail, "Số lần làm tối đa",
+                        String.valueOf(attempts));
+            }
+            appendInfoLine(detail, "Trạng thái",
+                    source.optBoolean("published", false) ? "Đã xuất bản" : "Bản nháp");
+        } else if ("teacher_students".equals(specKey) || "teacher_progress".equals(specKey)) {
+            appendInfoLine(detail, "Email", SafeJson.string(source, "", "email"));
+            double score = SafeJson.decimal(source, -1, "avgScore");
+            if (score >= 0) appendInfoLine(detail, "Điểm trung bình", String.valueOf(score));
+            appendInfoLine(detail, "Hoạt động gần nhất",
+                    SafeJson.string(source, "", "lastActive"));
+            JSONArray courses = source.optJSONArray("courses");
+            if (courses != null && courses.length() > 0) {
+                appendInfoLine(detail, "", "\nTiến độ từng khóa học:");
+                for (int index = 0; index < courses.length(); index++) {
+                    JSONObject course = courses.optJSONObject(index);
+                    if (course == null) continue;
+                    int progress = SafeJson.integer(course, 0, "progress");
+                    appendInfoLine(detail, "", "• "
+                            + SafeJson.string(course, "Khóa học", "title")
+                            + " — " + progress + "% ("
+                            + SafeJson.integer(course, 0, "completedLessons") + "/"
+                            + SafeJson.integer(course, 0, "totalLessons") + " bài)"
+                            + (progress >= 100 ? " ✓ hoàn thành" : ""));
+                }
+            } else {
+                appendInfoLine(detail, "", "Học viên chưa tham gia khóa học nào của bạn.");
+            }
+        } else {
+            appendInfoLine(detail, "", item.getSubtitle());
+            appendInfoLine(detail, "", item.getDetail());
+            appendInfoLine(detail, "", item.getStatus());
+        }
+        return detail.length() == 0
+                ? (item.getSubtitle() + "\n" + item.getDetail()).trim() : detail.toString();
+    }
+
+    /** Nhãn nút hành động theo từng màn, thay cho "Thao tác" chung chung. */
+    private String actionButtonLabel(String specKey) {
+        switch (specKey) {
+            case "teacher_exam_reports": return "Xem báo cáo";
+            case "teacher_exams": return "Sửa bài kiểm tra";
+            case "teacher_students": return "Gửi phản hồi";
+            default: return "Thao tác";
+        }
+    }
+
+    private String questionTypeLabel(String type) {
+        switch (type) {
+            case "mcq": return "Trắc nghiệm";
+            case "short_answer": return "Trả lời ngắn";
+            case "matching": return "Nối cặp";
+            default: return type;
+        }
+    }
+
     /** Thông báo: hiện nội dung thân thiện thay vì JSON thô, kèm ngữ cảnh khóa học/bài học. */
+    /** Đánh dấu đã đọc thông báo (chạy nền, không chặn việc mở màn hỏi đáp). */
+    private void markNotificationRead(String notificationId) {
+        repository.action(Request.Method.POST,
+                "teacher/notifications/" + notificationId + "/read/", new JSONObject(),
+                new ApiCallback<JSONObject>() {
+                    @Override public void onSuccess(JSONObject data) { }
+                    @Override public void onError(ApiError error) { }
+                });
+    }
+
     private void showNotificationDetail(FeatureItem item) {
         JSONObject source = item.getSource();
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
@@ -240,20 +331,14 @@ public class TeacherManagementActivity extends BaseActivity {
         String body = SafeJson.string(source, item.getDetail(), "message");
         String message = body.isEmpty() ? info.toString()
                 : (info.length() == 0 ? body : body + "\n\n" + info);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+        // Thông báo thường: chỉ là bảng để đọc. Thông báo hỏi bài đã được mở thẳng
+        // sang màn Hỏi đáp từ trước nên không vào tới đây.
+        new AlertDialog.Builder(this)
                 .setTitle(item.getTitle())
                 .setMessage(message.trim())
-                .setNegativeButton("Đóng", null);
-        if ("lesson_question".equals(SafeJson.string(source, "", "category"))) {
-            builder.setPositiveButton("Mở hỏi đáp", (dialog, which) -> openQaScreen());
-            String lessonId = SafeJson.string(metadata, "", "lesson_id");
-            String lessonTitle = SafeJson.string(metadata, "", "lesson_title");
-            if (!lessonId.isEmpty()) {
-                builder.setNeutralButton("Xem bài học", (dialog, which) ->
-                        openLessonPreview(lessonId, lessonTitle));
-            }
-        }
-        builder.show();
+                .setPositiveButton("Đóng", null)
+                .show();
+        if (!item.getId().isEmpty()) markNotificationRead(item.getId());
     }
 
     /** Hỏi đáp: câu hỏi + bài học liên quan, trả lời học viên ngay trong dialog. */
@@ -304,7 +389,9 @@ public class TeacherManagementActivity extends BaseActivity {
     private void appendInfoLine(StringBuilder target, String label, String value) {
         if (value == null || value.trim().isEmpty()) return;
         if (target.length() > 0) target.append('\n');
-        target.append(label).append(": ").append(value.trim());
+        // Nhãn rỗng: chỉ in giá trị, không thêm dấu ":" đứng đầu dòng.
+        if (label != null && !label.isEmpty()) target.append(label).append(": ");
+        target.append(value.trim());
     }
 
     /** "2026-07-25T18:11:34.845711+00:00" (UTC) -> "25/07/2026 18:11" theo giờ máy. */

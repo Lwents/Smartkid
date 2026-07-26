@@ -9,13 +9,18 @@ public final class TeacherDashboardData {
     private final int courseCount;
     private final int studentCount;
     private final int lessonCount;
+    private final int examCount;
+    private final int attemptCount;
     private final List<CourseItem> courses;
 
     public TeacherDashboardData(int courseCount, int studentCount, int lessonCount,
+                                int examCount, int attemptCount,
                                 List<CourseItem> courses) {
         this.courseCount = courseCount;
         this.studentCount = studentCount;
         this.lessonCount = lessonCount;
+        this.examCount = examCount;
+        this.attemptCount = attemptCount;
         this.courses = Collections.unmodifiableList(courses == null
                 ? new ArrayList<>() : new ArrayList<>(courses));
     }
@@ -23,6 +28,8 @@ public final class TeacherDashboardData {
     public int getCourseCount() { return courseCount; }
     public int getStudentCount() { return studentCount; }
     public int getLessonCount() { return lessonCount; }
+    public int getExamCount() { return examCount; }
+    public int getAttemptCount() { return attemptCount; }
     public List<CourseItem> getCourses() { return courses; }
 
     public static final class CourseItem {

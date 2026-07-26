@@ -46,6 +46,7 @@ public final class SwipeRefreshFix {
         return null;
     }
 
+    /** Kiểm tra một view có thuộc loại cuộn được không. */
     private static boolean isScrollable(View view) {
         return view instanceof AbsListView
                 || view instanceof RecyclerView
@@ -53,6 +54,7 @@ public final class SwipeRefreshFix {
                 || view instanceof ScrollView;
     }
 
+    /** Hỏi view đó còn cuộn lên được nữa không - căn cứ để cho phép kéo tải lại. */
     private static boolean canScrollUp(View view) {
         if (view instanceof AbsListView) {
             AbsListView list = (AbsListView) view;

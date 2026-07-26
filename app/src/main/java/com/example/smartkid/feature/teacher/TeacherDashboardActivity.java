@@ -22,6 +22,8 @@ import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.model.User;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
+import com.example.smartkid.feature.shared.profile.ChangePasswordActivity;
+import com.example.smartkid.feature.shared.profile.ProfileEditActivity;
 import com.example.smartkid.common.navigation.UserRole;
 import com.example.smartkid.common.ui.FeatureSpec;
 import com.example.smartkid.common.ui.RoleDashboardActivity;
@@ -37,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/** Native teacher home based on SunEdu's quick actions and course overview. */
+/** Native teacher home based on SmartKid's quick actions and course overview. */
 public final class TeacherDashboardActivity extends RoleDashboardActivity {
     private static final int PAGE_OVERVIEW = 0;
     private static final int PAGE_COURSES = 1;
@@ -127,7 +129,35 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         ((TextView) findViewById(R.id.textTeacherWelcome)).setText(
                 getString(R.string.teacher_welcome_format));
         ((TextView) findViewById(R.id.textTeacherAvatar)).setText(initials(name));
-        bindLogoutAction(R.id.buttonTeacherLogout);
+        // Avatar mở menu tài khoản (hồ sơ / đổi mật khẩu / đăng xuất) thay vì
+        // đăng xuất ngay — bấm nhầm avatar không còn làm mất phiên đăng nhập.
+        findViewById(R.id.buttonTeacherLogout).setOnClickListener(view -> showAccountMenu(name));
+    }
+
+    private void showAccountMenu(String displayName) {
+        String[] labels = {
+                getString(R.string.account_menu_profile),
+                getString(R.string.account_menu_change_password),
+                getString(R.string.logout),
+        };
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(displayName.isEmpty() ? getString(R.string.account_menu_title) : displayName)
+                .setItems(labels, (dialog, which) -> {
+                    if (which == 0) openAccountScreen(ProfileEditActivity.class);
+                    else if (which == 1) openAccountScreen(ChangePasswordActivity.class);
+                    else confirmLogout();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void openAccountScreen(Class<?> target) {
+        try {
+            startActivity(new Intent(this, target));
+        } catch (Exception exception) {
+            AppLogger.error(this, "TeacherDashboardActivity", "Không thể mở trang tài khoản", exception);
+            showErrorDialog("Không thể mở trang tài khoản");
+        }
     }
 
     private void bindActions() {
@@ -303,6 +333,8 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         setText(R.id.textTeacherCourseCount, number(data.getCourseCount()));
         setText(R.id.textTeacherStudentCount, number(data.getStudentCount()));
         setText(R.id.textTeacherLessonCount, number(data.getLessonCount()));
+        setText(R.id.textTeacherExamCount, number(data.getExamCount()));
+        setText(R.id.textTeacherPendingCount, number(data.getAttemptCount()));
         setText(R.id.textTeacherChartTotal, getString(R.string.teacher_chart_total_format,
                 number(data.getStudentCount())));
         renderActivityChart(data.getCourses());

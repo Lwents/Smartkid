@@ -64,6 +64,40 @@ public class ManagementRepository {
             {"ram", "RAM"},
             {"disk", "Ổ đĩa"},
             {"backup", "Sao lưu"},
+            // Loại thông báo -> nhãn tiếng Việt
+            {"lesson_question", "Hỏi đáp bài học"},
+            {"lesson_question_reply", "Trả lời hỏi đáp"},
+            {"course", "Khóa học"},
+            {"exam", "Bài kiểm tra"},
+            {"system", "Hệ thống"},
+            {"info", "Thông tin"},
+            {"authSession", "Đăng nhập và phiên"},
+            {"logging", "Ghi log"},
+            {"maintenance", "Bảo trì hệ thống"},
+            {"version", "Phiên bản"},
+            {"updatedAt", "Cập nhật lúc"},
+            {"updatedBy", "Cập nhật bởi"},
+            // Key con hay xuất hiện trong phần cấu hình / bảo mật
+            {"enforceAdmin", "Bắt buộc với quản trị"},
+            {"enforceTeacher", "Bắt buộc với giáo viên"},
+            {"loginFailures", "Số lần sai tối đa"},
+            {"windowMin", "Trong vòng (phút)"},
+            {"attempts", "Số lần thử"},
+            {"lockMinutes", "Khóa (phút)"},
+            {"banStrikes", "Số lần bị khóa để chặn"},
+            {"domain", "Tên miền"},
+            {"forceHttps", "Bắt buộc HTTPS"},
+            {"hsts", "HSTS"},
+            {"siteName", "Tên hệ thống"},
+            {"language", "Ngôn ngữ"},
+            {"timezone", "Múi giờ"},
+            {"currency", "Tiền tệ"},
+            {"logoUrl", "Logo"},
+            {"lastBackup", "Sao lưu gần nhất"},
+            {"lastRun", "Chạy gần nhất"},
+            {"status", "Trạng thái"},
+            {"current", "Hiện tại"},
+            {"p95", "P95"},
     };
 
     /** Thứ tự hiển thị ưu tiên cho các key báo cáo (key không có trong danh sách xếp sau). */
@@ -81,6 +115,7 @@ public class ManagementRepository {
         apiClient = ApiClient.getInstance(appContext);
     }
 
+    /** Tải danh sách từ một endpoint bất kỳ, tự xử lý phân trang. */
     public void load(String endpoint, ApiCallback<List<FeatureItem>> callback) {
         PaginationState state = new PaginationState();
         if (endpoint == null || endpoint.trim().isEmpty()) {
@@ -90,6 +125,7 @@ public class ManagementRepository {
         loadPage(endpoint, endpoint, state, callback);
     }
 
+    /** Tải một trang; nếu còn trang sau thì gọi tiếp cho tới hết. */
     private void loadPage(String rootEndpoint, String endpoint, PaginationState state,
                           ApiCallback<List<FeatureItem>> callback) {
         if (!state.visit(endpoint)) {
@@ -165,6 +201,7 @@ public class ManagementRepository {
         });
     }
 
+    /** Thêm mục mới, bỏ mục trùng giữa các trang. */
     private void appendUnique(PaginationState state, List<FeatureItem> items) {
         if (items == null) return;
         for (FeatureItem item : items) {
@@ -173,6 +210,7 @@ public class ManagementRepository {
         }
     }
 
+    /** Khóa nhận dạng một mục để phát hiện trùng lặp. */
     private String stableItemKey(FeatureItem item) {
         JSONObject source = item.getSource();
         for (String key : ITEM_ID_KEYS) {
@@ -183,11 +221,13 @@ public class ManagementRepository {
         return null;
     }
 
+    /** Trả kết quả cuối cùng về màn hình sau khi đã gom hết trang. */
     private void deliverPaginationSuccess(PaginationState state,
                                           ApiCallback<List<FeatureItem>> callback) {
         if (state.finish()) callback.onSuccess(state.snapshot());
     }
 
+    /** Trả lỗi và bảo đảm chỉ gọi callback đúng một lần. */
     private void deliverPaginationError(PaginationState state,
                                         ApiCallback<List<FeatureItem>> callback,
                                         String message) {
@@ -235,6 +275,7 @@ public class ManagementRepository {
                 ? relativePath : relativePath + '?' + query;
     }
 
+    /** Chỉ đi theo link trang sau nếu cùng server, tránh bị dẫn sang địa chỉ lạ. */
     private static boolean sameOrigin(URI first, URI second) {
         String firstScheme = first.getScheme() == null ? "" : first.getScheme();
         String secondScheme = second.getScheme() == null ? "" : second.getScheme();
@@ -245,11 +286,13 @@ public class ManagementRepository {
                 && effectivePort(first) == effectivePort(second);
     }
 
+    /** Suy ra cổng mặc định (80/443) khi URL không ghi rõ. */
     private static int effectivePort(URI uri) {
         if (uri.getPort() >= 0) return uri.getPort();
         return "https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80;
     }
 
+    /** Bảo đảm đường dẫn kết thúc bằng dấu / như Django yêu cầu. */
     private static String ensureTrailingSlash(String value) {
         String safe = value == null ? "" : value.trim();
         return safe.endsWith("/") ? safe : safe + '/';
@@ -287,21 +330,25 @@ public class ManagementRepository {
         }
     }
 
+    /** Thực hiện một thao tác quản trị (xuất bản, khóa tài khoản, xóa...). */
     public void action(int method, String endpoint, JSONObject body,
                        ApiCallback<JSONObject> callback) {
         apiClient.request(method, endpoint, body, true, callback);
     }
 
+    /** Thao tác quản trị có kèm file tải lên. */
     public void multipartAction(int method, String endpoint, JSONObject fields,
                                 List<MultipartFilePart> files,
                                 ApiCallback<JSONObject> callback) {
         apiClient.multipart(method, endpoint, fields, files, true, callback);
     }
 
+    /** Đọc một object JSON đơn lẻ (chi tiết bài học, thống kê...). */
     public void loadObject(String endpoint, ApiCallback<JSONObject> callback) {
         apiClient.get(endpoint, true, callback);
     }
 
+    /** Điểm phân luồng: nhận diện dạng JSON rồi chọn cách đổi sang danh sách. */
     private List<FeatureItem> parse(String endpoint, Object data) {
         List<FeatureItem> result = new ArrayList<>();
         if (data instanceof JSONArray) {
@@ -363,10 +410,12 @@ public class ManagementRepository {
         return summary.length() == 0 ? "Nhấn để xem chi tiết" : summary.toString();
     }
 
+    /** Nhận biết API sức khỏe hệ thống để hiển thị riêng. */
     private boolean isSystemHealthEndpoint(String endpoint) {
         return endpoint != null && endpoint.startsWith("admin/system/health/");
     }
 
+    /** Đổi số liệu CPU/RAM/ổ đĩa/sao lưu thành các thẻ hiển thị. */
     private List<FeatureItem> parseSystemHealth(JSONObject response) {
         List<FeatureItem> result = new ArrayList<>();
         appendHealthMetric(result, response.optJSONObject("cpu"), "cpu", "CPU",
@@ -379,6 +428,7 @@ public class ManagementRepository {
         return result;
     }
 
+    /** Thêm một chỉ số tài nguyên kèm trạng thái tốt/cảnh báo. */
     private void appendHealthMetric(List<FeatureItem> target, JSONObject metric, String id,
                                     String title, String description, boolean disk) {
         JSONObject source = metric == null ? new JSONObject() : metric;
@@ -392,6 +442,7 @@ public class ManagementRepository {
         target.add(new FeatureItem(id, title, subtitle, detail, status, source));
     }
 
+    /** Thêm thẻ tình trạng sao lưu gần nhất. */
     private void appendBackupHealth(List<FeatureItem> target, JSONObject backup) {
         JSONObject source = backup == null ? new JSONObject() : backup;
         String rawStatus = SafeJson.string(source, "unknown", "status");
@@ -415,12 +466,14 @@ public class ManagementRepository {
         target.add(new FeatureItem("backup", "Sao lưu hệ thống", subtitle, detail, status, source));
     }
 
+    /** Ngưỡng đánh giá CPU/RAM: bình thường, cảnh báo hay quá tải. */
     private String resourceStatus(double value) {
         if (value >= 85) return "Mức sử dụng cao";
         if (value >= 70) return "Cần theo dõi";
         return "Ổn định";
     }
 
+    /** Ngưỡng đánh giá dung lượng ổ đĩa. */
     private String diskStatus(double value) {
         if (value >= 90) return "Gần hết dung lượng";
         if (value >= 75) return "Sắp đầy";
@@ -448,6 +501,46 @@ public class ManagementRepository {
                     SafeJson.string(item, "", "userEmail"),
                     shortTime(SafeJson.string(item, "", "timestamp")),
                     SafeJson.string(item, "", "status"), item);
+        }
+        // Bài kiểm tra: "5 câu • Trắc nghiệm" thay vì giá trị kỹ thuật "mcq"
+        String exerciseType = SafeJson.string(item, "", "type");
+        if (item.has("published") && isExerciseType(exerciseType)) {
+            JSONArray questions = item.optJSONArray("questions");
+            int questionCount = questions == null ? 0 : questions.length();
+            return new FeatureItem(id,
+                    SafeJson.string(item, "Bài kiểm tra", "title"),
+                    questionCount + " câu • " + exerciseTypeLabel(exerciseType),
+                    SafeJson.string(item, "", "description"),
+                    SafeJson.bool(item, false, "published") ? "Đã xuất bản" : "Bản nháp",
+                    item);
+        }
+        // Học viên của giáo viên: tóm tắt tiến độ học thay vì chỉ email + lần hoạt động
+        JSONArray courses = item.optJSONArray("courses");
+        if (courses != null && item.has("lastActive")) {
+            int courseCount = courses.length();
+            int completed = 0;
+            int totalLessons = 0;
+            int progressSum = 0;
+            int finishedCourses = 0;
+            for (int index = 0; index < courseCount; index++) {
+                JSONObject course = courses.optJSONObject(index);
+                if (course == null) continue;
+                completed += SafeJson.integer(course, 0, "completedLessons");
+                totalLessons += SafeJson.integer(course, 0, "totalLessons");
+                int progress = SafeJson.integer(course, 0, "progress");
+                progressSum += progress;
+                if (progress >= 100) finishedCourses++;
+            }
+            int average = courseCount == 0 ? 0 : progressSum / courseCount;
+            String subtitle = courseCount + " khóa học • " + completed + "/" + totalLessons
+                    + " bài học đã xong";
+            String detail = "Tiến độ trung bình: " + average + "%"
+                    + (finishedCourses > 0 ? " • Hoàn thành " + finishedCourses + " khóa" : "");
+            double score = SafeJson.decimal(item, -1, "avgScore");
+            if (score >= 0) detail += " • Điểm TB: " + score;
+            return new FeatureItem(id, SafeJson.string(item, "Học viên", "name", "username"),
+                    subtitle, detail,
+                    "Hoạt động: " + SafeJson.string(item, "", "lastActive"), item);
         }
         // Người dùng đang hoạt động: tên + vai trò/email + lần hoạt động gần nhất
         if (item.has("lastActive") && item.has("name")) {
@@ -484,6 +577,8 @@ public class ManagementRepository {
         String status = SafeJson.string(item, "", "status", "state", "role");
         if (item.has("is_active")) status = SafeJson.bool(item, false, "is_active") ? "Đang hoạt động" : "Đã khóa";
         if (item.has("published")) status = SafeJson.bool(item, false, "published") ? "Đã xuất bản" : "Bản nháp";
+        // API khóa học của admin trả status dạng chữ ("published"/"draft") -> dịch sang tiếng Việt
+        status = statusLabel(status);
         return new FeatureItem(id, title, subtitle, detail, status, item);
     }
 
@@ -501,6 +596,36 @@ public class ManagementRepository {
         return raw.length() > 400 ? raw.substring(0, 400) + "…" : raw;
     }
 
+    /** Dịch trạng thái sang tiếng Việt: published -> Đã xuất bản... */
+    private String statusLabel(String status) {
+        switch (status) {
+            case "published": return "Đã xuất bản";
+            case "draft": return "Bản nháp";
+            case "archived": return "Đã lưu trữ";
+            case "in_progress": return "Đang học";
+            case "completed": return "Hoàn thành";
+            case "success": return "Thành công";
+            case "failed": return "Thất bại";
+            default: return status;
+        }
+    }
+
+    /** Nhận biết JSON đang là bài kiểm tra dựa vào trường type. */
+    private boolean isExerciseType(String type) {
+        return "mcq".equals(type) || "short_answer".equals(type) || "matching".equals(type);
+    }
+
+    /** Dịch dạng câu hỏi sang tiếng Việt: mcq -> Trắc nghiệm... */
+    private String exerciseTypeLabel(String type) {
+        switch (type) {
+            case "mcq": return "Trắc nghiệm";
+            case "short_answer": return "Trả lời ngắn";
+            case "matching": return "Nối cặp";
+            default: return type;
+        }
+    }
+
+    /** Dịch key kỹ thuật của API sang nhãn tiếng Việt để hiển thị. */
     private String readable(String key) {
         if (key == null) return "Thông tin";
         for (String[] pair : KEY_LABELS) {

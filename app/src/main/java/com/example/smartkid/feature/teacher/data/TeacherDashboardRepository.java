@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Loads the teacher KPIs and course summaries exposed by SunEdu's dashboard API. */
+/** Loads the teacher KPIs and course summaries exposed by SmartKid's dashboard API. */
 public final class TeacherDashboardRepository {
     private final Context appContext;
     private final ApiClient apiClient;
@@ -54,6 +54,8 @@ public final class TeacherDashboardRepository {
                 SafeJson.integer(stats, 0, "courses"),
                 SafeJson.integer(stats, 0, "students"),
                 SafeJson.integer(stats, 0, "assignments", "lessons"),
+                SafeJson.integer(stats, 0, "exams", "exercises"),
+                SafeJson.integer(stats, 0, "attempts", "submissions"),
                 parseCourses(root));
     }
 
