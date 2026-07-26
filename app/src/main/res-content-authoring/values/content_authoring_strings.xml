@@ -152,8 +152,8 @@
     <string name="builder_create_and_add_content">Tạo và thêm nội dung</string>
     <string name="builder_create_course_subtitle">Nhập thông tin cơ bản để tạo khóa học nhanh chóng.</string>
     <string name="builder_add_module">+ Thêm chương</string>
-    <string name="builder_add_lesson_hint">Nhập tên bài học rồi nhấn Enter</string>
-    <string name="builder_add_module_hint">Nhập tên chương rồi nhấn Enter</string>
+    <string name="builder_add_lesson_hint">Nhập tên bài học</string>
+    <string name="builder_add_module_hint">Nhập tên chương</string>
     <string name="builder_autosaved">Đã tự động lưu</string>
     <string name="builder_saving">Đang lưu…</string>
     <string name="builder_save_error">Lưu thất bại, thử lại</string>

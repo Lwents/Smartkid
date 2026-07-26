@@ -43,6 +43,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
+import com.example.smartkid.common.util.SwipeRefreshFix;
 
 /** Teacher-owned management list backed by real APIs, with teacher-only actions. */
 public class TeacherManagementActivity extends BaseActivity {
@@ -87,6 +88,7 @@ public class TeacherManagementActivity extends BaseActivity {
             emptyText = findViewById(R.id.textFeatureListEmpty);
             refreshButton = findViewById(R.id.buttonFeatureAction);
             refreshLayout = findViewById(R.id.refreshFeatureList);
+            SwipeRefreshFix.attach(refreshLayout);
             TextInputEditText search = findViewById(R.id.inputFeatureSearch);
             ListView list = findViewById(R.id.listFeatures);
             if (toolbar == null || progressBar == null || emptyText == null || refreshButton == null
@@ -334,10 +336,11 @@ public class TeacherManagementActivity extends BaseActivity {
         String kind = spec.getActionKind();
         String[] labels;
         if ("teacher_courses".equals(kind)) {
-            boolean published = item.getSource().optBoolean("published", false);
+            boolean published = item.getSource().optBoolean("published", false)
+                    || "published".equals(SafeJson.string(item.getSource(), "", "status"));
             labels = published
-                    ? new String[]{"Quản lý nội dung", "Gỡ xuất bản"}
-                    : new String[]{"Quản lý nội dung", "Xuất bản"};
+                    ? new String[]{"Quản lý nội dung", "Gỡ xuất bản", "Xóa"}
+                    : new String[]{"Quản lý nội dung", "Xuất bản", "Xóa"};
         } else if ("teacher_exams".equals(kind)) {
             labels = new String[]{"Thêm câu hỏi", "Xem thống kê", "Xuất bản", "Gỡ xuất bản", "Xóa"};
         } else if ("teacher_exam_reports".equals(kind)) {
@@ -360,7 +363,7 @@ public class TeacherManagementActivity extends BaseActivity {
             return;
         }
         if ("Xuất bản".equals(label) && hasNoPlayableContent(item)) {
-            showErrorDialog("Hãy thêm ít nhất một câu hỏi trước khi xuất bản.");
+            showErrorDialog(publishBlockedMessage());
             return;
         }
         if ("Thêm câu hỏi".equals(label)) {
@@ -424,7 +427,18 @@ public class TeacherManagementActivity extends BaseActivity {
             JSONArray questions = source.optJSONArray("questions");
             return questions == null || questions.length() == 0;
         }
+        if ("teacher_courses".equals(spec.getActionKind())) {
+            // Server yêu cầu khóa học có ít nhất 1 chương + bài học mới cho xuất bản.
+            return source.optInt("lessonsCount", 0) <= 0;
+        }
         return false;
+    }
+
+    /** Thông báo chặn xuất bản, đúng ngữ cảnh khóa học hay bài kiểm tra. */
+    private String publishBlockedMessage() {
+        return "teacher_courses".equals(spec == null ? "" : spec.getActionKind())
+                ? "Hãy thêm ít nhất một chương và một bài học trước khi xuất bản."
+                : "Hãy thêm ít nhất một câu hỏi trước khi xuất bản.";
     }
 
     private void promptQuestion(FeatureItem item) {
@@ -549,7 +563,10 @@ public class TeacherManagementActivity extends BaseActivity {
     }
 
     private void deleteItem(FeatureItem item) {
-        String endpoint = "activities/exercises/" + item.getId() + "/";
+        // Khóa học và bài kiểm tra nằm ở hai API khác nhau.
+        String endpoint = "teacher_courses".equals(spec == null ? "" : spec.getActionKind())
+                ? "content/courses/" + item.getId() + "/"
+                : "activities/exercises/" + item.getId() + "/";
         setLoading(true);
         repository.action(Request.Method.DELETE, endpoint, null,
                 actionCallback("Đã xóa dữ liệu khỏi server"));
