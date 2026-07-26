@@ -73,6 +73,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".feature.student.course.LessonPlayerActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden"
             android:exported="false" />
         <activity
             android:name=".feature.student.course.LessonExerciseActivity"

@@ -70,6 +70,17 @@ public class LessonPlayerActivity extends BaseActivity {
     private boolean userSeeking;
     private TextView videoSpeedButton;
     private float playbackSpeed = 1.0f;
+
+    // ===== TRẠNG THÁI XEM TOÀN MÀN HÌNH =====
+    private android.widget.FrameLayout fullscreenContainer;   // lớp phủ che kín màn hình
+    private boolean fullscreen;
+    private android.view.ViewGroup videoHomeParent;           // chỗ cũ của khung video trong trang
+    private int videoHomeIndex;
+    private android.view.ViewGroup.LayoutParams videoHomeParams;
+    private int lastVideoWidth;                               // kích thước gốc của video, để tính lại tỉ lệ
+    private int lastVideoHeight;
+    private int resumePositionMs;                             // chỗ đang xem, giữ khi đổi chế độ
+    private boolean resumeWasPlaying = true;
     private static final float[] SPEED_OPTIONS = {0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f};
     private android.media.MediaPlayer mediaPlayer;
     private String pendingVideoUrl;
@@ -186,6 +197,7 @@ public class LessonPlayerActivity extends BaseActivity {
         videoTimeText = findViewById(R.id.textLessonVideoTime);
         videoControls = findViewById(R.id.barLessonVideoControls);
         videoSpeedButton = findViewById(R.id.buttonLessonVideoSpeed);
+        fullscreenContainer = findViewById(R.id.containerLessonFullscreen);
         bindVideoControls();
         webVideo = findViewById(R.id.webLessonVideo);
         webVideoContainer = findViewById(R.id.containerLessonWebVideo);
@@ -466,7 +478,18 @@ public class LessonPlayerActivity extends BaseActivity {
                         : (lessonContent != null && lessonContent.isCompleted()
                         ? getString(R.string.lesson_completed)
                         : getString(R.string.lesson_not_completed)));
+                // Vào/ra toàn màn hình làm hủy surface nên phải dựng lại trình phát;
+                // tua về đúng chỗ đang xem để học sinh không phải xem lại từ đầu.
+                if (resumePositionMs > 0) {
+                    prepared.seekTo(resumePositionMs);
+                    resumePositionMs = 0;
+                }
                 prepared.start();
+                if (!resumeWasPlaying) {
+                    prepared.pause();
+                    videoPlayButton.setVisibility(View.VISIBLE);
+                }
+                resumeWasPlaying = true;
                 if (playbackSpeed != 1.0f) applySpeed(playbackSpeed);
                 videoPlayButton.setVisibility(View.GONE);
                 if (videoControls != null) videoControls.setVisibility(View.VISIBLE);
@@ -674,13 +697,120 @@ public class LessonPlayerActivity extends BaseActivity {
         ((TextView) card.findViewById(R.id.textLessonActionSubtitle)).setText(subtitleRes);
     }
 
-    /** Xem video toàn màn hình: chuyển thiết bị sang ngang và cho khung video chiếm hết. */
+    /** Bấm nút phóng to: vào hoặc thoát chế độ xem toàn màn hình. */
     private void toggleFullscreen() {
-        boolean landscape = getResources().getConfiguration().orientation
-                == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-        setRequestedOrientation(landscape
-                ? android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                : android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        if (fullscreen) exitFullscreen();
+        else enterFullscreen();
+    }
+
+    /**
+     * Vào toàn màn hình: xoay ngang, ẩn thanh trạng thái và thanh điều hướng, rồi
+     * GỠ khung video khỏi trang và gắn vào lớp phủ che kín màn hình. Trước đây hàm này
+     * chỉ xoay ngang nên tiêu đề bài học vẫn còn và video vẫn nằm trong khung nhỏ.
+     */
+    private void enterFullscreen() {
+        if (fullscreen || videoContainer == null || fullscreenContainer == null) return;
+        android.view.ViewGroup parent = (android.view.ViewGroup) videoContainer.getParent();
+        if (parent == null) return;
+
+        videoHomeParent = parent;
+        videoHomeIndex = parent.indexOfChild(videoContainer);
+        videoHomeParams = videoContainer.getLayoutParams();
+
+        rememberPlaybackPosition();
+        parent.removeView(videoContainer);
+        fullscreenContainer.addView(videoContainer, new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+        fullscreenContainer.setVisibility(View.VISIBLE);
+
+        // Bỏ bo góc và nền khung để video áp sát mép màn hình
+        videoContainer.setBackground(null);
+        videoContainer.setClipToOutline(false);
+        stretchVideoView(android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+
+        setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        showSystemBars(false);
+        fullscreen = true;
+        refitVideo();
+    }
+
+    /** Thoát toàn màn hình: trả khung video về đúng vị trí cũ trong trang. */
+    private void exitFullscreen() {
+        if (!fullscreen) return;
+        fullscreen = false;
+
+        if (videoContainer != null && fullscreenContainer != null && videoHomeParent != null) {
+            rememberPlaybackPosition();
+            fullscreenContainer.removeView(videoContainer);
+            videoContainer.setBackgroundResource(R.drawable.course_bg_video_frame);
+            videoContainer.setClipToOutline(true);
+            if (videoHomeParams != null) videoContainer.setLayoutParams(videoHomeParams);
+            videoHomeParent.addView(videoContainer, videoHomeIndex);
+        }
+        if (fullscreenContainer != null) fullscreenContainer.setVisibility(View.GONE);
+
+        setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        showSystemBars(true);
+        applyVideoFrameSize();
+        refitVideo();
+    }
+
+    /** Lưu chỗ đang xem và trạng thái phát trước khi surface bị hủy. */
+    private void rememberPlaybackPosition() {
+        if (mediaPlayer == null) return;
+        try {
+            resumePositionMs = mediaPlayer.getCurrentPosition();
+            resumeWasPlaying = mediaPlayer.isPlaying();
+        } catch (IllegalStateException ignored) {
+            // Trình phát đã bị giải phóng, không có gì để lưu.
+        }
+    }
+
+    /** Ẩn/hiện thanh trạng thái và thanh điều hướng của hệ thống. */
+    private void showSystemBars(boolean show) {
+        androidx.core.view.WindowInsetsControllerCompat controller =
+                androidx.core.view.WindowCompat.getInsetsController(
+                        getWindow(), getWindow().getDecorView());
+        if (show) {
+            controller.show(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+        } else {
+            controller.setSystemBarsBehavior(androidx.core.view.WindowInsetsControllerCompat
+                    .BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            controller.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+        }
+    }
+
+    /** Đặt chiều cao cho TextureView (số pixel cụ thể hoặc MATCH_PARENT khi toàn màn hình). */
+    private void stretchVideoView(int height) {
+        if (videoView == null) return;
+        android.view.ViewGroup.LayoutParams params = videoView.getLayoutParams();
+        params.height = height;
+        videoView.setLayoutParams(params);
+    }
+
+    /** Tính lại ma trận sau khi khung đổi kích thước (xoay ngang, vào/ra toàn màn hình). */
+    private void refitVideo() {
+        if (videoView == null || lastVideoWidth <= 0 || lastVideoHeight <= 0) return;
+        videoView.post(() -> fitVideoToFrame(lastVideoWidth, lastVideoHeight));
+    }
+
+    /** Nút Back khi đang toàn màn hình thì chỉ thoát toàn màn hình, không rời bài học. */
+    @Override
+    public void onBackPressed() {
+        if (fullscreen) {
+            exitFullscreen();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    /** Xoay máy khi đang toàn màn hình: đo lại khung cho khớp kích thước mới. */
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (!fullscreen) applyVideoFrameSize();
+        refitVideo();
     }
 
     // ===== KHUNG VIDEO =====
@@ -688,12 +818,13 @@ public class LessonPlayerActivity extends BaseActivity {
     /** Khung video rộng hết màn hình, cao theo tỉ lệ 16:9 để không bị hụt hay thừa. */
     private void applyVideoFrameSize() {
         if (videoView == null || videoContainer == null) return;
+        if (fullscreen) {                                  // toàn màn hình thì để video chiếm hết
+            stretchVideoView(android.view.ViewGroup.LayoutParams.MATCH_PARENT);
+            return;
+        }
         int width = getResources().getDisplayMetrics().widthPixels
                 - (int) (28 * getResources().getDisplayMetrics().density);  // trừ padding 14dp mỗi bên
-        int height = Math.round(width * 9f / 16f);
-        android.view.ViewGroup.LayoutParams params = videoView.getLayoutParams();
-        params.height = height;
-        videoView.setLayoutParams(params);
+        stretchVideoView(Math.round(width * 9f / 16f));
     }
 
     /**
@@ -703,6 +834,8 @@ public class LessonPlayerActivity extends BaseActivity {
      */
     private void fitVideoToFrame(int videoWidth, int videoHeight) {
         if (videoView == null || videoWidth <= 0 || videoHeight <= 0) return;
+        lastVideoWidth = videoWidth;
+        lastVideoHeight = videoHeight;
         int viewWidth = videoView.getWidth();
         int viewHeight = videoView.getHeight();
         if (viewWidth <= 0 || viewHeight <= 0) {
@@ -711,7 +844,9 @@ public class LessonPlayerActivity extends BaseActivity {
         }
         float scaleX = (float) viewWidth / videoWidth;
         float scaleY = (float) viewHeight / videoHeight;
-        float scale = Math.max(scaleX, scaleY);       // lấp đầy khung
+        // Trong trang: cắt nhẹ cho lấp đầy khung 16:9. Toàn màn hình: thu vừa để
+        // không cắt mất chữ trên video (màn điện thoại thường dài hơn 16:9).
+        float scale = fullscreen ? Math.min(scaleX, scaleY) : Math.max(scaleX, scaleY);
         float drawWidth = videoWidth * scale;
         float drawHeight = videoHeight * scale;
 

@@ -3,8 +3,12 @@
   Màn học bài: khung video bo góc + thanh điều khiển, thẻ giới thiệu bài học,
   4 thẻ thao tác (hỏi đáp, Gia Sư AI, bài trước, bài tiếp) và nút hoàn thành.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+  <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -414,4 +418,16 @@
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
-</LinearLayout>
+  </LinearLayout>
+
+    <!--
+      Lớp phủ toàn màn hình: khi bấm nút phóng to, khung video được gỡ khỏi trang
+      và gắn vào đây để che kín màn hình. Bấm lần nữa (hoặc nút Back) thì trả về chỗ cũ.
+    -->
+    <FrameLayout
+        android:id="@+id/containerLessonFullscreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:visibility="gone" />
+</FrameLayout>
