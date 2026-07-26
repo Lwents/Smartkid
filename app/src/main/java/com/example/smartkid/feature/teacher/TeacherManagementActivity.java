@@ -25,6 +25,7 @@ import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.common.ui.FeatureItemAdapter;
 import com.example.smartkid.common.ui.FeatureSpec;
 import com.example.smartkid.common.ui.form.ExerciseScope;
+import com.example.smartkid.common.util.AppConstants;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.local.SessionManager;
@@ -318,8 +319,39 @@ public class TeacherManagementActivity extends BaseActivity {
                 .setTitle(title)
                 .setMessage(intro.isEmpty() ? "Mở video bài học để xem lại nội dung?" : intro)
                 .setNegativeButton("Đóng", null)
-                .setPositiveButton("Mở video", (dialog, which) -> openUrl(videoUrl));
+                .setPositiveButton("Mở video", (dialog, which) -> openVideo(videoUrl));
         builder.show();
+    }
+
+    /** Mở video: YouTube/link web -> app tương ứng; file video -> trình phát video của máy. */
+    private void openVideo(String url) {
+        String absolute = toAbsoluteMediaUrl(url);
+        boolean webVideo = absolute.contains("youtube.com") || absolute.contains("youtu.be")
+                || absolute.contains("vimeo.com");
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            if (webVideo) {
+                intent.setData(android.net.Uri.parse(absolute));
+            } else {
+                intent.setDataAndType(android.net.Uri.parse(absolute), "video/*");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "TeacherManagementActivity", "Không thể mở video", exception);
+            // Không có trình phát video: thử mở như liên kết thường (trình duyệt)
+            openUrl(absolute);
+        }
+    }
+
+    /** "/media/videos/x.mp4" -> "http://<host>/media/videos/x.mp4" theo server đang dùng. */
+    private String toAbsoluteMediaUrl(String url) {
+        String trimmed = url == null ? "" : url.trim();
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+        String root = AppConstants.getApiBaseUrl();
+        while (root.endsWith("/")) root = root.substring(0, root.length() - 1);
+        if (root.endsWith("/api")) root = root.substring(0, root.length() - 4);
+        return root + (trimmed.startsWith("/") ? trimmed : "/" + trimmed);
     }
 
     private void showInfoDialog(String title, String message) {
