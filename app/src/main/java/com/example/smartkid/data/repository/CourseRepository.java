@@ -158,6 +158,15 @@ public class CourseRepository {
                 });
     }
 
+    /** Xem trước bài học cho giáo viên: đọc thẳng content API, không cần enrollment. */
+    public void loadLessonPreview(String lessonId, ApiCallback<LessonContent> callback) {
+        if (lessonId == null || lessonId.trim().isEmpty()) {
+            callback.onError(new ApiError(0, "Mã bài học không hợp lệ", false));
+            return;
+        }
+        loadLessonFrom("content/lessons/" + lessonId.trim() + "/", callback);
+    }
+
     public void loadLesson(String courseId, String lessonId,
                            ApiCallback<LessonContent> callback) {
         if (courseId == null || courseId.trim().isEmpty()) {
@@ -168,6 +177,10 @@ public class CourseRepository {
         if (lessonId != null && !lessonId.trim().isEmpty()) {
             endpoint += lessonId.trim() + "/";
         }
+        loadLessonFrom(endpoint, callback);
+    }
+
+    private void loadLessonFrom(String endpoint, ApiCallback<LessonContent> callback) {
         apiClient.get(endpoint, true, new ApiCallback<JSONObject>() {
             @Override
             public void onSuccess(JSONObject response) {

@@ -281,90 +281,21 @@ public class TeacherManagementActivity extends BaseActivity {
         builder.show();
     }
 
-    /** Mở video/nội dung bài học để giáo viên xem lại trước khi trả lời học sinh. */
+    /** Mở bài học ngay trong app (trình phát của LessonPlayerActivity, chế độ xem trước). */
     private void openLessonPreview(String lessonId, String lessonTitle) {
-        setLoading(true);
-        repository.loadObject("content/lessons/" + lessonId.trim() + "/",
-                new ApiCallback<JSONObject>() {
-                    @Override
-                    public void onSuccess(JSONObject lesson) {
-                        if (!isUsable()) return;
-                        setLoading(false);
-                        showLessonPreview(lesson, lessonTitle);
-                    }
-
-                    @Override
-                    public void onError(ApiError error) {
-                        if (!isUsable()) return;
-                        setLoading(false);
-                        handleApiError(error);
-                    }
-                });
-    }
-
-    private void showLessonPreview(JSONObject lesson, String fallbackTitle) {
-        String title = SafeJson.string(lesson, fallbackTitle.isEmpty() ? "Bài học" : fallbackTitle,
-                "title");
-        String videoUrl = SafeJson.string(lesson, "", "video_url", "video_file");
-        String intro = SafeJson.string(lesson, "", "introduction", "description", "text_content");
-        if (videoUrl.isEmpty() && intro.isEmpty()) {
-            showInfoDialog(title, "Bài học chưa có video hay nội dung mô tả.");
-            return;
-        }
-        if (videoUrl.isEmpty()) {
-            showInfoDialog(title, intro);
-            return;
-        }
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(intro.isEmpty() ? "Mở video bài học để xem lại nội dung?" : intro)
-                .setNegativeButton("Đóng", null)
-                .setPositiveButton("Mở video", (dialog, which) -> openVideo(videoUrl));
-        builder.show();
-    }
-
-    /** Mở video: YouTube/link web -> app tương ứng; file video -> trình phát video của máy. */
-    private void openVideo(String url) {
-        String absolute = toAbsoluteMediaUrl(url);
-        boolean webVideo = absolute.contains("youtube.com") || absolute.contains("youtu.be")
-                || absolute.contains("vimeo.com");
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            if (webVideo) {
-                intent.setData(android.net.Uri.parse(absolute));
-            } else {
-                intent.setDataAndType(android.net.Uri.parse(absolute), "video/*");
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent intent = new Intent(this,
+                    com.example.smartkid.feature.student.course.LessonPlayerActivity.class);
+            intent.putExtra(AppConstants.EXTRA_LESSON_ID, lessonId.trim());
+            if (!lessonTitle.isEmpty()) {
+                intent.putExtra(AppConstants.EXTRA_LESSON_TITLE, lessonTitle);
             }
+            intent.putExtra(com.example.smartkid.feature.student.course.LessonPlayerActivity
+                    .EXTRA_PREVIEW_MODE, true);
             startActivity(intent);
         } catch (Exception exception) {
-            AppLogger.error(this, "TeacherManagementActivity", "Không thể mở video", exception);
-            // Không có trình phát video: thử mở như liên kết thường (trình duyệt)
-            openUrl(absolute);
-        }
-    }
-
-    /** "/media/videos/x.mp4" -> "http://<host>/media/videos/x.mp4" theo server đang dùng. */
-    private String toAbsoluteMediaUrl(String url) {
-        String trimmed = url == null ? "" : url.trim();
-        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
-        String root = AppConstants.getApiBaseUrl();
-        while (root.endsWith("/")) root = root.substring(0, root.length() - 1);
-        if (root.endsWith("/api")) root = root.substring(0, root.length() - 4);
-        return root + (trimmed.startsWith("/") ? trimmed : "/" + trimmed);
-    }
-
-    private void showInfoDialog(String title, String message) {
-        new AlertDialog.Builder(this).setTitle(title).setMessage(message)
-                .setPositiveButton("Đóng", null).show();
-    }
-
-    private void openUrl(String url) {
-        try {
-            startActivity(new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)));
-        } catch (Exception exception) {
-            AppLogger.error(this, "TeacherManagementActivity", "Không thể mở liên kết", exception);
-            showErrorDialog("Thiết bị không có ứng dụng mở liên kết này");
+            AppLogger.error(this, "TeacherManagementActivity", "Không thể mở bài học", exception);
+            showErrorDialog("Không thể mở bài học để xem trước");
         }
     }
 

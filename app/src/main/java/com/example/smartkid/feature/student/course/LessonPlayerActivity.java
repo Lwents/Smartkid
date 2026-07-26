@@ -44,6 +44,9 @@ import java.util.Map;
 import org.json.JSONObject;
 
 public class LessonPlayerActivity extends BaseActivity {
+    /** Chế độ xem trước cho giáo viên: phát nội dung bài học, ẩn mọi thao tác học viên. */
+    public static final String EXTRA_PREVIEW_MODE = "extra_lesson_preview";
+
     private MaterialToolbar toolbar;
     private ProgressBar loadingView;
     private TextView typeText;
@@ -61,6 +64,7 @@ public class LessonPlayerActivity extends BaseActivity {
     private LessonContent lessonContent;
     private String courseId;
     private String lessonId;
+    private boolean previewMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +73,13 @@ public class LessonPlayerActivity extends BaseActivity {
             setContentView(R.layout.course_activity_lesson_player);
             courseId = getIntent().getStringExtra(AppConstants.EXTRA_COURSE_ID);
             lessonId = getIntent().getStringExtra(AppConstants.EXTRA_LESSON_ID);
-            if (courseId == null || courseId.trim().isEmpty()) {
+            previewMode = getIntent().getBooleanExtra(EXTRA_PREVIEW_MODE, false);
+            if (!previewMode && (courseId == null || courseId.trim().isEmpty())) {
                 showErrorDialog("Không tìm thấy khóa học của bài học");
+                return;
+            }
+            if (previewMode && (lessonId == null || lessonId.trim().isEmpty())) {
+                showErrorDialog("Không tìm thấy bài học cần xem trước");
                 return;
             }
             repository = new CourseRepository(this);
@@ -82,6 +91,11 @@ public class LessonPlayerActivity extends BaseActivity {
             completeButton.setOnClickListener(view -> markCompleted(false));
             findViewById(R.id.buttonLessonAiTutor).setOnClickListener(view -> openAiTutor());
             findViewById(R.id.buttonLessonDiscussion).setOnClickListener(view -> openDiscussion());
+            if (previewMode) {
+                completeButton.setVisibility(View.GONE);
+                findViewById(R.id.buttonLessonAiTutor).setVisibility(View.GONE);
+                findViewById(R.id.buttonLessonDiscussion).setVisibility(View.GONE);
+            }
             loadLesson();
         } catch (Exception exception) {
             AppLogger.error(this, "LessonPlayerActivity", "Không thể tạo trình phát bài học", exception);
@@ -92,7 +106,7 @@ public class LessonPlayerActivity extends BaseActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        if (repository != null && lessonId != null && !lessonId.trim().isEmpty()) {
+        if (!previewMode && repository != null && lessonId != null && !lessonId.trim().isEmpty()) {
             loadExercises();
         }
     }
@@ -139,6 +153,25 @@ public class LessonPlayerActivity extends BaseActivity {
 
     private void loadLesson() {
         setLoading(true);
+        if (previewMode) {
+            repository.loadLessonPreview(lessonId, new ApiCallback<LessonContent>() {
+                @Override
+                public void onSuccess(LessonContent data) {
+                    if (isFinishing() || isDestroyed()) return;
+                    setLoading(false);
+                    lessonContent = data;
+                    bindContent(data);
+                }
+
+                @Override
+                public void onError(ApiError error) {
+                    if (isFinishing() || isDestroyed()) return;
+                    setLoading(false);
+                    handleApiError(error);
+                }
+            });
+            return;
+        }
         if (lessonId == null || lessonId.trim().isEmpty()) {
             loadLessonContent();
             return;
@@ -197,9 +230,13 @@ public class LessonPlayerActivity extends BaseActivity {
                 content.getContentType().isEmpty() ? "text" : content.getContentType()));
         contentText.setText(content.getTextContent().isEmpty()
                 ? getString(R.string.no_text_content) : content.getTextContent());
-        statusText.setText(content.isCompleted()
-                ? R.string.lesson_completed : R.string.lesson_not_completed);
-        completeButton.setEnabled(!content.isCompleted());
+        if (previewMode) {
+            statusText.setText("Chế độ xem trước của giáo viên");
+        } else {
+            statusText.setText(content.isCompleted()
+                    ? R.string.lesson_completed : R.string.lesson_not_completed);
+            completeButton.setEnabled(!content.isCompleted());
+        }
 
         String externalUrl = preferredExternalUrl(content);
         openExternalButton.setVisibility(externalUrl.isEmpty() ? View.GONE : View.VISIBLE);
@@ -361,6 +398,7 @@ public class LessonPlayerActivity extends BaseActivity {
     }
 
     private void markCompleted(boolean silent) {
+        if (previewMode) return;
         if (lessonId == null || lessonId.trim().isEmpty()) {
             if (!silent) {
                 showErrorDialog("Không tìm thấy mã bài học để cập nhật");
