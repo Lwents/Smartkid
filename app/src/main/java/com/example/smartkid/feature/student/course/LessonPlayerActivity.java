@@ -138,7 +138,9 @@ public class LessonPlayerActivity extends BaseActivity {
                 findViewById(R.id.buttonLessonAiTutor).setVisibility(View.GONE);
                 findViewById(R.id.buttonLessonDiscussion).setVisibility(View.GONE);
             }
+            updateLessonNavigation();   // ẩn sẵn 2 nút chuyển bài cho tới khi biết bài này nằm ở đâu
             loadLesson();
+            loadCourseLessons();        // thiếu lời gọi này thì danh sách bài luôn rỗng
         } catch (Exception exception) {
             AppLogger.error(this, "LessonPlayerActivity", "Không thể tạo trình phát bài học", exception);
             showErrorDialog("Không thể mở nội dung bài học: " + exception.getMessage());
@@ -1008,6 +1010,9 @@ public class LessonPlayerActivity extends BaseActivity {
                 if (isFinishing() || isDestroyed()) {
                     return;
                 }
+                // Bật lại nút: xem hết video sẽ tự gọi markCompleted(true), nếu không
+                // bật lại thì học sinh không bấm được nút Đánh dấu hoàn thành nữa.
+                completeButton.setEnabled(true);
                 statusText.setText(Boolean.TRUE.equals(completed)
                         ? R.string.lesson_completed : R.string.progress_saved);
                 if (!silent) {
