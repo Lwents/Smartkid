@@ -121,13 +121,9 @@ public abstract class ContentFormActivity extends BaseActivity {
     private TextView documentFileName;
     private MaterialButton documentFileButton;
     private MaterialButton documentClearButton;
-    private MaterialButtonToggleGroup videoSourceToggle;
-    private View lessonVideoSourceRow;
-    private View videoUrlRow;
     private View videoFileRow;
     private View documentFileRow;
     private View lessonTextRow;
-    private String videoSource = "youtube";
     private LinearLayout gradeButtonGroup;
     private MaterialButton[] gradeButtons;
     private String selectedGrade = "1";
@@ -290,9 +286,7 @@ public abstract class ContentFormActivity extends BaseActivity {
             inputs.get("position").setText(String.valueOf(defaultPosition));
             addInput("introduction", getString(R.string.management_lesson_introduction),
                     InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE, true);
-            lessonVideoSourceRow = addVideoSourceSelector();
-            videoUrlRow = addInput("video_url", getString(R.string.management_lesson_video_url),
-                    InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI, false);
+            // Bài học chỉ nhận video dạng file upload (không còn nhập link YouTube).
             videoFileRow = addCourseFilePicker(false);
             documentFileRow = addDocumentFilePicker();
             lessonTextRow = addInput("text_content", getString(R.string.management_lesson_text_content),
@@ -300,7 +294,6 @@ public abstract class ContentFormActivity extends BaseActivity {
             requiresExerciseSwitch = addSwitch(
                     R.string.management_lesson_requires_exercise, false);
             lessonPublishedSwitch = addSwitch(R.string.management_lesson_publish_now, true);
-            bindVideoSourceSelector(lessonVideoSourceRow);
             bindLessonContentType();
             return;
         }
@@ -485,51 +478,7 @@ public abstract class ContentFormActivity extends BaseActivity {
         return row;
     }
 
-    private View addVideoSourceSelector() {
-        View row = LayoutInflater.from(this).inflate(
-                R.layout.management_item_video_source, container, false);
-        container.addView(row);
-        return row;
-    }
-
-    private void bindVideoSourceSelector(View row) {
-        videoSourceToggle = row.findViewById(R.id.toggleManagementVideoSource);
-        videoSourceToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked) return;
-            setVideoSource(checkedId == R.id.buttonManagementVideoYoutube, true);
-        });
-        setVideoSource(true, false);
-    }
-
-    private void setVideoSource(boolean youtube, boolean clearOtherSource) {
-        videoSource = youtube ? "youtube" : "file";
-        boolean lessonVideo = kind != ContentFormKind.TEACHER_LESSON
-                || "video".equals(spinnerValue("content_type"));
-        if (videoUrlRow != null) {
-            videoUrlRow.setVisibility(lessonVideo && youtube ? View.VISIBLE : View.GONE);
-        }
-        if (videoFileRow != null) {
-            videoFileRow.setVisibility(lessonVideo && !youtube ? View.VISIBLE : View.GONE);
-        }
-        if (clearOtherSource) {
-            if (youtube) clearSelectedFile(false);
-            else if (inputs.get("video_url") != null) inputs.get("video_url").setText("");
-        }
-        MaterialButton youtubeButton = videoSourceToggle == null ? null
-                : videoSourceToggle.findViewById(R.id.buttonManagementVideoYoutube);
-        MaterialButton fileButton = videoSourceToggle == null ? null
-                : videoSourceToggle.findViewById(R.id.buttonManagementVideoFile);
-        if (youtubeButton != null) {
-            youtubeButton.setTextColor(ContextCompat.getColor(this,
-                    youtube ? R.color.role_primary : R.color.role_text_secondary));
-        }
-        if (fileButton != null) {
-            fileButton.setTextColor(ContextCompat.getColor(this,
-                    youtube ? R.color.role_text_secondary : R.color.role_primary));
-        }
-    }
-
-    private void registerFilePickers() {
+private void registerFilePickers() {
         thumbnailPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
                 uri -> handleSelectedFile(uri, true));
         videoPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
@@ -558,16 +507,8 @@ public abstract class ContentFormActivity extends BaseActivity {
         String contentType = spinnerValue("content_type");
         boolean video = "video".equals(contentType);
         boolean document = "pdf".equals(contentType) || "document".equals(contentType);
-        if (lessonVideoSourceRow != null) {
-            lessonVideoSourceRow.setVisibility(video ? View.VISIBLE : View.GONE);
-        }
-        if (videoUrlRow != null) {
-            videoUrlRow.setVisibility(video && "youtube".equals(videoSource)
-                    ? View.VISIBLE : View.GONE);
-        }
         if (videoFileRow != null) {
-            videoFileRow.setVisibility(video && "file".equals(videoSource)
-                    ? View.VISIBLE : View.GONE);
+            videoFileRow.setVisibility(video ? View.VISIBLE : View.GONE);
         }
         if (documentFileRow != null) {
             documentFileRow.setVisibility(document ? View.VISIBLE : View.GONE);
@@ -1408,18 +1349,9 @@ public abstract class ContentFormActivity extends BaseActivity {
             body.put("position", (int) decimal("position", 0, 0, 10000));
             body.put("introduction", value("introduction"));
             String textContent = value("text_content");
-            String videoUrl = optionalHttpUrl("video_url");
-            if (videoUrl == null) return null;
-            if ("video".equals(contentType)) {
-                if ("youtube".equals(videoSource) && videoUrl.isEmpty()) {
-                    inputs.get("video_url").setError(
-                            getString(R.string.management_video_url_required));
-                    return null;
-                }
-                if ("file".equals(videoSource) && selectedVideoUri == null) {
-                    showStatus(getString(R.string.management_video_file_required));
-                    return null;
-                }
+            if ("video".equals(contentType) && selectedVideoUri == null) {
+                showStatus(getString(R.string.management_video_file_required));
+                return null;
             }
             if ("text".equals(contentType) && textContent.isEmpty()) {
                 inputs.get("text_content").setError(
@@ -1432,10 +1364,6 @@ public abstract class ContentFormActivity extends BaseActivity {
                 return null;
             }
             body.put("text_content", textContent);
-            if ("video".equals(contentType) && "youtube".equals(videoSource)
-                    && !videoUrl.isEmpty()) {
-                body.put("video_url", videoUrl);
-            }
             body.put("requires_exercise_completion", requiresExerciseSwitch.isChecked()
                     || "exercise".equals(contentType));
             body.put("published", lessonPublishedSwitch.isChecked());
@@ -1680,13 +1608,12 @@ public abstract class ContentFormActivity extends BaseActivity {
             if (selectedThumbnailUri != null) {
                 files.add(new MultipartFilePart("thumbnail", selectedThumbnailUri));
             }
-            if ("file".equals(videoSource) && selectedVideoUri != null) {
+            if (selectedVideoUri != null) {
                 files.add(new MultipartFilePart("video_file", selectedVideoUri));
             }
         } else if (kind == ContentFormKind.TEACHER_LESSON) {
             String contentType = spinnerValue("content_type");
-            if ("video".equals(contentType) && "file".equals(videoSource)
-                    && selectedVideoUri != null) {
+            if ("video".equals(contentType) && selectedVideoUri != null) {
                 files.add(new MultipartFilePart("video_file", selectedVideoUri));
             }
             if (("pdf".equals(contentType) || "document".equals(contentType))
@@ -1739,7 +1666,6 @@ public abstract class ContentFormActivity extends BaseActivity {
         if (videoClearButton != null) videoClearButton.setEnabled(!loading);
         if (documentFileButton != null) documentFileButton.setEnabled(!loading);
         if (documentClearButton != null) documentClearButton.setEnabled(!loading);
-        if (videoSourceToggle != null) videoSourceToggle.setEnabled(!loading);
         if (gradeButtonGroup != null) {
             for (int index = 0; index < gradeButtonGroup.getChildCount(); index++) {
                 gradeButtonGroup.getChildAt(index).setEnabled(!loading);

@@ -92,59 +92,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="6dp"
-                android:text="@string/management_video_source_label"
+                android:text="@string/management_video_source_file"
                 android:textColor="@color/admin_text_secondary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggleSheetVideoSource"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                app:checkedButton="@id/buttonSheetVideoYoutube"
-                app:selectionRequired="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonSheetVideoYoutube"
-                    style="@style/Widget.Smartkid.GlassButton.Outlined"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:checked="true"
-                    android:text="@string/management_video_source_youtube"
-                    android:textAllCaps="false"
-                    android:textColor="@color/admin_primary"
-                    app:cornerRadius="18dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/buttonSheetVideoFile"
-                    style="@style/Widget.Smartkid.GlassButton.Outlined"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="@string/management_video_source_file"
-                    android:textAllCaps="false"
-                    android:textColor="@color/admin_text_secondary"
-                    app:cornerRadius="18dp" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-            <EditText
-                android:id="@+id/editSheetVideoUrl"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/admin_bg_chart_tabs"
-                android:hint="@string/sheet_lesson_video_url_hint"
-                android:inputType="textUri"
-                android:maxLines="1"
-                android:minHeight="48dp"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:textColor="@color/admin_text_primary"
-                android:textColorHint="@color/admin_text_secondary"
-                android:textSize="13sp"
-                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/rowSheetVideoFile"

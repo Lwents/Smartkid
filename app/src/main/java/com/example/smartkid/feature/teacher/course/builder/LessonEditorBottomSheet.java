@@ -61,8 +61,6 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     private Spinner contentTypeSpinner;
     private String[] contentTypeValues;
     private View videoSourceGroup;
-    private MaterialButtonToggleGroup videoSourceToggle;
-    private EditText videoUrlInput;
     private View videoFileRow;
     private TextView videoFileName;
     private EditText noteInput;
@@ -71,7 +69,6 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     private TextView statusView;
     private MaterialButton doneButton;
 
-    private String videoSource = "youtube";
     private Uri selectedVideoUri;
     private ActivityResultLauncher<String[]> videoPicker;
     private boolean saving;
@@ -118,7 +115,6 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
         bindViews(view);
         bindContentTypeSpinner();
-        bindVideoSource();
         ((TextView) view.findViewById(R.id.textSheetLessonTitle)).setText(lessonTitle);
         view.findViewById(R.id.buttonSheetLessonClose).setOnClickListener(v -> dismiss());
         doneButton.setOnClickListener(v -> save());
@@ -128,8 +124,6 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     private void bindViews(View view) {
         contentTypeSpinner = view.findViewById(R.id.spinnerSheetLessonContentType);
         videoSourceGroup = view.findViewById(R.id.groupSheetVideoSource);
-        videoSourceToggle = view.findViewById(R.id.toggleSheetVideoSource);
-        videoUrlInput = view.findViewById(R.id.editSheetVideoUrl);
         videoFileRow = view.findViewById(R.id.rowSheetVideoFile);
         videoFileName = view.findViewById(R.id.textSheetVideoFile);
         noteInput = view.findViewById(R.id.editSheetLessonNote);
@@ -165,20 +159,12 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         });
     }
 
-    private void bindVideoSource() {
-        videoSourceToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (!isChecked) return;
-            videoSource = checkedId == R.id.buttonSheetVideoYoutube ? "youtube" : "file";
-            updateContentFields();
-        });
-    }
 
     private void updateContentFields() {
         boolean video = "video".equals(selectedContentType());
+        // Bài học chỉ nhận video dạng file upload.
         videoSourceGroup.setVisibility(video ? View.VISIBLE : View.GONE);
-        boolean youtube = "youtube".equals(videoSource);
-        videoUrlInput.setVisibility(video && youtube ? View.VISIBLE : View.GONE);
-        videoFileRow.setVisibility(video && !youtube ? View.VISIBLE : View.GONE);
+        videoFileRow.setVisibility(video ? View.VISIBLE : View.GONE);
     }
 
     private String selectedContentType() {
@@ -223,15 +209,6 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     private void prefill(JSONObject data) {
         String type = SafeJson.string(data, "lesson", "content_type", "type");
         selectContentType(type);
-        String videoUrl = SafeJson.string(data, "", "video_url");
-        if (!videoUrl.isEmpty()) {
-            videoSource = "youtube";
-            videoSourceToggle.check(R.id.buttonSheetVideoYoutube);
-            videoUrlInput.setText(videoUrl);
-        } else if (!SafeJson.string(data, "", "video_file").isEmpty()) {
-            videoSource = "file";
-            videoSourceToggle.check(R.id.buttonSheetVideoFile);
-        }
         noteInput.setText(SafeJson.string(data, "", "introduction"));
         requiresExerciseSwitch.setChecked(
                 SafeJson.bool(data, false, "requires_exercise_completion"));
@@ -277,23 +254,12 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
             body.put("introduction", safe(text(noteInput)));
             body.put("requires_exercise_completion", requiresExerciseSwitch.isChecked());
             body.put("published", publishedSwitch.isChecked());
-            if ("video".equals(contentType) && "youtube".equals(videoSource)) {
-                String url = safe(text(videoUrlInput));
-                if (!url.isEmpty()) {
-                    if (!isYoutubeUrl(url)) {
-                        showStatus(getString(R.string.management_invalid_youtube_url));
-                        return;
-                    }
-                    body.put("video_url", url);
-                }
-            }
         } catch (Exception exception) {
             showStatus(getString(R.string.management_create_prepare_error));
             return;
         }
 
-        boolean hasFile = "video".equals(contentType) && "file".equals(videoSource)
-                && selectedVideoUri != null;
+        boolean hasFile = "video".equals(contentType) && selectedVideoUri != null;
         setSaving(true);
         if (hasFile) {
             java.util.List<MultipartFilePart> files = new java.util.ArrayList<>();
@@ -332,16 +298,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     // Helpers
     // ------------------------------------------------------------------
 
-    private boolean isYoutubeUrl(String raw) {
-        Uri uri = Uri.parse(raw);
-        String host = safe(uri.getHost()).toLowerCase(Locale.ROOT);
-        return host.equals("youtu.be") || host.endsWith(".youtu.be")
-                || host.equals("youtube.com") || host.endsWith(".youtube.com")
-                || host.equals("youtube-nocookie.com")
-                || host.endsWith(".youtube-nocookie.com");
-    }
-
-    private String fileDisplayName(Uri uri) {
+private String fileDisplayName(Uri uri) {
         String name = "";
         try (android.database.Cursor cursor = requireContext().getContentResolver()
                 .query(uri, null, null, null, null)) {
