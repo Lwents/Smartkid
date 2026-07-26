@@ -34,6 +34,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import org.json.JSONObject;
 
 import java.util.List;
+import com.example.smartkid.common.util.SwipeRefreshFix;
 
 /** Một khung danh sách thống nhất cho các trang dữ liệu đọc từ API học viên. */
 public class FeatureListActivity extends BaseActivity {
@@ -80,6 +81,7 @@ public class FeatureListActivity extends BaseActivity {
         emptyText = findViewById(R.id.textFeatureListEmpty);
         actionButton = findViewById(R.id.buttonFeatureAction);
         refreshLayout = findViewById(R.id.refreshFeatureList);
+        SwipeRefreshFix.attach(refreshLayout);
         TextInputEditText searchInput = findViewById(R.id.inputFeatureSearch);
         ListView listView = findViewById(R.id.listFeatures);
         if (toolbar == null || progressBar == null || emptyText == null || actionButton == null

@@ -27,6 +27,7 @@ import com.example.smartkid.common.ui.FeatureItemAdapter;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
+import com.example.smartkid.common.util.SwipeRefreshFix;
 
 public class ExamsFragment extends Fragment {
     private ProgressBar progressBar;
@@ -50,6 +51,7 @@ public class ExamsFragment extends Fragment {
             progressBar = view.findViewById(R.id.progressFragmentFeatures);
             emptyText = view.findViewById(R.id.textFragmentFeaturesEmpty);
             refreshLayout = view.findViewById(R.id.refreshFragmentFeatures);
+            SwipeRefreshFix.attach(refreshLayout);
             TextInputEditText search = view.findViewById(R.id.inputFragmentFeatureSearch);
             ListView list = view.findViewById(R.id.listFragmentFeatures);
             if (progressBar == null || emptyText == null || refreshLayout == null

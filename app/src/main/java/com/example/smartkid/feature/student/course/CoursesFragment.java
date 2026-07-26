@@ -27,6 +27,7 @@ import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.CourseRepository;
 import com.example.smartkid.common.ui.BaseActivity;
+import com.example.smartkid.common.util.SwipeRefreshFix;
 
 public class CoursesFragment extends Fragment {
     private ProgressBar progressBar;
@@ -109,6 +110,7 @@ public class CoursesFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressCourses);
         searchInput = view.findViewById(R.id.inputSearchCourse);
         refreshLayout = view.findViewById(R.id.refreshCourses);
+        SwipeRefreshFix.attach(refreshLayout);
         listView = view.findViewById(R.id.listCourses);
         emptyState = view.findViewById(R.id.emptyCoursesState);
         emptyText = view.findViewById(R.id.textCoursesEmpty);

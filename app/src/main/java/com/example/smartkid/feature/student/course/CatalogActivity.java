@@ -24,6 +24,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
+import com.example.smartkid.common.util.SwipeRefreshFix;
 
 /** Danh mục khóa học công khai lấy từ PostgreSQL qua API. */
 public class CatalogActivity extends BaseActivity {
@@ -47,6 +48,7 @@ public class CatalogActivity extends BaseActivity {
             progressBar = findViewById(R.id.progressCatalog);
             emptyText = findViewById(R.id.textCatalogEmpty);
             refreshLayout = findViewById(R.id.refreshCatalog);
+            SwipeRefreshFix.attach(refreshLayout);
             ListView listView = findViewById(R.id.listCatalog);
             if (toolbar == null || searchInput == null || searchButton == null
                     || progressBar == null || emptyText == null || refreshLayout == null

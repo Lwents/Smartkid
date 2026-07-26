@@ -23,6 +23,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.squareup.picasso.Picasso;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import com.example.smartkid.common.util.SwipeRefreshFix;
 
 public class CourseDetailActivity extends BaseActivity {
     private MaterialToolbar toolbar;
@@ -97,6 +98,7 @@ public class CourseDetailActivity extends BaseActivity {
         retryButton = findViewById(R.id.buttonRetryCourseDetail);
         lessonList = findViewById(R.id.listLessons);
         refreshLayout = findViewById(R.id.refreshCourseDetail);
+        SwipeRefreshFix.attach(refreshLayout);
         if (refreshLayout != null) {
             refreshLayout.setOnRefreshListener(this::safeLoadDetail);
         }

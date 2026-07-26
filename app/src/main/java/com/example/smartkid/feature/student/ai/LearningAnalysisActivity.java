@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.example.smartkid.common.util.SwipeRefreshFix;
 
 /** Phân tích tiến độ, gợi ý bài tiếp theo, đánh giá đầu vào và streak bằng API. */
 public class LearningAnalysisActivity extends BaseActivity {
@@ -76,6 +77,7 @@ public class LearningAnalysisActivity extends BaseActivity {
         assessmentButton = findViewById(R.id.buttonStartAssessment);
         restoreButton = findViewById(R.id.buttonRestoreStreak);
         refreshLayout = findViewById(R.id.refreshLearningAnalysis);
+        SwipeRefreshFix.attach(refreshLayout);
         if (progressBar == null || summaryText == null || statusText == null
                 || assessmentButton == null || restoreButton == null
                 || refreshLayout == null) {

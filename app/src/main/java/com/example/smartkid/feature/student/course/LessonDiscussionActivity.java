@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.example.smartkid.common.util.SwipeRefreshFix;
 
 /** Hỏi đáp theo bài học, đọc và cập nhật trực tiếp trên PostgreSQL qua API. */
 public class LessonDiscussionActivity extends BaseActivity {
@@ -82,6 +83,7 @@ public class LessonDiscussionActivity extends BaseActivity {
         questionInput = findViewById(R.id.inputLessonQuestion);
         sendButton = findViewById(R.id.buttonSendLessonQuestion);
         refreshLayout = findViewById(R.id.refreshLessonDiscussion);
+        SwipeRefreshFix.attach(refreshLayout);
         if (progressBar == null || emptyText == null || statusText == null
                 || questionInput == null || sendButton == null || refreshLayout == null) {
             throw new IllegalStateException("Giao diện hỏi đáp thiếu thành phần bắt buộc");

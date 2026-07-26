@@ -32,6 +32,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import org.json.JSONObject;
 
 import java.util.List;
+import com.example.smartkid.common.util.SwipeRefreshFix;
 
 /** Admin-owned management list backed by real APIs, with admin-only actions. */
 public class AdminManagementActivity extends BaseActivity {
@@ -76,6 +77,7 @@ public class AdminManagementActivity extends BaseActivity {
             emptyText = findViewById(R.id.textFeatureListEmpty);
             refreshButton = findViewById(R.id.buttonFeatureAction);
             refreshLayout = findViewById(R.id.refreshFeatureList);
+            SwipeRefreshFix.attach(refreshLayout);
             TextInputEditText search = findViewById(R.id.inputFeatureSearch);
             ListView list = findViewById(R.id.listFeatures);
             if (toolbar == null || progressBar == null || emptyText == null || refreshButton == null
