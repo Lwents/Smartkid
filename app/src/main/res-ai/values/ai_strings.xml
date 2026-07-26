@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Chuỗi hiển thị cho màn Phân tích học tập. -->
+<resources>
+    <string name="analysis_overall_progress">Tiến độ tổng thể</string>
+    <string name="analysis_next_lessons">Bài học nên học tiếp</string>
+    <string name="analysis_restore_streak">Khôi phục chuỗi học</string>
+
+    <string name="analysis_stat_lessons">Bài học</string>
+    <string name="analysis_stat_exercises">Bài tập</string>
+    <string name="analysis_stat_average">Điểm trung bình</string>
+    <string name="analysis_stat_goal">Mục tiêu hôm nay</string>
+    <string name="analysis_stat_streak">Chuỗi học</string>
+    <string name="analysis_streak_days">%d ngày</string>
+
+    <string name="analysis_encourage_title">Bạn đang làm rất tốt!</string>
+    <string name="analysis_encourage_done_title">Hoàn thành mục tiêu hôm nay!</string>
+    <string name="analysis_encourage_remaining">Chỉ còn %d bài nữa để hoàn thành mục tiêu hôm nay.</string>
+    <string name="analysis_encourage_done">Bạn đã học đủ số bài đặt ra cho hôm nay.</string>
+    <string name="analysis_encourage_start">Học một bài ngay hôm nay để bắt đầu chuỗi nhé.</string>
+
+    <string name="analysis_minutes">%d phút</string>
+    <string name="analysis_no_suggestion">Chưa có bài học nào được gợi ý. Hãy đăng ký một khóa học để bắt đầu.</string>
+</resources>

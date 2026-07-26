@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Màu riêng cho màn Phân tích học tập: mỗi ô chỉ số một tông pastel. -->
+<resources>
+    <color name="ring_track">#E8E7FB</color>
+
+    <color name="stat_purple_bg">#EDE9FE</color>
+    <color name="stat_teal_bg">#D6F5EF</color>
+    <color name="stat_amber_bg">#FEF3C7</color>
+    <color name="stat_rose_bg">#FEE2E6</color>
+    <color name="stat_blue_bg">#DBEAFE</color>
+
+    <color name="stat_purple">#7C6BF5</color>
+    <color name="stat_teal">#12B39A</color>
+    <color name="stat_amber">#F5A524</color>
+    <color name="stat_rose">#F2536D</color>
+    <color name="stat_blue">#3B82F6</color>
+
+    <color name="encourage_bg">#EDF9F0</color>
+    <color name="encourage_text">#16A34A</color>
+    <color name="time_chip_bg">#DCFCE7</color>
+    <color name="analysis_divider">#EFEEF7</color>
+</resources>
