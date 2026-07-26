@@ -101,7 +101,7 @@ public final class ApiClient {
         ApiCallback<JSONArray> safeCallback = callback == null ? noOpArrayCallback() : callback;
         if (endpoint == null || endpoint.trim().isEmpty()) {
             deliverArrayError(safeCallback,
-                    new ApiError(0, "Đường dẫn API không hợp lệ", false));
+                    new ApiError(0, "Chức năng này đang lỗi, vui lòng thử lại sau", false));
             return;
         }
         executeArray(endpoint, authenticated, true, safeCallback);
@@ -111,7 +111,7 @@ public final class ApiClient {
     public void getValue(String endpoint, boolean authenticated, ApiCallback<Object> callback) {
         ApiCallback<Object> safeCallback = callback == null ? noOpValueCallback() : callback;
         if (endpoint == null || endpoint.trim().isEmpty()) {
-            deliverValueError(safeCallback, new ApiError(0, "Đường dẫn API không hợp lệ", false));
+            deliverValueError(safeCallback, new ApiError(0, "Chức năng này đang lỗi, vui lòng thử lại sau", false));
             return;
         }
         executeValue(endpoint, authenticated, true, safeCallback);
@@ -147,7 +147,7 @@ public final class ApiClient {
         ApiCallback<JSONObject> safeCallback = callback == null ? noOpCallback() : callback;
         if (endpoint == null || endpoint.trim().isEmpty()) {
             deliverError(safeCallback,
-                    new ApiError(0, "Đường dẫn API không hợp lệ", false));
+                    new ApiError(0, "Chức năng này đang lỗi, vui lòng thử lại sau", false));
             return;
         }
         execute(method, endpoint, body, authenticated, true, safeCallback);
@@ -159,7 +159,7 @@ public final class ApiClient {
                           ApiCallback<JSONObject> callback) {
         ApiCallback<JSONObject> safeCallback = callback == null ? noOpCallback() : callback;
         if (endpoint == null || endpoint.trim().isEmpty()) {
-            deliverError(safeCallback, new ApiError(0, "Đường dẫn API không hợp lệ", false));
+            deliverError(safeCallback, new ApiError(0, "Chức năng này đang lỗi, vui lòng thử lại sau", false));
             return;
         }
         executeMultipart(method, endpoint, fields, files, authenticated, true, safeCallback);
@@ -313,13 +313,24 @@ public final class ApiClient {
         } catch (Exception ignored) {
             // Fall back to the normalized status message below.
         }
-        if (statusCode == 403) {
-            return new ApiError(403, "Bạn không có quyền thực hiện chức năng này", false);
-        }
-        if (statusCode == 413) {
-            return new ApiError(413, "Tệp vượt quá dung lượng máy chủ cho phép", false);
-        }
-        return new ApiError(statusCode, "Không thể tải tệp lên máy chủ", statusCode == 401);
+        return new ApiError(statusCode, thongBaoTheoMa(statusCode), statusCode == 401);
+    }
+
+    /**
+     * Thông báo dự phòng khi máy chủ trả về nội dung không phải JSON (ví dụ trang
+     * lỗi HTML). Trước đây mọi trường hợp đều báo "Không thể tải tệp lên máy chủ",
+     * kể cả khi người dùng chỉ đang mở bài học, nên rất khó hiểu.
+     */
+    private String thongBaoTheoMa(int statusCode) {
+        if (statusCode == 400) return "Thông tin gửi lên không hợp lệ, vui lòng kiểm tra lại";
+        if (statusCode == 401) return "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại";
+        if (statusCode == 403) return "Bạn không có quyền thực hiện chức năng này";
+        if (statusCode == 404) return "Không tìm thấy dữ liệu yêu cầu";
+        if (statusCode == 408) return "Máy chủ phản hồi quá lâu, vui lòng thử lại";
+        if (statusCode == 413) return "Tệp vượt quá dung lượng máy chủ cho phép";
+        if (statusCode == 429) return "Bạn thao tác quá nhanh, vui lòng chờ một chút";
+        if (statusCode >= 500) return "Máy chủ đang gặp sự cố, vui lòng thử lại sau";
+        return "Không thực hiện được, vui lòng thử lại";
     }
 
     /** Đổi mã phương thức của Volley sang chữ (GET, POST...). */
@@ -393,7 +404,7 @@ public final class ApiClient {
         } catch (Exception exception) {
             AppLogger.error(appContext, "ApiClient", "Không thể tạo yêu cầu API", exception);
             deliverError(callback,
-                    new ApiError(0, "Không thể tạo yêu cầu kết nối", false));
+                    new ApiError(0, "Không thể kết nối, vui lòng thử lại", false));
         }
     }
 
@@ -432,7 +443,7 @@ public final class ApiClient {
         } catch (Exception exception) {
             AppLogger.error(appContext, "ApiClient", "Không thể tạo yêu cầu mảng API", exception);
             deliverArrayError(callback,
-                    new ApiError(0, "Không thể tạo yêu cầu kết nối", false));
+                    new ApiError(0, "Không thể kết nối, vui lòng thử lại", false));
         }
     }
 
@@ -456,7 +467,7 @@ public final class ApiClient {
             requestQueue.add(request);
         } catch (Exception exception) {
             AppLogger.error(appContext, "ApiClient", "Không thể tạo yêu cầu JSON", exception);
-            deliverValueError(callback, new ApiError(0, "Không thể tạo yêu cầu kết nối", false));
+            deliverValueError(callback, new ApiError(0, "Không thể kết nối, vui lòng thử lại", false));
         }
     }
 
@@ -577,16 +588,16 @@ public final class ApiClient {
                 return new ApiError(statusCode, serverMessage, statusCode == 401);
             }
             if (error instanceof TimeoutError) {
-                return new ApiError(0, "Server phản hồi quá lâu, vui lòng thử lại", false);
+                return new ApiError(0, "Máy chủ phản hồi quá lâu, vui lòng thử lại", false);
             }
             if (error instanceof NoConnectionError) {
-                return new ApiError(0, "Không có kết nối mạng hoặc server đang tạm dừng", false);
+                return new ApiError(0, "Không có mạng hoặc máy chủ đang tạm nghỉ", false);
             }
             if (error instanceof ParseError) {
-                return new ApiError(statusCode, "Dữ liệu server trả về không đúng định dạng", false);
+                return new ApiError(statusCode, "Dữ liệu nhận về bị lỗi, vui lòng thử lại", false);
             }
             if (error instanceof ServerError) {
-                return new ApiError(statusCode, "Server gặp lỗi, vui lòng thử lại sau", false);
+                return new ApiError(statusCode, "Máy chủ đang gặp sự cố, vui lòng thử lại sau", false);
             }
             if (statusCode == 401) {
                 return new ApiError(401, "Phiên đăng nhập không hợp lệ", true);
@@ -597,10 +608,10 @@ public final class ApiClient {
             if (statusCode == 404) {
                 return new ApiError(404, "Không tìm thấy dữ liệu yêu cầu", false);
             }
-            return new ApiError(statusCode, "Không thể kết nối tới server", false);
+            return new ApiError(statusCode, "Không kết nối được tới máy chủ", false);
         } catch (Exception exception) {
             AppLogger.error(appContext, "ApiClient", "Không thể phân tích lỗi mạng", exception);
-            return new ApiError(0, "Lỗi kết nối không xác định", false);
+            return new ApiError(0, "Kết nối bị lỗi, vui lòng thử lại", false);
         }
     }
 
@@ -639,7 +650,7 @@ public final class ApiClient {
             @Override
             public void onError(ApiError error) {
                 AppLogger.error(appContext, "ApiClient",
-                        error == null ? "Lỗi API không xác định" : error.getMessage(), null);
+                        error == null ? "Không thực hiện được, vui lòng thử lại" : error.getMessage(), null);
             }
         };
     }
@@ -654,7 +665,7 @@ public final class ApiClient {
             @Override
             public void onError(ApiError error) {
                 AppLogger.error(appContext, "ApiClient",
-                        error == null ? "Lỗi API không xác định" : error.getMessage(), null);
+                        error == null ? "Không thực hiện được, vui lòng thử lại" : error.getMessage(), null);
             }
         };
     }
@@ -664,7 +675,7 @@ public final class ApiClient {
             @Override public void onSuccess(Object data) { }
             @Override public void onError(ApiError error) {
                 AppLogger.error(appContext, "ApiClient",
-                        error == null ? "Lỗi API không xác định" : error.getMessage(), null);
+                        error == null ? "Không thực hiện được, vui lòng thử lại" : error.getMessage(), null);
             }
         };
     }
@@ -681,7 +692,7 @@ public final class ApiClient {
     private void deliverError(ApiCallback<JSONObject> callback, ApiError error) {
         try {
             callback.onError(error == null
-                    ? new ApiError(0, "Lỗi API không xác định", false) : error);
+                    ? new ApiError(0, "Không thực hiện được, vui lòng thử lại", false) : error);
         } catch (Exception exception) {
             AppLogger.error(appContext, "ApiClient",
                     "Lỗi khi xử lý thông báo API", exception);
@@ -700,7 +711,7 @@ public final class ApiClient {
     private void deliverArrayError(ApiCallback<JSONArray> callback, ApiError error) {
         try {
             callback.onError(error == null
-                    ? new ApiError(0, "Lỗi API không xác định", false) : error);
+                    ? new ApiError(0, "Không thực hiện được, vui lòng thử lại", false) : error);
         } catch (Exception exception) {
             AppLogger.error(appContext, "ApiClient",
                     "Lỗi khi xử lý thông báo API mảng", exception);
@@ -718,7 +729,7 @@ public final class ApiClient {
     private void deliverValueError(ApiCallback<Object> callback, ApiError error) {
         try {
             callback.onError(error == null
-                    ? new ApiError(0, "Lỗi API không xác định", false) : error);
+                    ? new ApiError(0, "Không thực hiện được, vui lòng thử lại", false) : error);
         } catch (Exception exception) {
             AppLogger.error(appContext, "ApiClient", "Không thể xử lý lỗi JSON API", exception);
         }

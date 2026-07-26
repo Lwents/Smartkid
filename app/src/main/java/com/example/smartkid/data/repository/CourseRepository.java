@@ -59,7 +59,7 @@ public class CourseRepository {
                     AppLogger.error(appContext, "CourseRepository",
                             "Không thể đọc danh sách khóa học", exception);
                     loadCacheOrError(callback,
-                            new ApiError(0, "Dữ liệu khóa học từ server không hợp lệ", false));
+                            new ApiError(0, "Không đọc được dữ liệu khóa học, vui lòng thử lại", false));
                 }
             }
 

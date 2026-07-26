@@ -140,7 +140,7 @@ public class LearningAnalysisActivity extends BaseActivity {
                 } catch (Exception exception) {
                     AppLogger.error(LearningAnalysisActivity.this,
                             "LearningAnalysisActivity", "Không thể đọc phân tích", exception);
-                    showEmpty("Dữ liệu phân tích từ server không hợp lệ");
+                    showEmpty("Không đọc được dữ liệu phân tích, vui lòng thử lại");
                 }
             }
 
@@ -278,7 +278,7 @@ public class LearningAnalysisActivity extends BaseActivity {
 
     private void confirmRestore() {
         new AlertDialog.Builder(this).setTitle(R.string.analysis_restore_streak)
-                .setMessage("Server chỉ cho phép khôi phục khi chuỗi học đã mất và còn lượt trong tháng.")
+                .setMessage("Chỉ khôi phục được khi chuỗi học đã mất và bạn còn lượt trong tháng này.")
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton("Kiểm tra và khôi phục", (dialog, which) -> restoreSafely())
                 .show();

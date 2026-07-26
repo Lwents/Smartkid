@@ -119,7 +119,7 @@ public class ManagementRepository {
     public void load(String endpoint, ApiCallback<List<FeatureItem>> callback) {
         PaginationState state = new PaginationState();
         if (endpoint == null || endpoint.trim().isEmpty()) {
-            deliverPaginationError(state, callback, "Đường dẫn API không hợp lệ");
+            deliverPaginationError(state, callback, "Chức năng này đang lỗi, vui lòng thử lại sau");
             return;
         }
         loadPage(endpoint, endpoint, state, callback);
