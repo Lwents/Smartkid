@@ -179,12 +179,13 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         bindFeature(R.id.buttonAdminCourses, "admin_courses");
         bindFeature(R.id.buttonAdminLearning, "admin_report_learning");
         bindFeature(R.id.buttonAdminHealth, "admin_health");
-        bindFeature(R.id.cardAdminKpiDau, "admin_active_users");
-        bindFeature(R.id.cardAdminKpiSignups, "admin_users");
-        bindFeature(R.id.cardAdminKpiStudents, "admin_users");
-        bindFeature(R.id.cardAdminKpiTeachers, "admin_users");
-        bindFeature(R.id.cardAdminKpiCourses, "admin_courses");
-        bindFeature(R.id.cardAdminKpiLessons, "admin_report_content");
+        // Các thẻ KPI "Tổng quan hệ thống" chỉ hiển thị số liệu, không bấm được
+        disableCard(R.id.cardAdminKpiDau);
+        disableCard(R.id.cardAdminKpiSignups);
+        disableCard(R.id.cardAdminKpiStudents);
+        disableCard(R.id.cardAdminKpiTeachers);
+        disableCard(R.id.cardAdminKpiCourses);
+        disableCard(R.id.cardAdminKpiLessons);
     }
 
     private void bindSectionPages() {
@@ -519,6 +520,14 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
 
     private void bindFeature(int viewId, String key) {
         findViewById(viewId).setOnClickListener(view -> openManagementFeature(key));
+    }
+
+    private void disableCard(int viewId) {
+        View card = findViewById(viewId);
+        if (card == null) return;
+        card.setOnClickListener(null);
+        card.setClickable(false);
+        card.setFocusable(false);
     }
 
     private void openManagementFeature(String key) {
