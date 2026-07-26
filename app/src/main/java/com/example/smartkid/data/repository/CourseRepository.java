@@ -8,6 +8,7 @@ import com.example.smartkid.common.util.MediaUrl;
 import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.model.Course;
 import com.example.smartkid.data.model.CourseDetail;
+import com.example.smartkid.data.model.CourseSection;
 import com.example.smartkid.data.model.CourseListResult;
 import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.model.Lesson;
@@ -136,10 +137,17 @@ public class CourseRepository {
                     public void onSuccess(JSONObject response) {
                         try {
                             Course course = parseCourse(response);
-                            List<Lesson> lessons = new ArrayList<>();
+                            // Giữ nguyên cấu trúc chương mà giáo viên đã tạo: trước đây
+                            // chỗ này gộp hết bài của mọi chương vào một danh sách nên
+                            // học sinh chỉ thấy bài học, không thấy chương nào cả.
+                            List<CourseSection> sectionList = new ArrayList<>();
                             JSONArray sections = SafeJson.array(response, "sections");
                             for (int sectionIndex = 0; sectionIndex < sections.length(); sectionIndex++) {
                                 JSONObject section = sections.optJSONObject(sectionIndex);
+                                if (section == null) {
+                                    continue;
+                                }
+                                List<Lesson> lessons = new ArrayList<>();
                                 JSONArray lessonArray = SafeJson.array(section, "lessons");
                                 for (int lessonIndex = 0; lessonIndex < lessonArray.length(); lessonIndex++) {
                                     JSONObject lesson = lessonArray.optJSONObject(lessonIndex);
@@ -153,8 +161,12 @@ public class CourseRepository {
                                             SafeJson.bool(lesson, false, "completed")
                                     ));
                                 }
+                                sectionList.add(new CourseSection(
+                                        SafeJson.string(section, "", "id"),
+                                        SafeJson.string(section, "", "title"),
+                                        lessons));
                             }
-                            callback.onSuccess(new CourseDetail(course, lessons));
+                            callback.onSuccess(new CourseDetail(course, sectionList));
                         } catch (Exception exception) {
                             AppLogger.error(appContext, "CourseRepository",
                                     "Không thể đọc chi tiết khóa học", exception);

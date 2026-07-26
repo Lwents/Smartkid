@@ -125,7 +125,7 @@ public class CourseDetailActivity extends BaseActivity {
                 setLoading(false);
                 courseDetail = data;
                 bindCourse(data.getCourse());
-                lessonAdapter.setLessons(data.getLessons());
+                lessonAdapter.setSections(data.getSections());
                 startButton.setEnabled(!data.getCourse().isEnrolled()
                         || !data.getLessons().isEmpty());
                 retryButton.setVisibility(View.GONE);

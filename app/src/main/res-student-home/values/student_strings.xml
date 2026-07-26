@@ -149,4 +149,6 @@
     <string name="submit_assessment">Nộp bài đánh giá</string>
     <string name="restore_streak">Khôi phục chuỗi học</string>
     <string name="no_learning_path">Bạn chưa có khóa học trong lộ trình</string>
+    <!-- Số bài của một chương, hiện bên phải tên chương trong chi tiết khóa học. -->
+    <string name="section_lesson_count">%1$d bài</string>
 </resources>

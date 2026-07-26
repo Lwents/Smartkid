@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dòng tiêu đề chương trong danh sách bài học: thanh dọc tím + tên chương
+  + số bài của chương. Không bấm được, chỉ để phân nhóm.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="2dp"
+    android:paddingTop="14dp"
+    android:paddingEnd="4dp"
+    android:paddingBottom="8dp">
+
+    <View
+        android:layout_width="4dp"
+        android:layout_height="20dp"
+        android:background="@drawable/course_bg_section_bar" />
+
+    <TextView
+        android:id="@+id/textSectionTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="9dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/role_primary"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textSectionCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/smartkid_text_secondary"
+        android:textSize="12.5sp" />
+</LinearLayout>
