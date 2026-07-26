@@ -17,13 +17,13 @@
     <string name="teacher_students_stat">Học viên</string>
     <string name="teacher_lessons_stat">Bài học</string>
     <string name="teacher_exams_stat">Bài kiểm tra</string>
-    <string name="teacher_pending_stat">Bài chờ chấm</string>
+    <string name="teacher_pending_stat">Lượt nộp bài</string>
     <string name="teacher_completion_stat">Tỷ lệ hoàn thành</string>
     <string name="teacher_courses_description">Đang giảng dạy</string>
     <string name="teacher_students_description">Tổng số học viên</string>
     <string name="teacher_lessons_description">Đã tạo nội dung</string>
     <string name="teacher_exams_description">Đã tạo bài kiểm tra</string>
-    <string name="teacher_pending_description">Cần chấm điểm</string>
+    <string name="teacher_pending_description">Học viên đã nộp</string>
     <string name="teacher_completion_description">Tiến độ học viên</string>
     <string name="teacher_delta_courses">↑ 0%</string>
     <string name="teacher_delta_students">↑ 0%</string>
@@ -33,7 +33,7 @@
     <string name="teacher_delta_completion">↑ 0%</string>
     <string name="teacher_completion_zero">0%</string>
     <string name="teacher_management_tools">Công cụ giảng dạy</string>
-    <string name="teacher_grade_action">Chấm bài</string>
+    <string name="teacher_grade_action">Kết quả bài kiểm tra</string>
     <string name="teacher_manage_students_action">Quản lý học viên</string>
     <string name="teacher_activity_title">Hoạt động giảng dạy</string>
     <string name="teacher_chart_metric">Số học viên tham gia</string>
@@ -46,7 +46,7 @@
     <string name="teacher_students_page_subtitle">Quản lý học viên, tiến độ và phản hồi học tập</string>
     <string name="teacher_course_actions_title">Công cụ khóa học</string>
     <string name="teacher_course_content_title">Nội dung khóa học</string>
-    <string name="teacher_course_content_subtitle">Quản lý chương, bài học, video và bài luyện tập theo đúng cấu trúc SunEdu.</string>
+    <string name="teacher_course_content_subtitle">Quản lý chương, bài học, video và bài luyện tập theo đúng cấu trúc SmartKid.</string>
     <string name="teacher_add_module">Thêm chương</string>
     <string name="teacher_add_lesson">Thêm bài học</string>
     <string name="teacher_add_exercise_short">+ Bài tập</string>

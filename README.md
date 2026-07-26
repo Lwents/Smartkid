@@ -1,6 +1,6 @@
 # SmartKid Android (Java)
 
-SmartKid là ứng dụng Android viết bằng Java, ánh xạ nghiệp vụ của frontend SunEdu
+SmartKid là ứng dụng Android viết bằng Java, ánh xạ nghiệp vụ của frontend SmartKid
 sang REST API Django. Ứng dụng không kết nối trực tiếp PostgreSQL, không dùng
 SQLite/Room và không sinh dữ liệu demo khi server trả lỗi.
 
@@ -41,7 +41,7 @@ com.example.smartkid
 ## Chạy backend Docker
 
 ```bash
-cd /home/lwent/Downloads/SunEdu/backend
+cd /home/lwent/Downloads/SmartKid/backend
 docker compose up -d --build
 docker compose ps
 docker compose logs -f web

@@ -36,6 +36,7 @@ public final class UnsupportedRoleActivity extends BaseActivity {
         }
     }
 
+    /** Dựng giao diện thông báo bằng code (không cần file layout riêng). */
     private LinearLayout buildContent() {
         int padding = Math.round(24 * getResources().getDisplayMetrics().density);
         LinearLayout root = new LinearLayout(this);
@@ -79,6 +80,7 @@ public final class UnsupportedRoleActivity extends BaseActivity {
         return root;
     }
 
+    /** Đăng xuất rồi đưa về màn đăng nhập. */
     private void logoutAndReturn() {
         try {
             new AuthRepository(this).logout(new ApiCallback<Boolean>() {
@@ -95,6 +97,7 @@ public final class UnsupportedRoleActivity extends BaseActivity {
         }
     }
 
+    /** Về màn đăng nhập và xóa lịch sử màn hình phía trước. */
     private void returnToLogin() {
         try {
             Intent intent = new Intent(this, LoginActivity.class);

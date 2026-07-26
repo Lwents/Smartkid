@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Kết quả tải danh sách khóa học.
+ * 
+ * Có thêm cờ fromCache và notice để màn hình nói rõ 'đang xem dữ liệu đã lưu' khi mất mạng.
+ */
 public class CourseListResult {
     private final List<Course> courses;
     private final boolean fromCache;

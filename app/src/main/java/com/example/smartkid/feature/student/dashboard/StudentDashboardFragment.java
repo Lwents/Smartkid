@@ -26,7 +26,6 @@ import com.example.smartkid.data.repository.DashboardRepository;
 import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.feature.student.course.CatalogActivity;
 import com.example.smartkid.feature.student.course.CourseDetailActivity;
-import com.example.smartkid.feature.student.ai.AITutorActivity;
 import com.example.smartkid.feature.shared.notification.FeatureListActivity;
 import com.example.smartkid.feature.student.ai.LearningAnalysisActivity;
 
@@ -43,6 +42,7 @@ public class StudentDashboardFragment extends Fragment {
     private Button retryButton;
     private SwipeRefreshLayout refreshLayout;
     private DashboardRepository repository;
+    private TextView streakText;
     private Course resumeCourse;
 
     @Nullable
@@ -103,8 +103,11 @@ public class StudentDashboardFragment extends Fragment {
                 || catalogButton == null) {
             throw new IllegalStateException("Giao diện thao tác nhanh chưa đầy đủ");
         }
+        streakText = view.findViewById(R.id.textHomeStreakDays);
         notificationButton.setOnClickListener(clicked -> openNotifications());
-        aiButton.setOnClickListener(clicked -> openActivity(AITutorActivity.class));
+        // Ô lửa nay hiển thị chuỗi ngày học -> mở màn phân tích học tập (nơi có
+        // chi tiết chuỗi học và khôi phục chuỗi), không mở AI Tutor nữa.
+        aiButton.setOnClickListener(clicked -> openActivity(LearningAnalysisActivity.class));
         analysisButton.setOnClickListener(clicked -> openActivity(LearningAnalysisActivity.class));
         catalogButton.setOnClickListener(clicked -> openActivity(CatalogActivity.class));
     }
@@ -135,6 +138,29 @@ public class StudentDashboardFragment extends Fragment {
                 ((BaseActivity) getActivity()).showShortMessage("Không thể mở chức năng đã chọn");
             }
         }
+    }
+
+    /** Ô lửa hiển thị số ngày học liên tiếp thay cho nhãn "AI Tutor". */
+    private void loadStreak() {
+        if (streakText == null) return;
+        new com.example.smartkid.data.repository.StudentFeatureRepository(requireContext())
+                .loadLearningAnalysis(new ApiCallback<org.json.JSONObject>() {
+                    @Override
+                    public void onSuccess(org.json.JSONObject data) {
+                        if (!isAdded() || streakText == null) return;
+                        org.json.JSONObject daily = data.optJSONObject("daily_goal");
+                        if (daily == null) daily = data.optJSONObject("daily");
+                        int streak = com.example.smartkid.common.util.SafeJson
+                                .integer(daily, 0, "streak");
+                        streakText.setText(getString(R.string.home_streak_days, streak));
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        if (!isAdded() || streakText == null) return;
+                        streakText.setText(getString(R.string.home_streak_days, 0));
+                    }
+                });
     }
 
     private void safeLoadDashboard() {
@@ -170,6 +196,7 @@ public class StudentDashboardFragment extends Fragment {
                             resumeCourse.getProgress()));
                     resumeButton.setEnabled(true);
                 }
+                loadStreak();
             }
 
             @Override

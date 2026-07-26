@@ -41,6 +41,7 @@ public final class LiquidGlassUi {
     private LiquidGlassUi() {
     }
 
+    /** Áp giao diện chung cho một màn hình. */
     public static void decorate(Activity activity) {
         if (activity == null || activity.isFinishing()) {
             return;
@@ -57,6 +58,7 @@ public final class LiquidGlassUi {
         }
     }
 
+    /** Áp giao diện cho một nhánh view (dùng cho fragment, dialog). */
     public static void decorate(View root) {
         if (root == null) {
             return;
@@ -87,6 +89,7 @@ public final class LiquidGlassUi {
         configureSystemBars(activity);
     }
 
+    /** Đặt màu và độ trong suốt của thanh trạng thái / điều hướng. */
     private static void configureSystemBars(Activity activity) {
         Window window = activity.getWindow();
         if (window == null) {
@@ -115,6 +118,7 @@ public final class LiquidGlassUi {
         applySafeInsets(activity);
     }
 
+    /** Đặt nền cửa sổ khớp với nền nội dung. */
     private static void applyWindowBackground(Activity activity, View content) {
         View decor = activity.getWindow().getDecorView();
         Object backdropTag = decor.getTag(R.id.tag_status_bar_backdrop);
@@ -129,6 +133,7 @@ public final class LiquidGlassUi {
         content.setBackgroundResource(R.drawable.common_bg_liquid_screen);
     }
 
+    /** Chèn lề an toàn để nội dung không bị tai thỏ hay thanh điều hướng che. */
     private static void applySafeInsets(Activity activity) {
         View content = activity.findViewById(android.R.id.content);
         if (content == null || content.getTag(R.id.tag_liquid_glass_insets) != null) {
@@ -148,6 +153,7 @@ public final class LiquidGlassUi {
         ViewCompat.requestApplyInsets(content);
     }
 
+    /** Đi đệ quy cây view và trang trí từng loại thành phần. */
     private static void decorateTree(View view) {
         if (view == null) {
             return;
@@ -179,6 +185,7 @@ public final class LiquidGlassUi {
         }
     }
 
+    /** Chuẩn hóa thanh tiêu đề. */
     private static void decorateToolbar(MaterialToolbar toolbar) {
         Context context = toolbar.getContext();
         toolbar.setBackgroundColor(ContextCompat.getColor(context, R.color.glass_toolbar));
@@ -193,6 +200,7 @@ public final class LiquidGlassUi {
         }
     }
 
+    /** Chuẩn hóa ô nhập liệu. */
     private static void decorateInput(TextInputLayout input) {
         Context context = input.getContext();
         int radius = context.getResources().getDimensionPixelSize(R.dimen.glass_radius_small);
@@ -203,6 +211,7 @@ public final class LiquidGlassUi {
                 ContextCompat.getColor(context, R.color.smartkid_text_secondary)));
     }
 
+    /** Chuẩn hóa nút bấm. */
     private static void decorateButton(MaterialButton button) {
         Context context = button.getContext();
         button.setCornerRadius(context.getResources().getDimensionPixelSize(R.dimen.glass_radius_large));

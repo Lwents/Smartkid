@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Khóa học kèm danh sách bài học, dùng cho màn chi tiết khóa học.
+ */
 public class CourseDetail {
     private final Course course;
     private final List<Lesson> lessons;

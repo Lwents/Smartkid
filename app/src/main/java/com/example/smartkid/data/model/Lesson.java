@@ -1,5 +1,8 @@
 package com.example.smartkid.data.model;
 
+/**
+ * Một bài học trong danh sách của khóa học (chưa gồm nội dung chi tiết).
+ */
 public class Lesson {
     private final String id;
     private final String title;

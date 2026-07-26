@@ -1,7 +1,7 @@
-# Đối chiếu frontend SunEdu → SmartKid Android
+# Đối chiếu frontend SmartKid → SmartKid Android
 
 Ngày rà soát: 22/07/2026. Nguồn đối chiếu là `frontend/src/router/index.ts`, các
-page/service Vue và URL Django trong `/home/lwent/Downloads/SunEdu/backend`.
+page/service Vue và URL Django trong `/home/lwent/Downloads/SmartKid/backend`.
 
 ## Xác thực và dùng chung
 

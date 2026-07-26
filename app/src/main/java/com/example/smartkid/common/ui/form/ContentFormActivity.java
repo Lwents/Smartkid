@@ -697,7 +697,7 @@ private void registerFilePickers() {
             final int selected = index;
             gradeButtons[index].setOnClickListener(view -> selectGrade(selected));
         }
-        // SunEdu's routed wizard starts at grade 3.
+        // SmartKid's routed wizard starts at grade 3.
         selectGrade(2);
         container.addView(row);
     }

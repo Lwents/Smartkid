@@ -2,6 +2,9 @@ package com.example.smartkid.data.model;
 
 import com.example.smartkid.domain.BusinessRules;
 
+/**
+ * Một khóa học hiển thị trong danh sách hoặc trang chi tiết.
+ */
 public class Course {
     private final String id;
     private final String title;
@@ -53,6 +56,7 @@ public class Course {
         return lessonsCount;
     }
 
+    /** Tiến độ 0-100, tính từ số bài đã hoàn thành trên tổng số bài. */
     public int getProgress() {
         return progress;
     }
@@ -65,6 +69,7 @@ public class Course {
         return description;
     }
 
+    /** Học sinh đã ghi danh khóa này chưa (quyết định hiện nút Học hay Đăng ký). */
     public boolean isEnrolled() {
         return enrolled;
     }

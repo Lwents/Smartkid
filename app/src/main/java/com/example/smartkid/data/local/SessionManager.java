@@ -6,6 +6,13 @@ import android.content.SharedPreferences;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.model.User;
 
+/**
+ * Bộ nhớ phiên đăng nhập, lưu vào SharedPreferences của máy.
+ * 
+ * Giữ access token, refresh token và thông tin người dùng nên đóng app mở lại vẫn
+ * còn đăng nhập. Các hàm ghi đều synchronized vì ApiClient có thể làm mới token
+ * ở luồng nền cùng lúc giao diện đang đọc.
+ */
 public class SessionManager {
     private static final String PREF_NAME = "smartkid_session";
     private static final String KEY_ACCESS = "access_token";
@@ -20,6 +27,7 @@ public class SessionManager {
     private final Context appContext;
     private final SharedPreferences preferences;
 
+    /** Mở vùng lưu trữ phiên của app. */
     public SessionManager(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("Context không được để trống");
@@ -28,6 +36,7 @@ public class SessionManager {
         preferences = appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
+    /** Lưu phiên mới sau khi đăng nhập thành công. */
     public synchronized void saveSession(String accessToken, String refreshToken, User user) {
         try {
             SharedPreferences.Editor editor = preferences.edit()
@@ -40,6 +49,7 @@ public class SessionManager {
         }
     }
 
+    /** Cập nhật access token sau khi làm mới. */
     public synchronized void updateAccessToken(String accessToken) {
         try {
             preferences.edit().putString(KEY_ACCESS, safe(accessToken)).apply();
@@ -62,6 +72,7 @@ public class SessionManager {
         }
     }
 
+    /** Cập nhật thông tin người dùng sau khi sửa hồ sơ. */
     public synchronized void updateUser(User user) {
         try {
             SharedPreferences.Editor editor = preferences.edit();
@@ -72,18 +83,22 @@ public class SessionManager {
         }
     }
 
+    /** Còn phiên đăng nhập hay không, dùng để quyết định mở màn nào lúc khởi động. */
     public boolean hasSession() {
         return !getAccessToken().isEmpty() && !getRefreshToken().isEmpty();
     }
 
+    /** Token gắn vào header Authorization của mỗi request. */
     public String getAccessToken() {
         return preferences.getString(KEY_ACCESS, "");
     }
 
+    /** Token dùng để xin access token mới khi hết hạn. */
     public String getRefreshToken() {
         return preferences.getString(KEY_REFRESH, "");
     }
 
+    /** Thông tin người dùng đang đăng nhập (tên, email, vai trò). */
     public User getUser() {
         return new User(
                 preferences.getString(KEY_USER_ID, ""),
@@ -95,6 +110,7 @@ public class SessionManager {
         );
     }
 
+    /** Xóa sạch phiên khi đăng xuất hoặc phiên hết hạn. */
     public synchronized void clear() {
         try {
             preferences.edit().clear().apply();
@@ -103,6 +119,7 @@ public class SessionManager {
         }
     }
 
+    /** Ghi từng trường của người dùng xuống bộ nhớ. */
     private void writeUser(SharedPreferences.Editor editor, User user) {
         User safeUser = user == null ? new User("", "", "", "", "student", "") : user;
         editor.putString(KEY_USER_ID, safeUser.getId())
@@ -113,6 +130,7 @@ public class SessionManager {
                 .putString(KEY_CLASS_NAME, safeUser.getClassName());
     }
 
+    /** Đổi null thành chuỗi rỗng để không phải kiểm tra null khắp nơi. */
     private static String safe(String value) {
         return value == null ? "" : value;
     }

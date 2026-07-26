@@ -14,6 +14,7 @@ public final class BusinessRules {
     private BusinessRules() {
     }
 
+    /** Kiểm tra thông tin đăng nhập trước khi gọi API (đỡ tốn một lượt mạng). */
     public static String validateLogin(String identifier, String password) {
         if (identifier == null || identifier.trim().isEmpty()) {
             return "Vui lòng nhập tài khoản hoặc email";
@@ -30,6 +31,7 @@ public final class BusinessRules {
         return "";
     }
 
+    /** Kiểm tra dữ liệu đăng ký: tên, email, số điện thoại, mật khẩu và xác nhận. */
     public static String validateRegistration(String username, String email, String phone,
                                               String password, String confirmation) {
         if (username == null || username.trim().length() < 3) {
@@ -54,10 +56,12 @@ public final class BusinessRules {
         return "";
     }
 
+    /** Kiểm tra email khi yêu cầu đặt lại mật khẩu. */
     public static String validateForgotPasswordEmail(String email) {
         return isEmail(email) ? "" : "Vui lòng nhập đúng địa chỉ email";
     }
 
+    /** Kiểm tra dữ liệu ở bước đặt mật khẩu mới bằng mã xác nhận. */
     public static String validateResetPassword(String email, String token,
                                                String password, String confirmation) {
         if (!isEmail(email)) {
@@ -75,6 +79,7 @@ public final class BusinessRules {
         return "";
     }
 
+    /** Kiểm tra chuỗi có đúng dạng email. */
     public static boolean isEmail(String value) {
         if (value == null) {
             return false;
@@ -82,6 +87,7 @@ public final class BusinessRules {
         return value.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     }
 
+    /** Lọc khóa học theo từ khóa; bỏ dấu nên gõ 'dai so' vẫn tìm ra 'Đại số'. */
     public static List<Course> filterCourses(List<Course> source, String keyword) {
         List<Course> result = new ArrayList<>();
         if (source == null) {
@@ -105,6 +111,7 @@ public final class BusinessRules {
         return result;
     }
 
+    /** Sắp xếp theo tên, trả về danh sách mới để không sửa dữ liệu gốc. */
     public static List<Course> sortCoursesByTitle(List<Course> source, boolean ascending) {
         List<Course> result = source == null ? new ArrayList<>() : new ArrayList<>(source);
         Comparator<Course> comparator = (left, right) -> {
@@ -116,10 +123,12 @@ public final class BusinessRules {
         return result;
     }
 
+    /** Ép tiến độ về khoảng 0-100 để giao diện không vẽ sai thanh tiến trình. */
     public static int clampProgress(int progress) {
         return Math.max(0, Math.min(100, progress));
     }
 
+    /** Chuẩn hóa chuỗi để so sánh: bỏ dấu, đổi đ thành d, về chữ thường. */
     private static String normalize(String value) {
         if (value == null) {
             return "";

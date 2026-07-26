@@ -10,6 +10,11 @@ import androidx.annotation.Nullable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+/**
+ * Ghi log lỗi ra Logcat và lưu lỗi nghiêm trọng vào máy.
+ *
+ * Nhờ lưu lại, lần mở app sau vẫn đọc được nguyên nhân lần sập trước đó.
+ */
 public final class AppLogger {
     private static final String PREF_NAME = "smartkid_error_log";
     private static final String KEY_FATAL_ERROR = "fatal_error";
@@ -18,6 +23,7 @@ public final class AppLogger {
     private AppLogger() {
     }
 
+    /** Ghi một lỗi kèm ngữ cảnh (tên lớp, thông báo, ngoại lệ). */
     public static void error(@Nullable Context context, String tag, String message,
                              @Nullable Throwable throwable) {
         if (throwable == null) {
@@ -71,6 +77,7 @@ public final class AppLogger {
         }
     }
 
+    /** Cắt ngắn nội dung log để không phình bộ nhớ. */
     private static String trim(String value) {
         if (value == null) {
             return "Không có mô tả lỗi";

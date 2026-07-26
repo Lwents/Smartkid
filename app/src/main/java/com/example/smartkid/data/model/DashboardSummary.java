@@ -1,5 +1,8 @@
 package com.example.smartkid.data.model;
 
+/**
+ * Số liệu tóm tắt cho trang chủ học sinh: khóa đang học dở và các con số nổi bật.
+ */
 public class DashboardSummary {
     private final Course resumeCourse;
     private final int featuredCourseCount;

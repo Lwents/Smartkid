@@ -24,13 +24,16 @@ public class ProfileEditActivity extends BaseActivity {
     private TextInputEditText fullNameInput;
     private TextInputEditText emailInput;
     private TextInputEditText phoneInput;
-    private TextInputEditText classInput;
-    private TextInputEditText bioInput;
-    private TextInputEditText addressInput;
     private Button saveButton;
     private ProgressBar progressBar;
     private TextView statusText;
     private AuthRepository repository;
+    // Chỉ học sinh mới có lớp đang học và địa chỉ.
+    private boolean studentProfile;
+    private View studentFields;
+    private android.widget.Spinner classSpinner;
+    private TextInputEditText addressInput;
+    private static final String[] CLASS_VALUES = {"", "1", "2", "3", "4", "5"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,14 +57,24 @@ public class ProfileEditActivity extends BaseActivity {
         fullNameInput = findViewById(R.id.inputProfileFullName);
         emailInput = findViewById(R.id.inputProfileEmail);
         phoneInput = findViewById(R.id.inputProfilePhone);
-        classInput = findViewById(R.id.inputProfileClass);
-        bioInput = findViewById(R.id.inputProfileBio);
-        addressInput = findViewById(R.id.inputProfileAddress);
         saveButton = findViewById(R.id.buttonSaveProfile);
         progressBar = findViewById(R.id.progressProfileEdit);
         statusText = findViewById(R.id.textProfileEditStatus);
+        studentFields = findViewById(R.id.groupProfileStudentFields);
+        classSpinner = findViewById(R.id.spinnerProfileClass);
+        addressInput = findViewById(R.id.inputProfileAddress);
+        studentProfile = com.example.smartkid.common.navigation.UserRole.STUDENT
+                == com.example.smartkid.common.navigation.UserRole.fromString(
+                new com.example.smartkid.data.local.SessionManager(this).getUser().getRole());
+        if (studentFields != null) {
+            studentFields.setVisibility(studentProfile ? View.VISIBLE : View.GONE);
+        }
+        if (studentProfile && classSpinner != null) {
+            classSpinner.setAdapter(new android.widget.ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    new String[]{"Chưa chọn lớp", "Lớp 1", "Lớp 2", "Lớp 3", "Lớp 4", "Lớp 5"}));
+        }
         if (fullNameInput == null || emailInput == null || phoneInput == null
-                || classInput == null || bioInput == null || addressInput == null
                 || saveButton == null || progressBar == null || statusText == null) {
             throw new IllegalStateException("Giao diện chỉnh hồ sơ chưa đầy đủ");
         }
@@ -74,13 +87,14 @@ public class ProfileEditActivity extends BaseActivity {
             public void onSuccess(JSONObject data) {
                 if (!isUsable()) return;
                 setLoading(false);
-                JSONObject metadata = data.optJSONObject("metadata");
                 fullNameInput.setText(SafeJson.string(data, "", "full_name", "fullName", "display_name"));
                 emailInput.setText(SafeJson.string(data, "", "email"));
                 phoneInput.setText(SafeJson.string(data, "", "phone"));
-                classInput.setText(value(data, metadata, "class_name"));
-                bioInput.setText(value(data, metadata, "bio"));
-                addressInput.setText(value(data, metadata, "address"));
+                if (studentProfile) {
+                    JSONObject metadata = data.optJSONObject("metadata");
+                    selectClass(value(data, metadata, "class_name"));
+                    addressInput.setText(value(data, metadata, "address"));
+                }
             }
 
             @Override
@@ -90,6 +104,24 @@ public class ProfileEditActivity extends BaseActivity {
                 handleApiError(error);
             }
         });
+    }
+
+    /** "3" hoặc "Lớp 3" -> chọn đúng mục trong danh sách lớp. */
+    private void selectClass(String rawValue) {
+        String digits = rawValue == null ? "" : rawValue.replaceAll("[^1-5]", "");
+        for (int index = 1; index < CLASS_VALUES.length; index++) {
+            if (CLASS_VALUES[index].equals(digits)) {
+                classSpinner.setSelection(index);
+                return;
+            }
+        }
+        classSpinner.setSelection(0);
+    }
+
+    /** Giá trị có thể nằm ở gốc response hoặc trong metadata. */
+    private String value(JSONObject data, JSONObject metadata, String key) {
+        String direct = SafeJson.string(data, "", key);
+        return direct.isEmpty() ? SafeJson.string(metadata, "", key) : direct;
     }
 
     private void saveSafely() {
@@ -108,9 +140,12 @@ public class ProfileEditActivity extends BaseActivity {
             body.put("full_name", textOf(fullNameInput));
             body.put("email", email);
             body.put("phone", phone);
-            body.put("class_name", textOf(classInput));
-            body.put("bio", textOf(bioInput));
-            body.put("address", textOf(addressInput));
+            if (studentProfile) {
+                int position = classSpinner.getSelectedItemPosition();
+                body.put("class_name", position >= 0 && position < CLASS_VALUES.length
+                        ? CLASS_VALUES[position] : "");
+                body.put("address", textOf(addressInput));
+            }
             setLoading(true);
             repository.updateAccountProfile(body, new ApiCallback<JSONObject>() {
                 @Override
@@ -134,10 +169,6 @@ public class ProfileEditActivity extends BaseActivity {
         }
     }
 
-    private String value(JSONObject data, JSONObject metadata, String key) {
-        String direct = SafeJson.string(data, "", key);
-        return direct.isEmpty() ? SafeJson.string(metadata, "", key) : direct;
-    }
 
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);

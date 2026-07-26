@@ -57,6 +57,9 @@
     <string name="mark_all_read">Đọc tất cả</string>
     <string name="no_server_data">Server chưa có dữ liệu cho chức năng này</string>
     <string name="logout">Đăng xuất</string>
+    <string name="account_menu_title">Tài khoản</string>
+    <string name="account_menu_profile">Hồ sơ của tôi</string>
+    <string name="account_menu_change_password">Đổi mật khẩu</string>
     <string name="logout_confirmation">Bạn có chắc muốn kết thúc phiên đăng nhập trên thiết bị này?</string>
     <string name="active_users_title">Đang hoạt động</string>
     <string name="active_window_format">Trong %1$d phút gần nhất</string>

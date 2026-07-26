@@ -26,6 +26,7 @@ public class StudentFeatureRepository {
         apiClient = ApiClient.getInstance(appContext);
     }
 
+    /** Lộ trình học được gợi ý cho học sinh. */
     public void loadLearningPath(ApiCallback<List<FeatureItem>> callback) {
         apiClient.get("student/learning-path/", true, new ApiCallback<JSONObject>() {
             @Override
@@ -44,6 +45,7 @@ public class StudentFeatureRepository {
         });
     }
 
+    /** Yêu cầu hệ thống tạo lộ trình cho một khóa học. */
     public void generateLearningPath(String courseId, ApiCallback<String> callback) {
         if (courseId == null || courseId.trim().isEmpty()) {
             callback.onError(new ApiError(0, "Mã khóa học không hợp lệ", false));
@@ -68,6 +70,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Danh sách thông báo của học sinh. */
     public void loadNotifications(ApiCallback<List<FeatureItem>> callback) {
         apiClient.get("student/notifications/?limit=100", true, new ApiCallback<JSONObject>() {
             @Override
@@ -96,6 +99,7 @@ public class StudentFeatureRepository {
         });
     }
 
+    /** Đánh dấu một thông báo đã đọc. */
     public void markNotificationRead(String id, ApiCallback<Boolean> callback) {
         if (id == null || id.trim().isEmpty()) {
             callback.onError(new ApiError(0, "Mã thông báo không hợp lệ", false));
@@ -105,15 +109,18 @@ public class StudentFeatureRepository {
                 new JSONObject(), true, booleanCallback(callback));
     }
 
+    /** Đánh dấu tất cả thông báo đã đọc. */
     public void markAllNotificationsRead(ApiCallback<Boolean> callback) {
         apiClient.patch("student/notifications/read-all/", new JSONObject(), true,
                 booleanCallback(callback));
     }
 
+    /** Thông tin phụ huynh liên kết với học sinh. */
     public void loadParent(ApiCallback<JSONObject> callback) {
         apiClient.get("student/account/parent/", true, callback);
     }
 
+    /** Cập nhật thông tin phụ huynh. */
     public void updateParent(String name, String email, String phone, String relationship,
                              ApiCallback<JSONObject> callback) {
         try {
@@ -129,6 +136,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Đổi mật khẩu; endpoint và tên trường khác nhau giữa học sinh và các vai trò khác. */
     public void changePassword(String oldPassword, String newPassword,
                                ApiCallback<String> callback) {
         try {
@@ -156,6 +164,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Gửi câu hỏi cho Gia Sư AI kèm ngữ cảnh bài học đang xem. */
     public void chatWithTutor(String message, String lessonId, String lessonTitle,
                               ApiCallback<String> callback) {
         String normalized = safe(message);
@@ -181,7 +190,7 @@ public class StudentFeatureRepository {
                         public void onSuccess(JSONObject data) {
                             if (!SafeJson.bool(data, false, "success")) {
                                 callback.onError(new ApiError(503,
-                                        SafeJson.string(data, "AI Tutor chưa sẵn sàng", "detail", "error"),
+                                        SafeJson.string(data, "Gia Sư AI chưa sẵn sàng", "detail", "error"),
                                         false));
                                 return;
                             }
@@ -202,6 +211,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Xóa lịch sử hội thoại với Gia Sư AI. */
     public void clearTutorHistory(String lessonId, ApiCallback<Boolean> callback) {
         String endpoint = "student/ai/tutor/history/";
         String normalized = safe(lessonId);
@@ -217,6 +227,7 @@ public class StudentFeatureRepository {
         apiClient.delete(endpoint, null, true, booleanCallback(callback));
     }
 
+    /** Danh sách câu hỏi thảo luận trong bài học. */
     public void loadLessonQuestions(String lessonId, ApiCallback<List<FeatureItem>> callback) {
         String normalized = safe(lessonId);
         if (normalized.isEmpty()) {
@@ -260,6 +271,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Đặt câu hỏi mới cho giáo viên trong bài học. */
     public void createLessonQuestion(String lessonId, String content,
                                      ApiCallback<Boolean> callback) {
         String normalizedLesson = safe(lessonId);
@@ -278,6 +290,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Trả lời một câu hỏi thảo luận. */
     public void replyLessonQuestion(String questionId, String content,
                                     ApiCallback<Boolean> callback) {
         String id = safe(questionId);
@@ -296,6 +309,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Bày tỏ cảm xúc (thích) với câu hỏi. */
     public void reactLessonQuestion(String questionId, ApiCallback<Boolean> callback) {
         String id = safe(questionId);
         if (id.isEmpty()) {
@@ -306,6 +320,7 @@ public class StudentFeatureRepository {
                 new JSONObject(), true, booleanCallback(callback));
     }
 
+    /** Sửa nội dung câu hỏi của chính mình. */
     public void editLessonQuestion(String questionId, String content,
                                    ApiCallback<Boolean> callback) {
         String id = safe(questionId);
@@ -324,6 +339,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Xóa câu hỏi của chính mình. */
     public void deleteLessonQuestion(String questionId, ApiCallback<Boolean> callback) {
         String id = safe(questionId);
         if (id.isEmpty()) {
@@ -334,6 +350,7 @@ public class StudentFeatureRepository {
                 null, true, booleanCallback(callback));
     }
 
+    /** Báo cáo câu hỏi có nội dung không phù hợp. */
     public void reportLessonQuestion(String questionId, String detail,
                                      ApiCallback<Boolean> callback) {
         String id = safe(questionId);
@@ -353,10 +370,12 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Phân tích học tập: tiến độ, điểm trung bình, mục tiêu và chuỗi ngày học. */
     public void loadLearningAnalysis(ApiCallback<JSONObject> callback) {
         apiClient.get("student/ai/learning-analyzer/", true, callback);
     }
 
+    /** Bắt đầu bài đánh giá đầu vào của một khóa học. */
     public void startAssessment(String courseId, ApiCallback<JSONObject> callback) {
         String id = safe(courseId);
         if (id.isEmpty()) {
@@ -375,6 +394,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Nộp bài đánh giá đầu vào. */
     public void submitAssessment(String courseId, JSONArray answers,
                                  ApiCallback<JSONObject> callback) {
         String id = safe(courseId);
@@ -395,6 +415,7 @@ public class StudentFeatureRepository {
         }
     }
 
+    /** Xin khôi phục chuỗi ngày học đã mất (server giới hạn số lần mỗi tháng). */
     public void restoreLearningStreak(ApiCallback<String> callback) {
         apiClient.post("student/ai/learning/restore-streak/", new JSONObject(), true,
                 new ApiCallback<JSONObject>() {

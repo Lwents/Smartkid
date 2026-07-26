@@ -71,10 +71,12 @@ public final class ApiClient {
         sessionManager = new SessionManager(appContext);
     }
 
+    /** Khởi tạo sẵn ở lúc app mở để lần gọi đầu không bị chậm. */
     public static void initialize(Context context) {
         getInstance(context);
     }
 
+    /** Lấy thể hiện dùng chung (singleton) cho toàn app. */
     public static ApiClient getInstance(Context context) {
         if (instance == null) {
             synchronized (ApiClient.class) {
@@ -89,10 +91,12 @@ public final class ApiClient {
         return instance;
     }
 
+    /** GET trả về một object JSON. */
     public void get(String endpoint, boolean authenticated, ApiCallback<JSONObject> callback) {
         request(Request.Method.GET, endpoint, null, authenticated, callback);
     }
 
+    /** GET trả về một mảng JSON. */
     public void getArray(String endpoint, boolean authenticated, ApiCallback<JSONArray> callback) {
         ApiCallback<JSONArray> safeCallback = callback == null ? noOpArrayCallback() : callback;
         if (endpoint == null || endpoint.trim().isEmpty()) {
@@ -113,26 +117,31 @@ public final class ApiClient {
         executeValue(endpoint, authenticated, true, safeCallback);
     }
 
+    /** POST tạo mới dữ liệu. */
     public void post(String endpoint, JSONObject body, boolean authenticated,
                      ApiCallback<JSONObject> callback) {
         request(Request.Method.POST, endpoint, body, authenticated, callback);
     }
 
+    /** PUT thay toàn bộ dữ liệu. */
     public void put(String endpoint, JSONObject body, boolean authenticated,
                     ApiCallback<JSONObject> callback) {
         request(Request.Method.PUT, endpoint, body, authenticated, callback);
     }
 
+    /** PATCH sửa một phần dữ liệu. */
     public void patch(String endpoint, JSONObject body, boolean authenticated,
                       ApiCallback<JSONObject> callback) {
         request(Request.Method.PATCH, endpoint, body, authenticated, callback);
     }
 
+    /** DELETE xóa dữ liệu. */
     public void delete(String endpoint, JSONObject body, boolean authenticated,
                        ApiCallback<JSONObject> callback) {
         request(Request.Method.DELETE, endpoint, body, authenticated, callback);
     }
 
+    /** Điểm vào chung cho mọi phương thức HTTP dạng JSON. */
     public void request(int method, String endpoint, JSONObject body, boolean authenticated,
                         ApiCallback<JSONObject> callback) {
         ApiCallback<JSONObject> safeCallback = callback == null ? noOpCallback() : callback;
@@ -144,6 +153,7 @@ public final class ApiClient {
         execute(method, endpoint, body, authenticated, true, safeCallback);
     }
 
+    /** Gửi kèm file (ảnh bìa, video bài học) theo chuẩn multipart. */
     public void multipart(int method, String endpoint, JSONObject fields,
                           List<MultipartFilePart> files, boolean authenticated,
                           ApiCallback<JSONObject> callback) {
@@ -155,6 +165,7 @@ public final class ApiClient {
         executeMultipart(method, endpoint, fields, files, authenticated, true, safeCallback);
     }
 
+    /** Tự dựng body multipart và gửi ở luồng riêng vì file có thể rất lớn. */
     private void executeMultipart(int method, String endpoint, JSONObject fields,
                                   List<MultipartFilePart> files, boolean authenticated,
                                   boolean allowRefresh, ApiCallback<JSONObject> callback) {
@@ -212,6 +223,7 @@ public final class ApiClient {
         });
     }
 
+    /** Ghi các trường chữ vào body multipart. */
     private void writeMultipartFields(OutputStream output, String boundary,
                                       JSONObject fields) throws Exception {
         if (fields == null) return;
@@ -229,6 +241,7 @@ public final class ApiClient {
         }
     }
 
+    /** Ghi nội dung từng file vào body multipart. */
     private void writeMultipartFiles(OutputStream output, String boundary,
                                      List<MultipartFilePart> files) throws Exception {
         if (files == null || files.isEmpty()) return;
@@ -255,6 +268,7 @@ public final class ApiClient {
         }
     }
 
+    /** Lấy tên file người dùng chọn để gửi kèm lên server. */
     private String displayName(ContentResolver resolver, Uri uri) {
         String name = "upload";
         try (Cursor cursor = resolver.query(uri,
@@ -269,6 +283,7 @@ public final class ApiClient {
         return name == null || name.trim().isEmpty() ? "upload" : name.trim();
     }
 
+    /** Đọc nội dung phản hồi, kể cả khi server trả mã lỗi. */
     private String readResponse(HttpURLConnection connection, int statusCode) throws Exception {
         InputStream source = statusCode >= 200 && statusCode < 400
                 ? connection.getInputStream() : connection.getErrorStream();
@@ -281,6 +296,7 @@ public final class ApiClient {
         }
     }
 
+    /** Đổi phản hồi lỗi của server thành thông báo tiếng Việt cho người dùng. */
     private ApiError responseError(int statusCode, String raw) {
         try {
             JSONObject json = new JSONObject(raw == null ? "" : raw);
@@ -306,6 +322,7 @@ public final class ApiClient {
         return new ApiError(statusCode, "Không thể tải tệp lên máy chủ", statusCode == 401);
     }
 
+    /** Đổi mã phương thức của Volley sang chữ (GET, POST...). */
     private String methodName(int method) {
         if (method == Request.Method.POST) return "POST";
         if (method == Request.Method.PUT) return "PUT";
@@ -313,15 +330,18 @@ public final class ApiClient {
         throw new IllegalArgumentException("Multipart chỉ hỗ trợ POST, PUT hoặc PATCH");
     }
 
+    /** Ghi chuỗi UTF-8 để không lỗi font tiếng Việt. */
     private void writeUtf8(OutputStream output, String value) throws Exception {
         output.write(value.getBytes(StandardCharsets.UTF_8));
     }
 
+    /** Làm sạch giá trị header, tránh ký tự xuống dòng gây lỗi request. */
     private String headerValue(String value) {
         return value == null ? "" : value.replace("\r", "_")
                 .replace("\n", "_").replace("\"", "_");
     }
 
+    /** Thực thi request JSON: gắn token, xử lý 401, trả kết quả về luồng giao diện. */
     private void execute(int method, String endpoint, JSONObject body, boolean authenticated,
                          boolean allowRefresh, ApiCallback<JSONObject> callback) {
         try {
@@ -377,6 +397,7 @@ public final class ApiClient {
         }
     }
 
+    /** Thực thi request trả mảng JSON. */
     private void executeArray(String endpoint, boolean authenticated, boolean allowRefresh,
                               ApiCallback<JSONArray> callback) {
         try {
@@ -415,6 +436,7 @@ public final class ApiClient {
         }
     }
 
+    /** Thực thi request chưa biết kiểu dữ liệu trả về. */
     private void executeValue(String endpoint, boolean authenticated, boolean allowRefresh,
                               ApiCallback<Object> callback) {
         try {
@@ -438,6 +460,7 @@ public final class ApiClient {
         }
     }
 
+    /** Xếp request bị 401 vào hàng chờ; chỉ làm mới token một lần rồi chạy lại tất cả. */
     private void queueForTokenRefresh(Runnable retry,
                                       java.util.function.Consumer<ApiError> failure) {
         boolean shouldStartRefresh = false;
@@ -454,6 +477,7 @@ public final class ApiClient {
         }
     }
 
+    /** Gọi API refresh để lấy access token mới bằng refresh token đã lưu. */
     private void refreshAccessToken() {
         String refreshToken = sessionManager.getRefreshToken();
         if (refreshToken.isEmpty()) {

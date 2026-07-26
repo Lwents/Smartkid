@@ -23,14 +23,17 @@ public abstract class RoleDashboardActivity extends BaseActivity {
     private SessionManager sessionManager;
     private AuthRepository authRepository;
 
+    /** Người dùng của phiên đang đăng nhập. */
     protected final User currentUser() {
         return session().getUser();
     }
 
+    /** Vai trò đã chuẩn hóa của phiên hiện tại. */
     protected final UserRole currentRole() {
         return UserRole.fromString(currentUser().getRole());
     }
 
+    /** Chặn vào màn nếu sai vai trò; trả false thì màn hình phải dừng khởi tạo. */
     protected final boolean requireRole(UserRole... acceptedRoles) {
         UserRole role = currentRole();
         if (acceptedRoles != null) {
@@ -43,10 +46,12 @@ public abstract class RoleDashboardActivity extends BaseActivity {
         return false;
     }
 
+    /** Gắn nút đăng xuất kèm hộp xác nhận mặc định. */
     protected final void bindLogoutAction(int logoutButtonId) {
         findViewById(logoutButtonId).setOnClickListener(view -> confirmLogout());
     }
 
+    /** Gắn nút đăng xuất với tiêu đề và nội dung xác nhận riêng. */
     protected final void bindLogoutAction(int logoutButtonId, int titleRes, int messageRes) {
         findViewById(logoutButtonId).setOnClickListener(view ->
                 confirmLogout(getString(titleRes), getString(messageRes)));
@@ -62,7 +67,8 @@ public abstract class RoleDashboardActivity extends BaseActivity {
         return authRepository;
     }
 
-    private void confirmLogout() {
+    /** Hỏi xác nhận rồi đăng xuất (gọi được từ menu tài khoản). */
+    protected final void confirmLogout() {
         confirmLogout(getString(R.string.logout), getString(R.string.logout_confirmation));
     }
 

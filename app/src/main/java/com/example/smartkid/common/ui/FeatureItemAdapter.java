@@ -30,12 +30,14 @@ public class FeatureItemAdapter extends BaseAdapter {
         inflater = LayoutInflater.from(context);
     }
 
+    /** Nạp dữ liệu mới và vẽ lại danh sách. */
     public void setItems(List<FeatureItem> items) {
         source.clear();
         if (items != null) source.addAll(items);
         filter("");
     }
 
+    /** Lọc theo từ khóa, bỏ dấu nên gõ không dấu vẫn tìm được. */
     public void filter(String keyword) {
         displayed.clear();
         String query = normalize(keyword);
@@ -86,11 +88,13 @@ public class FeatureItemAdapter extends BaseAdapter {
         return convertView;
     }
 
+    /** Ẩn hẳn dòng nếu không có dữ liệu, thay vì để khoảng trống. */
     private void bindOptional(TextView view, String value) {
         view.setText(value);
         view.setVisibility(value == null || value.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
+    /** Hiện trạng thái kèm màu theo nghĩa (đã xuất bản / bản nháp / đã khóa). */
     private void bindStatus(TextView view, String value) {
         bindOptional(view, value);
         if (value == null || value.isEmpty()) return;
@@ -106,6 +110,7 @@ public class FeatureItemAdapter extends BaseAdapter {
         view.setTextColor(ContextCompat.getColor(context, color));
     }
 
+    /** Bỏ dấu và về chữ thường để so khớp khi tìm kiếm. */
     private static String normalize(String value) {
         if (value == null) return "";
         return Normalizer.normalize(value, Normalizer.Form.NFD)

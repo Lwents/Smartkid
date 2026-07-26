@@ -26,6 +26,7 @@ public class FeatureItem {
     public String getSubtitle() { return subtitle; }
     public String getDetail() { return detail; }
     public String getStatus() { return status; }
+    /** JSON gốc từ server, giữ lại để dialog chi tiết đọc thêm trường mà danh sách không hiện. */
     public JSONObject getSource() { return source; }
 
     private static String safe(String value) {

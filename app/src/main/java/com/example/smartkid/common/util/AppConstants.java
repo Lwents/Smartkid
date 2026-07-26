@@ -2,6 +2,11 @@ package com.example.smartkid.common.util;
 
 import com.example.smartkid.BuildConfig;
 
+/**
+ * Hằng số dùng chung: địa chỉ server, tên endpoint, tên khóa Intent.
+ *
+ * Để tên endpoint ở một chỗ giúp đổi đường dẫn API không phải sửa rải rác khắp app.
+ */
 public final class AppConstants {
     /** URL local ưu tiên (backend chạy trên máy dev / emulator). */
     public static final String API_LOCAL_URL = BuildConfig.API_BASE_URL;
@@ -14,10 +19,12 @@ public final class AppConstants {
      */
     private static volatile String resolvedBaseUrl = API_FALLBACK_URL;
 
+    /** Địa chỉ server đang dùng thật (do ApiEnvironment chốt lúc khởi động). */
     public static String getApiBaseUrl() {
         return resolvedBaseUrl;
     }
 
+    /** Đổi địa chỉ server sau khi dò được máy chủ phản hồi. */
     public static void setApiBaseUrl(String url) {
         if (url != null && !url.trim().isEmpty()) {
             resolvedBaseUrl = url.trim();

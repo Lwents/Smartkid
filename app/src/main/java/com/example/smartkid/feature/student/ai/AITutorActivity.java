@@ -41,16 +41,16 @@ public class AITutorActivity extends BaseActivity {
                     : safe(getIntent().getStringExtra(AppConstants.EXTRA_LESSON_TITLE));
             bindViews();
             MaterialToolbar toolbar = findViewById(R.id.toolbarAiTutor);
-            if (toolbar == null) throw new IllegalStateException("Thiếu thanh điều hướng AI Tutor");
+            if (toolbar == null) throw new IllegalStateException("Thiếu thanh điều hướng Gia Sư AI");
             toolbar.setNavigationOnClickListener(view -> finish());
             if (!lessonTitle.isEmpty()) toolbar.setSubtitle(lessonTitle);
             sendButton.setOnClickListener(view -> sendSafely());
             clearButton.setOnClickListener(view -> clearSafely());
-            conversation.append("AI Tutor chỉ hiển thị câu trả lời do server AI cung cấp.\n");
+            conversation.append("Gia Sư AI chỉ hiển thị câu trả lời do server AI cung cấp.\n");
             bindConversation();
         } catch (Exception exception) {
-            AppLogger.error(this, "AITutorActivity", "Không thể tạo AI Tutor", exception);
-            showErrorDialog("Không thể mở AI Tutor");
+            AppLogger.error(this, "AITutorActivity", "Không thể tạo Gia Sư AI", exception);
+            showErrorDialog("Không thể mở Gia Sư AI");
         }
     }
 
@@ -63,7 +63,7 @@ public class AITutorActivity extends BaseActivity {
         progressBar = findViewById(R.id.progressAiTutor);
         if (conversationText == null || statusText == null || messageInput == null
                 || sendButton == null || clearButton == null || progressBar == null) {
-            throw new IllegalStateException("Giao diện AI Tutor thiếu thành phần bắt buộc");
+            throw new IllegalStateException("Giao diện Gia Sư AI thiếu thành phần bắt buộc");
         }
     }
 
@@ -87,7 +87,7 @@ public class AITutorActivity extends BaseActivity {
                         public void onSuccess(String answer) {
                             if (!isUsable()) return;
                             setLoading(false);
-                            appendLine("AI Tutor", answer);
+                            appendLine("Gia Sư AI", answer);
                             showStatus("Đã nhận câu trả lời từ server");
                         }
 

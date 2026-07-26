@@ -25,25 +25,30 @@ public class ExamRepository {
         apiClient = ApiClient.getInstance(appContext);
     }
 
+    /** Danh sách đề học sinh được phép làm (theo khóa đã ghi danh và khối lớp). */
     public void loadExams(ApiCallback<List<FeatureItem>> callback) {
         apiClient.getArray("student/exams/", true, listCallback(callback, false));
     }
 
+    /** Danh sách chứng chỉ đã đạt. */
     public void loadCertificates(ApiCallback<List<FeatureItem>> callback) {
         apiClient.getArray("student/exams/certificates/", true, listCallback(callback, true));
     }
 
+    /** Chi tiết đề: câu hỏi, thời gian làm bài, điểm đạt (không kèm đáp án đúng). */
     public void loadDetail(String examId, ApiCallback<JSONObject> callback) {
         if (!validId(examId, callback)) return;
         apiClient.get("student/exams/" + examId.trim() + "/", true, callback);
     }
 
+    /** Mở một lượt làm bài, trả về attemptId. */
     public void start(String examId, ApiCallback<JSONObject> callback) {
         if (!validId(examId, callback)) return;
         apiClient.post("student/exams/" + examId.trim() + "/start/",
                 new JSONObject(), true, callback);
     }
 
+    /** Nộp toàn bộ đáp án của lượt làm bài và nhận kết quả chấm. */
     public void submit(String examId, String attemptId, JSONObject answers,
                        ApiCallback<JSONObject> callback) {
         if (!validId(examId, callback) || attemptId == null || attemptId.trim().isEmpty()) {
@@ -63,6 +68,7 @@ public class ExamRepository {
         }
     }
 
+    /** Xem lại kết quả của một lượt đã nộp. */
     public void loadResult(String examId, String attemptId, ApiCallback<JSONObject> callback) {
         if (!validId(examId, callback) || attemptId == null || attemptId.trim().isEmpty()) {
             if (attemptId == null || attemptId.trim().isEmpty()) {
@@ -74,11 +80,13 @@ public class ExamRepository {
                 + attemptId.trim() + "/", true, callback);
     }
 
+    /** Bảng xếp hạng điểm của đề. */
     public void loadRanking(String examId, ApiCallback<JSONObject> callback) {
         if (!validId(examId, callback)) return;
         apiClient.get("student/exams/" + examId.trim() + "/ranking/", true, callback);
     }
 
+    /** Đổi mảng JSON thành danh sách hiển thị dùng chung cho đề và chứng chỉ. */
     private ApiCallback<JSONArray> listCallback(ApiCallback<List<FeatureItem>> callback,
                                                  boolean certificate) {
         return new ApiCallback<JSONArray>() {
@@ -120,6 +128,7 @@ public class ExamRepository {
         };
     }
 
+    /** Chặn sớm khi thiếu mã đề/lượt làm bài để không gọi API sai đường dẫn. */
     private boolean validId(String id, ApiCallback<?> callback) {
         if (id == null || id.trim().isEmpty()) {
             callback.onError(new ApiError(0, "Mã bài kiểm tra không hợp lệ", false));

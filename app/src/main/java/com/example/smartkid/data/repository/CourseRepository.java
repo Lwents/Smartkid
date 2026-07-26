@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.smartkid.common.util.AppConstants;
 import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.util.MediaUrl;
 import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.model.Course;
 import com.example.smartkid.data.model.CourseDetail;
@@ -21,6 +22,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Nhóm API khóa học và bài học, cho cả học sinh và phần xem trước của giáo viên.
+ * 
+ * Có thêm bộ đệm trong bộ nhớ (memoryCache): khi mất mạng vẫn hiển thị được danh sách
+ * khóa học đã tải lần trước thay vì bỏ trống màn hình.
+ */
 public class CourseRepository {
     private static final Object CACHE_LOCK = new Object();
     private static final List<Course> memoryCache = new ArrayList<>();
@@ -33,6 +40,7 @@ public class CourseRepository {
         apiClient = ApiClient.getInstance(appContext);
     }
 
+    /** Danh sách khóa học đang học; lỗi mạng thì lấy bộ đệm. */
     public void loadMyCourses(ApiCallback<CourseListResult> callback) {
         apiClient.get(AppConstants.MY_COURSES_ENDPOINT, true, new ApiCallback<JSONObject>() {
             @Override
@@ -65,6 +73,7 @@ public class CourseRepository {
         });
     }
 
+    /** Danh mục khóa học đã xuất bản, có tìm kiếm theo từ khóa. */
     public void loadCatalog(String keyword, ApiCallback<List<Course>> callback) {
         String endpoint = "student/catalog/?page=1&pageSize=100";
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -89,6 +98,7 @@ public class CourseRepository {
         });
     }
 
+    /** Ghi danh vào khóa học. */
     public void enroll(String courseId, ApiCallback<Boolean> callback) {
         if (courseId == null || courseId.trim().isEmpty()) {
             callback.onError(new ApiError(0, "Mã khóa học không hợp lệ", false));
@@ -101,6 +111,7 @@ public class CourseRepository {
                 });
     }
 
+    /** Rời khỏi khóa học. */
     public void unenroll(String courseId, ApiCallback<Boolean> callback) {
         if (courseId == null || courseId.trim().isEmpty()) {
             callback.onError(new ApiError(0, "Mã khóa học không hợp lệ", false));
@@ -113,6 +124,7 @@ public class CourseRepository {
                 });
     }
 
+    /** Chi tiết khóa học kèm danh sách chương và bài học. */
     public void loadCourseDetail(String courseId, ApiCallback<CourseDetail> callback) {
         if (courseId == null || courseId.trim().isEmpty()) {
             callback.onError(new ApiError(0, "Mã khóa học không hợp lệ", false));
@@ -167,6 +179,7 @@ public class CourseRepository {
         loadLessonFrom("content/lessons/" + lessonId.trim() + "/", callback);
     }
 
+    /** Nội dung bài học cho học sinh (qua player API, có kiểm tra ghi danh). */
     public void loadLesson(String courseId, String lessonId,
                            ApiCallback<LessonContent> callback) {
         if (courseId == null || courseId.trim().isEmpty()) {
@@ -180,6 +193,7 @@ public class CourseRepository {
         loadLessonFrom(endpoint, callback);
     }
 
+    /** Phần đọc JSON dùng chung cho cả hai đường trên; đổi link media về dạng tuyệt đối. */
     private void loadLessonFrom(String endpoint, ApiCallback<LessonContent> callback) {
         apiClient.get(endpoint, true, new ApiCallback<JSONObject>() {
             @Override
@@ -191,7 +205,8 @@ public class CourseRepository {
                             SafeJson.string(response, "", "id"),
                             SafeJson.string(response, "Bài học", "title"),
                             SafeJson.string(response, "text", "content_type"),
-                            SafeJson.string(response, "", "video_file", "video_url"),
+                            MediaUrl.absolute(
+                                    SafeJson.string(response, "", "video_file", "video_url")),
                             SafeJson.string(response, "", "document_file"),
                             text,
                             SafeJson.bool(progress, false, "completed")
@@ -210,6 +225,7 @@ public class CourseRepository {
         });
     }
 
+    /** Ghi nhận đã học xong bài (cập nhật tiến độ). */
     public void markLessonCompleted(String lessonId, ApiCallback<Boolean> callback) {
         if (lessonId == null || lessonId.trim().isEmpty()) {
             callback.onError(new ApiError(0, "Mã bài học không hợp lệ", false));
@@ -236,6 +252,7 @@ public class CourseRepository {
         }
     }
 
+    /** Danh sách bài luyện tập gắn trong bài học. */
     public void loadLessonExercises(String lessonId, ApiCallback<List<FeatureItem>> callback) {
         if (lessonId == null || lessonId.trim().isEmpty()) {
             callback.onError(new ApiError(0, "Mã bài học không hợp lệ", false));
@@ -296,6 +313,7 @@ public class CourseRepository {
                 });
     }
 
+    /** Kiểm tra bài học đã được mở chưa (phải học xong bài trước). */
     public void checkLessonUnlock(String lessonId, ApiCallback<JSONObject> callback) {
         if (lessonId == null || lessonId.trim().isEmpty()) {
             callback.onSuccess(new JSONObject());
@@ -305,6 +323,7 @@ public class CourseRepository {
                 true, callback);
     }
 
+    /** Gửi điểm bài luyện tập và cập nhật tiến độ bài học. */
     public void markExerciseCompleted(String lessonId, double score,
                                       ApiCallback<Boolean> callback) {
         if (lessonId == null || lessonId.trim().isEmpty()) {
@@ -335,10 +354,12 @@ public class CourseRepository {
         }
     }
 
+    /** Hủy các request đang chờ khi màn hình đóng, tránh rò bộ nhớ. */
     public void close() {
         // Không giữ tài nguyên cần đóng. Hàm được giữ để lifecycle gọi thống nhất.
     }
 
+    /** Mất mạng: trả bộ đệm nếu có, không có thì báo lỗi gốc. */
     private void loadCacheOrError(ApiCallback<CourseListResult> callback, ApiError originalError) {
         try {
             List<Course> cachedCourses = readMemoryCache();
@@ -356,6 +377,7 @@ public class CourseRepository {
         }
     }
 
+    /** Lưu danh sách vừa tải vào bộ đệm. */
     private void saveMemoryCache(List<Course> courses) {
         synchronized (CACHE_LOCK) {
             memoryCache.clear();
@@ -365,12 +387,14 @@ public class CourseRepository {
         }
     }
 
+    /** Đọc bản sao bộ đệm (trả bản copy để nơi khác không sửa được dữ liệu gốc). */
     private List<Course> readMemoryCache() {
         synchronized (CACHE_LOCK) {
             return new ArrayList<>(memoryCache);
         }
     }
 
+    /** Đổi mảng JSON thành danh sách Course. */
     private List<Course> parseCourses(JSONArray array) {
         List<Course> courses = new ArrayList<>();
         for (int index = 0; index < array.length(); index++) {
@@ -385,6 +409,7 @@ public class CourseRepository {
         return courses;
     }
 
+    /** Đổi một JSON thành Course, chấp nhận nhiều cách đặt tên trường của server. */
     private Course parseCourse(JSONObject object) {
         String description = SafeJson.string(object, "", "description", "introduction");
         return new Course(
@@ -401,6 +426,7 @@ public class CourseRepository {
         );
     }
 
+    /** Ghép hai mảng khi server chia khóa học thành nhóm base và supp. */
     private JSONArray mergeArrays(JSONArray first, JSONArray second) {
         JSONArray result = new JSONArray();
         for (int index = 0; index < first.length(); index++) {

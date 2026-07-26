@@ -17,6 +17,13 @@ import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.feature.shared.auth.LoginActivity;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+/**
+ * Lớp cha của mọi màn hình trong app.
+ *
+ * Gom phần việc lặp lại: áp giao diện chung (LiquidGlassUi), xử lý lỗi API tập trung
+ * (kể cả tự đưa về đăng nhập khi hết phiên), hiện hộp thoại lỗi và thông báo ngắn.
+ * Nhờ vậy màn hình con chỉ tập trung vào nghiệp vụ của nó.
+ */
 public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
@@ -68,6 +75,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         LiquidGlassUi.decorate(this);
     }
 
+    /** Xử lý lỗi API tập trung: hết phiên thì về đăng nhập, còn lại hiện hộp thoại. */
     public void handleApiError(ApiError error) {
         if (error == null) {
             showErrorDialog("Có lỗi không xác định xảy ra");
@@ -89,6 +97,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         showErrorDialog(error.getMessage());
     }
 
+    /** Hộp thoại lỗi có nút Đã hiểu. */
     public void showErrorDialog(String message) {
         if (isFinishing() || isDestroyed()) {
             return;
@@ -106,6 +115,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+    /** Thông báo ngắn dạng snackbar/toast. */
     public void showShortMessage(String message) {
         try {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();

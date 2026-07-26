@@ -34,14 +34,17 @@ public enum UserRole {
         }
     }
 
+    /** Có phải giáo viên (gồm cả instructor). */
     public boolean isTeacher() {
         return this == TEACHER;
     }
 
+    /** Có phải quản trị viên. */
     public boolean isAdmin() {
         return this == ADMIN;
     }
 
+    /** Có phải học sinh. */
     public boolean isStudent() {
         return this == STUDENT;
     }

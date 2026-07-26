@@ -1,5 +1,8 @@
 package com.example.smartkid.data.model;
 
+/**
+ * Nội dung đầy đủ của một bài học: video, tài liệu, văn bản và trạng thái hoàn thành.
+ */
 public class LessonContent {
     private final String id;
     private final String title;
@@ -28,10 +31,12 @@ public class LessonContent {
         return title;
     }
 
+    /** Loại nội dung: video, text, pdf, document, exercise. */
     public String getContentType() {
         return contentType;
     }
 
+    /** URL video đã được đổi sang dạng tuyệt đối để trình phát dùng được. */
     public String getVideoUrl() {
         return videoUrl;
     }

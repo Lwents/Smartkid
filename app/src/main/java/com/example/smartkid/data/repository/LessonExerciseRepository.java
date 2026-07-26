@@ -8,7 +8,7 @@ import com.example.smartkid.data.remote.ApiError;
 
 import org.json.JSONObject;
 
-/** API làm bài luyện tập gắn bài học theo luồng activities của SunEdu. */
+/** API làm bài luyện tập gắn bài học theo luồng activities của SmartKid. */
 public final class LessonExerciseRepository {
     private final ApiClient apiClient;
 
@@ -16,17 +16,20 @@ public final class LessonExerciseRepository {
         apiClient = ApiClient.getInstance(context.getApplicationContext());
     }
 
+    /** Chi tiết bài luyện tập và danh sách câu hỏi. */
     public void loadDetail(String exerciseId, ApiCallback<JSONObject> callback) {
         if (!valid(exerciseId, callback)) return;
         apiClient.get("activities/exercises/" + exerciseId.trim() + "/", true, callback);
     }
 
+    /** Mở lượt làm bài luyện tập. */
     public void start(String exerciseId, ApiCallback<JSONObject> callback) {
         if (!valid(exerciseId, callback)) return;
         apiClient.post("activities/exercises/" + exerciseId.trim() + "/start/",
                 new JSONObject(), true, callback);
     }
 
+    /** Gửi đáp án của một câu. */
     public void submitAnswer(String attemptId, String questionId, JSONObject answer,
                              ApiCallback<JSONObject> callback) {
         if (!valid(attemptId, callback) || questionId == null || questionId.trim().isEmpty()) {
@@ -46,12 +49,14 @@ public final class LessonExerciseRepository {
         }
     }
 
+    /** Chốt lượt làm bài và nhận điểm tổng. */
     public void finalizeAttempt(String attemptId, ApiCallback<JSONObject> callback) {
         if (!valid(attemptId, callback)) return;
         apiClient.post("activities/attempts/" + attemptId.trim() + "/finalize/",
                 new JSONObject(), true, callback);
     }
 
+    /** Kiểm tra mã hợp lệ trước khi gọi API. */
     private boolean valid(String id, ApiCallback<?> callback) {
         if (id == null || id.trim().isEmpty()) {
             callback.onError(new ApiError(0, "Mã bài luyện tập không hợp lệ", false));

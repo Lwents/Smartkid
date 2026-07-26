@@ -32,12 +32,15 @@ public final class FeatureSpec {
     public String getActionKind() { return actionKind; }
     public String getUnavailableReason() { return unavailableReason; }
     public UserRole owner() { return owner; }
+    /** Chức năng có dùng được không; nếu không thì unavailableReason là lý do hiển thị cho người dùng. */
     public boolean isAvailable() { return unavailableReason.isEmpty(); }
 
+    /** Vai trò này có quyền mở chức năng không. */
     public boolean isAllowedForRole(UserRole role) {
         return role != null && role == owner;
     }
 
+    /** Phiên bản nhận chuỗi vai trò thô từ server. */
     public boolean isAllowedForRole(String role) {
         return isAllowedForRole(UserRole.fromString(role));
     }

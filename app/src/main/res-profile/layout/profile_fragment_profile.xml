@@ -135,7 +135,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="5"
+                    android:id="@+id/textProfileStatCourses"
+                    android:text="0"
                     android:textColor="#0F172A"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -175,7 +176,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="3"
+                    android:id="@+id/textProfileStatCompleted"
+                    android:text="0"
                     android:textColor="#0F172A"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -215,7 +217,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="92%"
+                    android:id="@+id/textProfileStatScore"
+                    android:text="0%"
                     android:textColor="#0F172A"
                     android:textSize="20sp"
                     android:textStyle="bold" />

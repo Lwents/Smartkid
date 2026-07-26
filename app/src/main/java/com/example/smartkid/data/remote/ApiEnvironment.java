@@ -86,12 +86,14 @@ public final class ApiEnvironment {
         }
     }
 
+    /** Thêm địa chỉ nếu chưa có trong danh sách. */
     private static void addUnique(List<String> target, String url) {
         if (url == null || url.trim().isEmpty()) return;
         String value = url.trim();
         if (!target.contains(value)) target.add(value);
     }
 
+    /** Thử kết nối nhanh xem địa chỉ có sống không. */
     private static boolean canReach(String url) {
         try {
             Uri uri = Uri.parse(url);

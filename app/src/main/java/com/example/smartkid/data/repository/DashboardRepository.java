@@ -14,6 +14,9 @@ import com.example.smartkid.data.remote.ApiError;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+/**
+ * API trang chủ học sinh: khóa học nổi bật, khóa đang học dở, đề thi sắp tới.
+ */
 public class DashboardRepository {
     private final Context appContext;
     private final ApiClient apiClient;
@@ -23,6 +26,7 @@ public class DashboardRepository {
         apiClient = ApiClient.getInstance(appContext);
     }
 
+    /** Tải toàn bộ số liệu trang chủ trong một lần gọi. */
     public void loadDashboard(ApiCallback<DashboardSummary> callback) {
         apiClient.get(AppConstants.DASHBOARD_ENDPOINT, true, new ApiCallback<JSONObject>() {
             @Override
@@ -48,6 +52,7 @@ public class DashboardRepository {
         });
     }
 
+    /** Đổi JSON khóa học trong dashboard thành đối tượng Course. */
     private Course parseCourse(JSONObject object) {
         return new Course(
                 SafeJson.string(object, "", "id"),

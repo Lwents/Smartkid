@@ -7,6 +7,9 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 
+/**
+ * Theo dõi trạng thái mạng để màn hình biết lúc nào mất/có kết nối.
+ */
 public class NetworkStateReceiver extends BroadcastReceiver {
     public interface Listener {
         void onNetworkChanged(boolean connected);
@@ -30,6 +33,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
         }
     }
 
+    /** Kiểm tra nhanh máy có đang kết nối mạng không. */
     public static boolean isConnected(Context context) {
         if (context == null) {
             return false;

@@ -14,6 +14,12 @@ import com.example.smartkid.data.remote.ApiError;
 
 import org.json.JSONObject;
 
+/**
+ * Nhóm API xác thực: đăng nhập, đăng ký, quên/đổi mật khẩu, đăng xuất, hồ sơ.
+ * 
+ * Đây là nơi duy nhất biết đường dẫn của các API tài khoản; màn hình chỉ gọi hàm ở
+ * đây chứ không tự ghép URL.
+ */
 public class AuthRepository {
     private final Context appContext;
     private final ApiClient apiClient;
@@ -28,6 +34,7 @@ public class AuthRepository {
         sessionManager = new SessionManager(appContext);
     }
 
+    /** Đăng nhập bằng email/tên đăng nhập; thành công thì lưu token và người dùng vào phiên. */
     public void login(String identifier, String password, String otp,
                       ApiCallback<AuthResult> callback) {
         try {
@@ -88,6 +95,7 @@ public class AuthRepository {
         }
     }
 
+    /** Tải hồ sơ và cập nhật lại phiên (dùng khi mở màn Hồ sơ). */
     public void loadProfile(ApiCallback<User> callback) {
         apiClient.get(AppConstants.PROFILE_ENDPOINT, true, new ApiCallback<JSONObject>() {
             @Override
@@ -109,15 +117,18 @@ public class AuthRepository {
         });
     }
 
+    /** Tải hồ sơ dạng JSON thô để form chỉnh sửa đọc đủ trường. */
     public void loadAccountProfile(ApiCallback<JSONObject> callback) {
         apiClient.get("account/profile/", true, callback);
     }
 
+    /** Lưu thay đổi hồ sơ lên server. */
     public void updateAccountProfile(JSONObject values, ApiCallback<JSONObject> callback) {
         apiClient.patch("account/profile/", values == null ? new JSONObject() : values,
                 true, callback);
     }
 
+    /** Tạo tài khoản mới. */
     public void register(String username, String email, String phone, String password,
                          ApiCallback<String> callback) {
         try {
@@ -140,6 +151,7 @@ public class AuthRepository {
         }
     }
 
+    /** Gửi yêu cầu đặt lại mật khẩu qua email. */
     public void requestPasswordReset(String email, ApiCallback<String> callback) {
         try {
             JSONObject body = new JSONObject();
@@ -152,6 +164,7 @@ public class AuthRepository {
         }
     }
 
+    /** Đặt mật khẩu mới bằng mã xác nhận nhận qua email. */
     public void resetPassword(String email, String token, String newPassword,
                               ApiCallback<String> callback) {
         try {
@@ -167,6 +180,7 @@ public class AuthRepository {
         }
     }
 
+    /** Rút lấy câu thông báo từ phản hồi server, không có thì dùng câu mặc định. */
     private ApiCallback<JSONObject> messageCallback(String fallback, ApiCallback<String> callback) {
         return new ApiCallback<JSONObject>() {
             @Override
@@ -181,6 +195,7 @@ public class AuthRepository {
         };
     }
 
+    /** Đăng xuất trên server rồi xóa phiên trong máy. */
     public void logout(ApiCallback<Boolean> callback) {
         String refresh = sessionManager.getRefreshToken();
         try {
@@ -208,10 +223,12 @@ public class AuthRepository {
         }
     }
 
+    /** Cho màn hình đọc phiên hiện tại (tên, vai trò) mà không cần tự tạo. */
     public SessionManager getSessionManager() {
         return sessionManager;
     }
 
+    /** Đổi JSON người dùng thành đối tượng User, chịu được việc server đổi tên trường. */
     private User parseUser(JSONObject object) {
         JSONObject safeObject = object == null ? new JSONObject() : object;
         String username = SafeJson.string(safeObject, "Học viên", "username", "name");

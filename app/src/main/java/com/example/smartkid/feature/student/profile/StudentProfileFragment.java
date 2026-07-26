@@ -47,6 +47,9 @@ public class StudentProfileFragment extends Fragment {
     private SwipeRefreshLayout refreshLayout;
     private View logoutButton;
     private AuthRepository repository;
+    private TextView statCoursesText;
+    private TextView statCompletedText;
+    private TextView statScoreText;
 
     @Nullable
     @Override
@@ -153,6 +156,9 @@ public class StudentProfileFragment extends Fragment {
         roleText = view.findViewById(R.id.textProfileRole);
         serverText = view.findViewById(R.id.textProfileServer);
         statusText = view.findViewById(R.id.textProfileStatus);
+        statCoursesText = view.findViewById(R.id.textProfileStatCourses);
+        statCompletedText = view.findViewById(R.id.textProfileStatCompleted);
+        statScoreText = view.findViewById(R.id.textProfileStatScore);
         progressBar = view.findViewById(R.id.progressProfile);
         refreshLayout = view.findViewById(R.id.refreshProfile);
         logoutButton = view.findViewById(R.id.buttonLogout);
@@ -163,6 +169,46 @@ public class StudentProfileFragment extends Fragment {
                 || logoutButton == null) {
             throw new IllegalStateException("Giao diện hồ sơ thiếu thành phần bắt buộc");
         }
+    }
+
+    /** 3 ô thống kê lấy số thật: khóa học đã tham gia, khóa đã hoàn thành, điểm trung bình. */
+    private void loadStats() {
+        if (statCoursesText == null) return;
+        new com.example.smartkid.data.repository.CourseRepository(requireContext()).loadMyCourses(
+                new ApiCallback<com.example.smartkid.data.model.CourseListResult>() {
+                    @Override
+                    public void onSuccess(com.example.smartkid.data.model.CourseListResult data) {
+                        if (!isAdded() || statCoursesText == null) return;
+                        java.util.List<com.example.smartkid.data.model.Course> courses = data.getCourses();
+                        int finished = 0;
+                        for (com.example.smartkid.data.model.Course course : courses) {
+                            if (course.getProgress() >= 100) finished++;
+                        }
+                        statCoursesText.setText(String.valueOf(courses.size()));
+                        statCompletedText.setText(String.valueOf(finished));
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        // Giữ nguyên số cũ nếu không tải được.
+                    }
+                });
+        new com.example.smartkid.data.repository.StudentFeatureRepository(requireContext())
+                .loadLearningAnalysis(new ApiCallback<org.json.JSONObject>() {
+                    @Override
+                    public void onSuccess(org.json.JSONObject data) {
+                        if (!isAdded() || statScoreText == null) return;
+                        org.json.JSONObject analysis = data.optJSONObject("analysis");
+                        double score = com.example.smartkid.common.util.SafeJson
+                                .decimal(analysis == null ? data : analysis, 0, "avg_score");
+                        statScoreText.setText(Math.round(score) + "%");
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        // Giữ nguyên số cũ nếu không tải được.
+                    }
+                });
     }
 
     private void safelyLoadProfile() {
@@ -176,6 +222,7 @@ public class StudentProfileFragment extends Fragment {
                     }
                     setLoading(false);
                     bindUser(user);
+                    loadStats();
                     showStatus(getString(R.string.profile_updated));
                 }
 
