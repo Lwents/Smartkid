@@ -236,16 +236,17 @@
                                 android:background="@android:color/transparent"
                                 android:contentDescription="@null"
                                 android:scaleType="fitCenter"
-                                android:src="@drawable/home_icon_glass_ai_tutor" />
+                                android:src="@drawable/home_ic_flame_tutor" />
 
                             <TextView
+                                android:id="@+id/textHomeStreakDays"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/space_xs"
                                 android:background="@null"
                                 android:gravity="center"
                                 android:maxLines="2"
-                                android:text="@string/ai_tutor"
+                                android:text="@string/home_streak_loading"
                                 android:textColor="@color/smartkid_text"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />

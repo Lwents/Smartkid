@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Màn học bài: khung video bo góc + thanh điều khiển, thẻ giới thiệu bài học,
+  4 thẻ thao tác (hỏi đáp, Gia Sư AI, bài trước, bài tiếp) và nút hoàn thành.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -13,6 +17,7 @@
         app:navigationIcon="@drawable/common_ic_arrow_back"
         app:navigationIconTint="@color/smartkid_text"
         app:title="@string/lesson_content"
+        app:titleTextAppearance="@style/TextAppearance.AppCompat.Title"
         app:titleTextColor="@color/smartkid_text" />
 
     <ProgressBar
@@ -33,21 +38,134 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/screen_padding_compact">
+            android:padding="14dp">
 
-            <VideoView
-                android:id="@+id/videoLesson"
+            <!-- ===== KHUNG VIDEO (TextureView để không bị khung đen trên máy ảo) ===== -->
+            <FrameLayout
+                android:id="@+id/containerLessonVideo"
                 android:layout_width="match_parent"
-                android:layout_height="210dp"
-                android:background="@color/black"
-                android:contentDescription="@string/lesson_content"
-                android:visibility="gone" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/course_bg_video_frame"
+                android:clipToOutline="true"
+                android:visibility="gone">
+
+                <TextureView
+                    android:id="@+id/videoLesson"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:contentDescription="@string/lesson_content" />
+
+                <!-- Nút phát lớn giữa khung, hiện khi video đang dừng -->
+                <ImageView
+                    android:id="@+id/buttonLessonVideoPlay"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_gravity="center"
+                    android:alpha="0.85"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/video_play_pause"
+                    android:padding="14dp"
+                    android:src="@drawable/course_ic_play"
+                    app:tint="@android:color/white" />
+
+                <!-- Thanh điều khiển: tua ở trên, các nút ở dưới -->
+                <LinearLayout
+                    android:id="@+id/barLessonVideoControls"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:background="@drawable/course_bg_video_controls"
+                    android:orientation="vertical"
+                    android:paddingStart="8dp"
+                    android:paddingTop="2dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp">
+
+                    <SeekBar
+                        android:id="@+id/seekLessonVideo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="1000"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/buttonLessonVideoToggle"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/video_play_pause"
+                            android:padding="4dp"
+                            android:src="@android:drawable/ic_media_pause"
+                            app:tint="@android:color/white" />
+
+                        <ImageView
+                            android:id="@+id/buttonLessonVideoRewind"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/video_rewind"
+                            android:padding="4dp"
+                            android:src="@android:drawable/ic_media_previous"
+                            app:tint="@android:color/white" />
+
+                        <ImageView
+                            android:id="@+id/buttonLessonVideoForward"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/video_forward"
+                            android:padding="4dp"
+                            android:src="@android:drawable/ic_media_next"
+                            app:tint="@android:color/white" />
+
+                        <TextView
+                            android:id="@+id/textLessonVideoTime"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:layout_weight="1"
+                            android:text="0:00 / 0:00"
+                            android:textColor="@android:color/white"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/buttonLessonVideoSpeed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:background="?attr/selectableItemBackground"
+                            android:gravity="center"
+                            android:minWidth="42dp"
+                            android:text="@string/video_speed_normal"
+                            android:textColor="@android:color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/buttonLessonVideoFullscreen"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="@string/video_fullscreen"
+                            android:padding="4dp"
+                            android:src="@drawable/course_ic_fullscreen"
+                            app:tint="@android:color/white" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/containerLessonWebVideo"
                 android:layout_width="match_parent"
-                android:layout_height="210dp"
-                android:background="@color/black"
+                android:layout_height="220dp"
+                android:background="@drawable/course_bg_video_frame"
+                android:clipToOutline="true"
                 android:visibility="gone">
 
                 <WebView
@@ -67,147 +185,233 @@
                 app:autoPlay="false"
                 app:enableAutomaticInitialization="false" />
 
-
+            <!-- ===== HAI NHÃN: loại nội dung và trạng thái hoàn thành ===== -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/textLessonContentType"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/course_bg_hero_badge"
-                    android:paddingStart="12dp"
-                    android:paddingTop="5dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="10dp"
+                    android:paddingTop="7dp"
                     android:paddingEnd="12dp"
-                    android:paddingBottom="5dp"
-                    android:text="@string/lesson_content"
-                    android:textColor="@color/smartkid_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:paddingBottom="7dp">
 
-                <TextView
-                    android:id="@+id/textLessonContentStatus"
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/course_ic_video_badge"
+                        app:tint="@color/role_primary" />
+
+                    <TextView
+                        android:id="@+id/textLessonContentType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="@color/role_primary"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <View
                     android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end"
-                    android:text="@string/lesson_not_completed"
-                    android:textColor="@color/smartkid_success"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:background="@drawable/course_bg_status_done"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="10dp"
+                    android:paddingTop="7dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="7dp">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/role_ic_check_circle"
+                        app:tint="@color/smartkid_success" />
+
+                    <TextView
+                        android:id="@+id/textLessonContentStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="@color/smartkid_success"
+                        android:textSize="12.5sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
 
-            <FrameLayout
+            <!-- ===== THẺ GIỚI THIỆU BÀI HỌC ===== -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:background="@drawable/common_bg_glass_card"
-                android:clipToOutline="true"
-                android:elevation="@dimen/glass_elevation">
-
-                <TextView
-                    android:id="@+id/textLessonContent"
-                    android:background="@null"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="130dp"
-                    android:padding="18dp"
-                    android:text="@string/no_text_content"
-                    android:textColor="@color/smartkid_text"
-                    android:textIsSelectable="true"
-                    android:textSize="16sp"
-                    android:lineSpacingExtra="5dp" />
-            </FrameLayout>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardLessonExercises"
-                style="@style/Widget.Smartkid.AdminGlassCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:visibility="gone"
-                app:cardCornerRadius="20dp">
+                android:layout_marginTop="12dp"
+                android:background="@drawable/course_bg_card"
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="14dp">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/profile_ic_book"
+                        app:tint="@color/role_primary" />
 
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/lesson_exercises_title"
-                        android:textColor="@color/admin_text_primary"
-                        android:textSize="15sp"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/lesson_intro_title"
+                        android:textColor="@color/smartkid_text"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:text="@string/lesson_exercises_subtitle"
-                        android:textColor="@color/admin_text_secondary"
-                        android:textSize="11sp" />
-
-                    <LinearLayout
-                        android:id="@+id/containerLessonExercises"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:orientation="vertical" />
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
 
+                <TextView
+                    android:id="@+id/textLessonIntro"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/smartkid_text"
+                    android:textSize="16sp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/textLessonContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:lineSpacingExtra="4dp"
+                    android:textColor="@color/smartkid_text_secondary"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <!-- ===== 4 THẺ THAO TÁC (2 hàng x 2 cột) ===== -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
+                android:layout_marginTop="12dp"
                 android:orientation="horizontal">
 
-                <com.google.android.material.button.MaterialButton
+                <include
                     android:id="@+id/buttonLessonDiscussion"
-                    style="@style/Widget.Smartkid.GlassButton.Outlined"
+                    layout="@layout/course_item_lesson_action"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
-                    android:layout_weight="1"
-                    android:text="@string/lesson_discussion"
-                    app:icon="@drawable/role_ic_question"
-                    app:iconGravity="textStart" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
 
-                <com.google.android.material.button.MaterialButton
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="1dp" />
+
+                <include
                     android:id="@+id/buttonLessonAiTutor"
-                    style="@style/Widget.Smartkid.GlassButton.Outlined"
+                    layout="@layout/course_item_lesson_action"
                     android:layout_width="0dp"
-                    android:layout_height="52dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:text="@string/ai_tutor"
-                    app:icon="@drawable/ai_ic_tutor"
-                    app:iconGravity="textStart" />
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonOpenExternal"
-                style="@style/Widget.Smartkid.GlassButton.Outlined"
+            <LinearLayout
+                android:id="@+id/rowLessonNavigation"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="@string/open_content"
-                android:visibility="gone" />
+                android:orientation="horizontal">
 
+                <include
+                    android:id="@+id/buttonLessonPrev"
+                    layout="@layout/course_item_lesson_action"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <View
+                    android:id="@+id/spacerLessonNavigation"
+                    android:layout_width="10dp"
+                    android:layout_height="1dp" />
+
+                <include
+                    android:id="@+id/buttonLessonNext"
+                    layout="@layout/course_item_lesson_action"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <!-- ===== NÚT HOÀN THÀNH ===== -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonCompleteLesson"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="12dp"
-                android:enabled="false"
+                android:layout_height="58dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="6dp"
                 android:text="@string/mark_completed"
-                app:cornerRadius="@dimen/glass_radius_large" />
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/role_primary"
+                app:cornerRadius="29dp"
+                app:icon="@drawable/course_ic_trophy"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:iconSize="22dp"
+                app:iconTint="@color/white" />
+
+            <LinearLayout
+                android:id="@+id/cardLessonExercises"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/course_bg_card"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lesson_exercises_title"
+                    android:textColor="@color/smartkid_text"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/lesson_exercises_subtitle"
+                    android:textColor="@color/smartkid_text_secondary"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:id="@+id/containerLessonExercises"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

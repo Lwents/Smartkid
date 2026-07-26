@@ -6,11 +6,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.VideoView;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -52,13 +51,41 @@ public class LessonPlayerActivity extends BaseActivity {
     private TextView typeText;
     private TextView contentText;
     private TextView statusText;
-    private VideoView videoView;
+    private android.view.TextureView videoView;
+    private View videoContainer;
+    private ImageView videoPlayButton;
+    private ImageView videoToggleButton;
+    private android.widget.SeekBar videoSeekBar;
+    private TextView videoTimeText;
+    private View videoControls;
+    private final android.os.Handler videoProgressHandler =
+            new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable videoProgressTick = new Runnable() {
+        @Override
+        public void run() {
+            updateVideoProgress();
+            videoProgressHandler.postDelayed(this, 500);
+        }
+    };
+    private boolean userSeeking;
+    private TextView videoSpeedButton;
+    private float playbackSpeed = 1.0f;
+    private static final float[] SPEED_OPTIONS = {0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f};
+    private android.media.MediaPlayer mediaPlayer;
+    private String pendingVideoUrl;
     private WebView webVideo;
     private View webVideoContainer;
     private YouTubePlayerView youtubePlayerView;
     private View exercisesCard;
     private LinearLayout exercisesContainer;
-    private Button openExternalButton;
+    private View lessonPrevCard;
+    private View lessonNextCard;
+    private View lessonNavigationRow;
+    private View lessonNavigationSpacer;
+    private TextView introText;
+    // Danh sách bài học của khóa, dùng để biết bài trước / bài sau là bài nào.
+    private final java.util.List<com.example.smartkid.data.model.Lesson> courseLessons =
+            new java.util.ArrayList<>();
     private Button completeButton;
     private CourseRepository repository;
     private LessonContent lessonContent;
@@ -88,7 +115,10 @@ public class LessonPlayerActivity extends BaseActivity {
             toolbar.setNavigationOnClickListener(view -> finish());
             String title = getIntent().getStringExtra(AppConstants.EXTRA_LESSON_TITLE);
             toolbar.setTitle(title == null ? getString(R.string.lesson_content) : title);
-            openExternalButton.setOnClickListener(view -> openExternalContent());
+            lessonPrevCard.setOnClickListener(view -> openSiblingLesson(-1));
+            lessonNextCard.setOnClickListener(view -> openSiblingLesson(1));
+            findViewById(R.id.buttonLessonVideoFullscreen)
+                    .setOnClickListener(view -> toggleFullscreen());
             completeButton.setOnClickListener(view -> markCompleted(false));
             findViewById(R.id.buttonLessonAiTutor).setOnClickListener(view -> openAiTutor());
             findViewById(R.id.buttonLessonDiscussion).setOnClickListener(view -> openDiscussion());
@@ -105,6 +135,15 @@ public class LessonPlayerActivity extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Rời màn rồi quay lại: surface cũ đã bị hủy nên phải dựng lại trình phát.
+        if (mediaPlayer == null && pendingVideoUrl != null) {
+            prepareVideo(pendingVideoUrl);
+        }
+    }
+
+    @Override
     protected void onRestart() {
         super.onRestart();
         if (!previewMode && repository != null && lessonId != null && !lessonId.trim().isEmpty()) {
@@ -115,9 +154,7 @@ public class LessonPlayerActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         try {
-            if (videoView != null) {
-                videoView.stopPlayback();
-            }
+            releasePlayer();
             if (webVideo != null) {
                 webVideo.loadUrl("about:blank");
                 webVideo.stopLoading();
@@ -142,13 +179,34 @@ public class LessonPlayerActivity extends BaseActivity {
         contentText = findViewById(R.id.textLessonContent);
         statusText = findViewById(R.id.textLessonContentStatus);
         videoView = findViewById(R.id.videoLesson);
+        videoContainer = findViewById(R.id.containerLessonVideo);
+        videoPlayButton = findViewById(R.id.buttonLessonVideoPlay);
+        videoToggleButton = findViewById(R.id.buttonLessonVideoToggle);
+        videoSeekBar = findViewById(R.id.seekLessonVideo);
+        videoTimeText = findViewById(R.id.textLessonVideoTime);
+        videoControls = findViewById(R.id.barLessonVideoControls);
+        videoSpeedButton = findViewById(R.id.buttonLessonVideoSpeed);
+        bindVideoControls();
         webVideo = findViewById(R.id.webLessonVideo);
         webVideoContainer = findViewById(R.id.containerLessonWebVideo);
         youtubePlayerView = findViewById(R.id.youtubeLessonPlayer);
         getLifecycle().addObserver(youtubePlayerView);
         exercisesCard = findViewById(R.id.cardLessonExercises);
         exercisesContainer = findViewById(R.id.containerLessonExercises);
-        openExternalButton = findViewById(R.id.buttonOpenExternal);
+        lessonPrevCard = findViewById(R.id.buttonLessonPrev);
+        lessonNextCard = findViewById(R.id.buttonLessonNext);
+        lessonNavigationRow = findViewById(R.id.rowLessonNavigation);
+        lessonNavigationSpacer = findViewById(R.id.spacerLessonNavigation);
+        introText = findViewById(R.id.textLessonIntro);
+        // 4 thẻ thao tác dùng cùng một layout -> nạp icon và chữ cho từng thẻ
+        bindActionCard(findViewById(R.id.buttonLessonDiscussion), R.drawable.role_ic_question,
+                R.string.lesson_discussion, R.string.lesson_discussion_hint);
+        bindActionCard(findViewById(R.id.buttonLessonAiTutor), R.drawable.ai_ic_tutor,
+                R.string.ai_tutor, R.string.ai_tutor_hint);
+        bindActionCard(lessonPrevCard, R.drawable.course_ic_arrow_left,
+                R.string.lesson_prev, R.string.lesson_prev_hint);
+        bindActionCard(lessonNextCard, R.drawable.course_ic_arrow_right,
+                R.string.lesson_next, R.string.lesson_next_hint);
         completeButton = findViewById(R.id.buttonCompleteLesson);
     }
 
@@ -228,9 +286,14 @@ public class LessonPlayerActivity extends BaseActivity {
     private void bindContent(LessonContent content) {
         toolbar.setTitle(content.getTitle());
         typeText.setText(getString(R.string.content_type_format,
-                content.getContentType().isEmpty() ? "text" : content.getContentType()));
-        contentText.setText(content.getTextContent().isEmpty()
-                ? getString(R.string.no_text_content) : content.getTextContent());
+                contentTypeLabel(content.getContentType())));
+        // Thẻ giới thiệu: dòng đầu là phần giới thiệu bài, dòng dưới là nội dung văn bản.
+        String intro = content.getTextContent();
+        if (introText != null) {
+            introText.setText(content.getTitle());
+            introText.setVisibility(content.getTitle().isEmpty() ? View.GONE : View.VISIBLE);
+        }
+        contentText.setText(intro.isEmpty() ? getString(R.string.no_text_content) : intro);
         if (previewMode) {
             statusText.setText("Chế độ xem trước của giáo viên");
         } else {
@@ -239,9 +302,7 @@ public class LessonPlayerActivity extends BaseActivity {
             completeButton.setEnabled(!content.isCompleted());
         }
 
-        String externalUrl = preferredExternalUrl(content);
-        openExternalButton.setVisibility(externalUrl.isEmpty() ? View.GONE : View.VISIBLE);
-        videoView.setVisibility(View.GONE);
+        videoContainer.setVisibility(View.GONE);
         webVideo.setVisibility(View.GONE);
         webVideoContainer.setVisibility(View.GONE);
         youtubePlayerView.setVisibility(View.GONE);
@@ -287,14 +348,12 @@ public class LessonPlayerActivity extends BaseActivity {
                         return;
                     }
                     statusText.setText(R.string.video_embed_blocked);
-                    openExternalButton.setVisibility(View.VISIBLE);
                 }
             }, options);
         } catch (Exception exception) {
             AppLogger.error(this, "LessonPlayerActivity",
                     "Không thể mở trình phát YouTube", exception);
             youtubePlayerView.setVisibility(View.GONE);
-            openExternalButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -319,38 +378,430 @@ public class LessonPlayerActivity extends BaseActivity {
                     "Không thể nhúng video web", exception);
             webVideoContainer.setVisibility(View.GONE);
             webVideo.setVisibility(View.GONE);
-            openExternalButton.setVisibility(View.VISIBLE);
         }
     }
 
     private void prepareVideo(String videoUrl) {
         try {
-            Uri uri = Uri.parse(videoUrl);
-            MediaController controller = new MediaController(this);
-            controller.setAnchorView(videoView);
-            videoView.setMediaController(controller);
-            Map<String, String> headers = new HashMap<>();
-            String accessToken = new SessionManager(this).getAccessToken();
-            if (!accessToken.isEmpty()) {
-                headers.put("Authorization", "Bearer " + accessToken);
+            releasePlayer();
+            pendingVideoUrl = videoUrl;
+            statusText.setText(R.string.video_loading);
+            applyVideoFrameSize();
+            videoContainer.setVisibility(View.VISIBLE);
+            videoPlayButton.setVisibility(View.GONE);
+            if (videoControls != null) videoControls.setVisibility(View.GONE);
+            // Đăng ký lắng nghe TRƯỚC rồi mới kiểm tra, tránh trường hợp surface
+            // sẵn sàng đúng lúc giữa hai lệnh khiến không ai khởi động trình phát.
+            videoView.setSurfaceTextureListener(new android.view.TextureView.SurfaceTextureListener() {
+                @Override
+                public void onSurfaceTextureAvailable(android.graphics.SurfaceTexture texture,
+                                                      int width, int height) {
+                    startPlayer(videoUrl, new android.view.Surface(texture));
+                }
+
+                @Override
+                public void onSurfaceTextureSizeChanged(android.graphics.SurfaceTexture texture,
+                                                        int width, int height) { }
+
+                @Override
+                public boolean onSurfaceTextureDestroyed(android.graphics.SurfaceTexture texture) {
+                    releasePlayer();
+                    return true;
+                }
+
+                @Override
+                public void onSurfaceTextureUpdated(android.graphics.SurfaceTexture texture) { }
+            });
+            if (videoView.isAvailable() && videoView.getSurfaceTexture() != null) {
+                startPlayer(videoUrl, new android.view.Surface(videoView.getSurfaceTexture()));
+                return;
             }
-            videoView.setVideoURI(uri, headers);
-            videoView.setVisibility(View.VISIBLE);
-            videoView.setOnPreparedListener(player -> {
-                player.setOnVideoSizeChangedListener((mediaPlayer, width, height) ->
-                        controller.setAnchorView(videoView));
-                videoView.start();
-            });
-            videoView.setOnCompletionListener(player -> markCompleted(true));
-            videoView.setOnErrorListener((player, what, extra) -> {
-                statusText.setText(getString(R.string.video_error_code, what, extra));
-                openExternalButton.setVisibility(View.VISIBLE);
-                return true;
-            });
+            // Lưới an toàn: có máy không gọi lại onSurfaceTextureAvailable khi quay lại
+            // màn hình, khiến video kẹt mãi ở "Đang tải video…". Sau 1,2 giây mà vẫn
+            // chưa phát thì tự khởi động lại.
+            videoView.postDelayed(this::retryPendingVideo, 1200);
         } catch (Exception exception) {
             AppLogger.error(this, "LessonPlayerActivity", "Không thể phát video", exception);
             statusText.setText(R.string.cannot_play_video);
-            openExternalButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /** Khởi động lại video nếu surface đã sẵn sàng nhưng trình phát chưa chạy. */
+    private void retryPendingVideo() {
+        if (isFinishing() || isDestroyed()) return;
+        if (mediaPlayer != null || pendingVideoUrl == null) return;
+        if (videoView == null || !videoView.isAvailable()
+                || videoView.getSurfaceTexture() == null) {
+            videoView.postDelayed(this::retryPendingVideo, 1200);
+            return;
+        }
+        startPlayer(pendingVideoUrl, new android.view.Surface(videoView.getSurfaceTexture()));
+    }
+
+    /** Phát video bằng MediaPlayer gắn vào TextureView đã sẵn sàng. */
+    private void startPlayer(String videoUrl, android.view.Surface surface) {
+        try {
+            android.media.MediaPlayer player = new android.media.MediaPlayer();
+            mediaPlayer = player;
+            player.setSurface(surface);
+            player.setAudioAttributes(new android.media.AudioAttributes.Builder()
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MOVIE)
+                    .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                    .build());
+            // Chỉ gửi token cho backend của mình; CDN ngoài không cần header lạ.
+            Map<String, String> headers = new HashMap<>();
+            if (isOwnBackend(videoUrl)) {
+                String accessToken = new SessionManager(this).getAccessToken();
+                if (!accessToken.isEmpty()) {
+                    headers.put("Authorization", "Bearer " + accessToken);
+                }
+            }
+            player.setDataSource(this, Uri.parse(videoUrl), headers);
+            player.setOnVideoSizeChangedListener((mediaPlayer, width, height) ->
+                    fitVideoToFrame(width, height));
+            player.setOnPreparedListener(prepared -> {
+                if (isFinishing() || isDestroyed()) return;
+                fitVideoToFrame(prepared.getVideoWidth(), prepared.getVideoHeight());
+                statusText.setText(previewMode ? "Chế độ xem trước của giáo viên"
+                        : (lessonContent != null && lessonContent.isCompleted()
+                        ? getString(R.string.lesson_completed)
+                        : getString(R.string.lesson_not_completed)));
+                prepared.start();
+                if (playbackSpeed != 1.0f) applySpeed(playbackSpeed);
+                videoPlayButton.setVisibility(View.GONE);
+                if (videoControls != null) videoControls.setVisibility(View.VISIBLE);
+                videoProgressHandler.removeCallbacks(videoProgressTick);
+                videoProgressHandler.post(videoProgressTick);
+            });
+            player.setOnCompletionListener(done -> {
+                videoPlayButton.setVisibility(View.VISIBLE);
+                markCompleted(true);
+            });
+            player.setOnErrorListener((failed, what, extra) -> {
+                statusText.setText(getString(R.string.video_error_code, what, extra));
+                    return true;
+            });
+            player.prepareAsync();
+            // Bấm vào khung video để tạm dừng / phát tiếp.
+            videoContainer.setOnClickListener(view -> togglePlayback());
+            videoPlayButton.setOnClickListener(view -> togglePlayback());
+        } catch (Exception exception) {
+            AppLogger.error(this, "LessonPlayerActivity", "Không thể mở video", exception);
+            statusText.setText(R.string.cannot_play_video);
+        }
+    }
+
+    /** Thanh điều khiển: phát/dừng, lùi/tiến 10 giây, kéo tua. */
+    private void bindVideoControls() {
+        if (videoToggleButton == null || videoSeekBar == null) return;
+        videoToggleButton.setOnClickListener(view -> togglePlayback());
+        if (videoSpeedButton != null) {
+            videoSpeedButton.setOnClickListener(view -> showSpeedMenu());
+        }
+        findViewById(R.id.buttonLessonVideoRewind).setOnClickListener(view -> seekBy(-10000));
+        findViewById(R.id.buttonLessonVideoForward).setOnClickListener(view -> seekBy(10000));
+        videoSeekBar.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar bar, int value, boolean fromUser) {
+                if (fromUser && mediaPlayer != null && videoDurationMs() > 0) {
+                    videoTimeText.setText(getString(R.string.video_time_format,
+                            clock((long) videoDurationMs() * value / bar.getMax()),
+                            clock(videoDurationMs())));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(android.widget.SeekBar bar) {
+                userSeeking = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(android.widget.SeekBar bar) {
+                userSeeking = false;
+                if (mediaPlayer == null || videoDurationMs() <= 0) return;
+                try {
+                    mediaPlayer.seekTo((int) ((long) videoDurationMs() * bar.getProgress() / bar.getMax()));
+                } catch (IllegalStateException ignored) {
+                    // Trình phát chưa sẵn sàng.
+                }
+            }
+        });
+    }
+
+    /** Menu chọn tốc độ phát: 0.5x đến 2x. */
+    private void showSpeedMenu() {
+        String[] labels = new String[SPEED_OPTIONS.length];
+        for (int index = 0; index < SPEED_OPTIONS.length; index++) {
+            labels[index] = getString(R.string.video_speed_format, trimSpeed(SPEED_OPTIONS[index]))
+                    + (SPEED_OPTIONS[index] == 1.0f ? " (bình thường)" : "");
+        }
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(R.string.video_speed_title)
+                .setItems(labels, (dialog, which) -> applySpeed(SPEED_OPTIONS[which]))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void applySpeed(float speed) {
+        playbackSpeed = speed;
+        if (videoSpeedButton != null) {
+            videoSpeedButton.setText(getString(R.string.video_speed_format, trimSpeed(speed)));
+        }
+        if (mediaPlayer == null) return;
+        try {
+            boolean wasPlaying = mediaPlayer.isPlaying();
+            mediaPlayer.setPlaybackParams(
+                    mediaPlayer.getPlaybackParams().setSpeed(speed));
+            // setPlaybackParams tự chuyển sang trạng thái phát; giữ đúng ý người dùng.
+            if (!wasPlaying) mediaPlayer.pause();
+        } catch (Exception exception) {
+            AppLogger.error(this, "LessonPlayerActivity", "Không đổi được tốc độ phát", exception);
+            showShortMessage("Thiết bị không hỗ trợ đổi tốc độ phát");
+        }
+    }
+
+    /** 1.0 -> "1", 1.25 -> "1.25" cho nhãn gọn. */
+    private String trimSpeed(float speed) {
+        return speed == Math.rint(speed)
+                ? String.valueOf((int) speed)
+                : String.valueOf(speed).replaceAll("0+$", "").replaceAll("\\.$", "");
+    }
+
+    private void seekBy(int deltaMs) {
+        if (mediaPlayer == null) return;
+        try {
+            int target = Math.max(0, Math.min(videoDurationMs(),
+                    mediaPlayer.getCurrentPosition() + deltaMs));
+            mediaPlayer.seekTo(target);
+            updateVideoProgress();
+        } catch (IllegalStateException ignored) {
+            // Bỏ qua khi trình phát chưa sẵn sàng.
+        }
+    }
+
+    private int videoDurationMs() {
+        try {
+            return mediaPlayer == null ? 0 : Math.max(0, mediaPlayer.getDuration());
+        } catch (IllegalStateException ignored) {
+            return 0;
+        }
+    }
+
+    private void updateVideoProgress() {
+        if (mediaPlayer == null || videoSeekBar == null || videoTimeText == null) return;
+        try {
+            int duration = videoDurationMs();
+            int position = mediaPlayer.getCurrentPosition();
+            if (duration > 0 && !userSeeking) {
+                videoSeekBar.setProgress((int) ((long) position * videoSeekBar.getMax() / duration));
+            }
+            videoTimeText.setText(getString(R.string.video_time_format,
+                    clock(position), clock(duration)));
+            videoToggleButton.setImageResource(mediaPlayer.isPlaying()
+                    ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play);
+        } catch (IllegalStateException ignored) {
+            // Trình phát vừa được giải phóng.
+        }
+    }
+
+    /** 125000ms -> "2:05" (hoặc "1:02:05" nếu dài hơn 1 giờ). */
+    private String clock(long milliseconds) {
+        long totalSeconds = Math.max(0, milliseconds) / 1000;
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+        return hours > 0
+                ? String.format(Locale.US, "%d:%02d:%02d", hours, minutes, seconds)
+                : String.format(Locale.US, "%d:%02d", minutes, seconds);
+    }
+
+    private void togglePlayback() {
+        if (mediaPlayer == null) return;
+        try {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.pause();
+                videoPlayButton.setVisibility(View.VISIBLE);
+            } else {
+                mediaPlayer.start();
+                videoPlayButton.setVisibility(View.GONE);
+            }
+        } catch (IllegalStateException ignored) {
+            // Trình phát chưa sẵn sàng: bỏ qua thao tác.
+        }
+    }
+
+    private void releasePlayer() {
+        videoProgressHandler.removeCallbacks(videoProgressTick);
+        if (mediaPlayer == null) return;
+        try {
+            mediaPlayer.reset();
+            mediaPlayer.release();
+        } catch (Exception exception) {
+            AppLogger.error(this, "LessonPlayerActivity", "Không thể giải phóng trình phát", exception);
+        }
+        mediaPlayer = null;
+    }
+
+    /** URL trỏ về backend của app (không phải CDN/bên thứ ba)? */
+    private boolean isOwnBackend(String url) {
+        try {
+            String host = Uri.parse(url).getHost();
+            String apiHost = Uri.parse(AppConstants.getApiBaseUrl()).getHost();
+            return host != null && apiHost != null && host.equalsIgnoreCase(apiHost);
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    /** Nạp icon, tiêu đề và dòng mô tả cho một thẻ thao tác. */
+    /** "video" -> "Video", "text" -> "Văn bản"... cho nhãn loại nội dung. */
+    private String contentTypeLabel(String type) {
+        switch (type == null ? "" : type) {
+            case "video": return "Video";
+            case "text": return "Văn bản";
+            case "pdf": return "Tài liệu PDF";
+            case "document": return "Tài liệu";
+            case "exercise": return "Bài luyện tập";
+            case "": return "Văn bản";
+            default: return type;
+        }
+    }
+
+    private void bindActionCard(View card, int iconRes, int titleRes, int subtitleRes) {
+        if (card == null) return;
+        ((ImageView) card.findViewById(R.id.iconLessonAction)).setImageResource(iconRes);
+        ((TextView) card.findViewById(R.id.textLessonActionTitle)).setText(titleRes);
+        ((TextView) card.findViewById(R.id.textLessonActionSubtitle)).setText(subtitleRes);
+    }
+
+    /** Xem video toàn màn hình: chuyển thiết bị sang ngang và cho khung video chiếm hết. */
+    private void toggleFullscreen() {
+        boolean landscape = getResources().getConfiguration().orientation
+                == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+        setRequestedOrientation(landscape
+                ? android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                : android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    }
+
+    // ===== KHUNG VIDEO =====
+
+    /** Khung video rộng hết màn hình, cao theo tỉ lệ 16:9 để không bị hụt hay thừa. */
+    private void applyVideoFrameSize() {
+        if (videoView == null || videoContainer == null) return;
+        int width = getResources().getDisplayMetrics().widthPixels
+                - (int) (28 * getResources().getDisplayMetrics().density);  // trừ padding 14dp mỗi bên
+        int height = Math.round(width * 9f / 16f);
+        android.view.ViewGroup.LayoutParams params = videoView.getLayoutParams();
+        params.height = height;
+        videoView.setLayoutParams(params);
+    }
+
+    /**
+     * TextureView mặc định kéo giãn video cho vừa khung nên hình bị méo. Hàm này
+     * tính lại ma trận biến đổi để video giữ đúng tỉ lệ và lấp đầy khung
+     * (phần thừa hai bên hoặc trên dưới bị cắt nhẹ, giống trình phát thường thấy).
+     */
+    private void fitVideoToFrame(int videoWidth, int videoHeight) {
+        if (videoView == null || videoWidth <= 0 || videoHeight <= 0) return;
+        int viewWidth = videoView.getWidth();
+        int viewHeight = videoView.getHeight();
+        if (viewWidth <= 0 || viewHeight <= 0) {
+            videoView.post(() -> fitVideoToFrame(videoWidth, videoHeight));
+            return;
+        }
+        float scaleX = (float) viewWidth / videoWidth;
+        float scaleY = (float) viewHeight / videoHeight;
+        float scale = Math.max(scaleX, scaleY);       // lấp đầy khung
+        float drawWidth = videoWidth * scale;
+        float drawHeight = videoHeight * scale;
+
+        android.graphics.Matrix matrix = new android.graphics.Matrix();
+        matrix.setScale(drawWidth / viewWidth, drawHeight / viewHeight);
+        matrix.postTranslate((viewWidth - drawWidth) / 2f, (viewHeight - drawHeight) / 2f);
+        videoView.setTransform(matrix);
+        videoView.invalidate();
+    }
+
+    // ===== CHUYỂN GIỮA CÁC BÀI HỌC =====
+
+    /** Tải danh sách bài học của khóa để biết bài trước / bài sau. */
+    private void loadCourseLessons() {
+        if (previewMode || courseId == null || courseId.trim().isEmpty()) {
+            updateLessonNavigation();
+            return;
+        }
+        repository.loadCourseDetail(courseId,
+                new ApiCallback<com.example.smartkid.data.model.CourseDetail>() {
+                    @Override
+                    public void onSuccess(com.example.smartkid.data.model.CourseDetail data) {
+                        if (isFinishing() || isDestroyed()) return;
+                        courseLessons.clear();
+                        if (data != null && data.getLessons() != null) {
+                            courseLessons.addAll(data.getLessons());
+                        }
+                        updateLessonNavigation();
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        if (isFinishing() || isDestroyed()) return;
+                        updateLessonNavigation();  // không tải được thì ẩn nút chuyển bài
+                    }
+                });
+    }
+
+    /** Vị trí bài đang xem trong danh sách, -1 nếu chưa xác định được. */
+    private int currentLessonIndex() {
+        if (lessonId == null) return -1;
+        for (int index = 0; index < courseLessons.size(); index++) {
+            if (lessonId.equals(courseLessons.get(index).getId())) return index;
+        }
+        return -1;
+    }
+
+    /** Ẩn hẳn thẻ không dùng được: bài đầu ẩn "Bài trước", bài cuối ẩn "Bài tiếp". */
+    private void updateLessonNavigation() {
+        if (lessonPrevCard == null || lessonNextCard == null) return;
+        int index = currentLessonIndex();
+        boolean hasPrev = !previewMode && index > 0;
+        boolean hasNext = !previewMode && index >= 0 && index < courseLessons.size() - 1;
+
+        lessonPrevCard.setVisibility(hasPrev ? View.VISIBLE : View.GONE);
+        lessonNextCard.setVisibility(hasNext ? View.VISIBLE : View.GONE);
+        // Khoảng cách giữa hai thẻ chỉ cần khi cả hai cùng hiện.
+        if (lessonNavigationSpacer != null) {
+            lessonNavigationSpacer.setVisibility(hasPrev && hasNext ? View.VISIBLE : View.GONE);
+        }
+        // Không còn thẻ nào thì bỏ luôn cả hàng để không chừa khoảng trống.
+        if (lessonNavigationRow != null) {
+            lessonNavigationRow.setVisibility(hasPrev || hasNext ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    /** Mở bài liền trước (step = -1) hoặc liền sau (step = 1) trong cùng khóa học. */
+    private void openSiblingLesson(int step) {
+        int index = currentLessonIndex();
+        if (index < 0) return;
+        int target = index + step;
+        if (target < 0) {
+            showShortMessage(getString(R.string.lesson_is_first));
+            return;
+        }
+        if (target >= courseLessons.size()) {
+            showShortMessage(getString(R.string.lesson_is_last));
+            return;
+        }
+        com.example.smartkid.data.model.Lesson lesson = courseLessons.get(target);
+        try {
+            Intent intent = new Intent(this, LessonPlayerActivity.class);
+            intent.putExtra(AppConstants.EXTRA_COURSE_ID, courseId);
+            intent.putExtra(AppConstants.EXTRA_LESSON_ID, lesson.getId());
+            intent.putExtra(AppConstants.EXTRA_LESSON_TITLE, lesson.getTitle());
+            startActivity(intent);
+            finish();  // không xếp chồng vô hạn khi chuyển nhiều bài liên tiếp
+        } catch (Exception exception) {
+            AppLogger.error(this, "LessonPlayerActivity", "Không thể mở bài học khác", exception);
+            showErrorDialog("Không thể mở bài học kế tiếp");
         }
     }
 

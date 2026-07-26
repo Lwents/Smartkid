@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Icon ngọn lửa cho ô AI Tutor ở trang chủ học sinh: lửa ngoài cam-hồng,
+  lõi trong vàng, kèm hai tia nhỏ để nhìn sinh động như bộ icon còn lại.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+
+    <!-- Vầng sáng nền mềm phía sau ngọn lửa -->
+    <path
+        android:pathData="M48,86C64.6,86 78,72.6 78,56C78,39.4 64.6,10 48,10C31.4,10 18,39.4 18,56C18,72.6 31.4,86 48,86Z"
+        android:fillAlpha="0.13">
+        <aapt:attr name="android:fillColor" xmlns:aapt="http://schemas.android.com/aapt">
+            <gradient
+                android:startX="48" android:startY="10"
+                android:endX="48" android:endY="86"
+                android:type="linear">
+                <item android:offset="0" android:color="#FFB347" />
+                <item android:offset="1" android:color="#FF5E7E" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Ngọn lửa ngoài -->
+    <path
+        android:pathData="M50.5,8C50.5,8 53,20.5 61,29.5C68.2,37.6 74,44.4 74,55.5C74,71.3 62.4,82 48,82C33.6,82 22,71.3 22,55.5C22,45.9 25.7,38.9 31.5,32.5C36.2,27.3 40,22.5 41.5,16.5C41.5,16.5 44.5,24 48.5,27.5C48.5,20.5 50.5,8 50.5,8Z">
+        <aapt:attr name="android:fillColor" xmlns:aapt="http://schemas.android.com/aapt">
+            <gradient
+                android:startX="48" android:startY="8"
+                android:endX="48" android:endY="82"
+                android:type="linear">
+                <item android:offset="0" android:color="#FFC24B" />
+                <item android:offset="0.45" android:color="#FF8A3D" />
+                <item android:offset="1" android:color="#F5426C" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Lõi lửa sáng -->
+    <path
+        android:pathData="M48,36C48,36 51.5,44 55,49C58.2,53.6 60,57 60,62C60,70.3 54.6,76 48,76C41.4,76 36,70.3 36,62C36,56.5 38.4,52.7 41.5,48.5C44,45 46.5,41 48,36Z">
+        <aapt:attr name="android:fillColor" xmlns:aapt="http://schemas.android.com/aapt">
+            <gradient
+                android:startX="48" android:startY="36"
+                android:endX="48" android:endY="76"
+                android:type="linear">
+                <item android:offset="0" android:color="#FFF6C9" />
+                <item android:offset="0.55" android:color="#FFD84D" />
+                <item android:offset="1" android:color="#FF9A2E" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Điểm sáng nhỏ trong lõi -->
+    <path
+        android:pathData="M48,58C51,58 53,60.4 53,63.5C53,66.6 51,69 48,69C45,69 43,66.6 43,63.5C43,60.4 45,58 48,58Z"
+        android:fillColor="#FFFDF2"
+        android:fillAlpha="0.85" />
+
+    <!-- Hai tia lửa bay bên cạnh -->
+    <path
+        android:pathData="M78,30C80.2,30 82,31.8 82,34C82,36.2 80.2,38 78,38C75.8,38 74,36.2 74,34C74,31.8 75.8,30 78,30Z"
+        android:fillColor="#FFB347"
+        android:fillAlpha="0.9" />
+    <path
+        android:pathData="M17,44C18.7,44 20,45.3 20,47C20,48.7 18.7,50 17,50C15.3,50 14,48.7 14,47C14,45.3 15.3,44 17,44Z"
+        android:fillColor="#FF7A59"
+        android:fillAlpha="0.85" />
+</vector>
