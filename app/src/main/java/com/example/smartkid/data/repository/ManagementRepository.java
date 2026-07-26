@@ -32,7 +32,8 @@ public class ManagementRepository {
     };
     private static final String[] ARRAY_KEYS = {
             "results", "items", "courses", "users", "students", "transactions",
-            "logs", "notifications", "backups", "sessions", "data", "questions", "feedback"
+            "logs", "notifications", "backups", "sessions", "data", "questions", "feedback",
+            "recent"
     };
 
     /** Nhãn tiếng Việt cho các key kỹ thuật trong báo cáo/cấu hình admin. */
@@ -447,6 +448,16 @@ public class ManagementRepository {
                     SafeJson.string(item, "", "userEmail"),
                     shortTime(SafeJson.string(item, "", "timestamp")),
                     SafeJson.string(item, "", "status"), item);
+        }
+        // Người dùng đang hoạt động: tên + vai trò/email + lần hoạt động gần nhất
+        if (item.has("lastActive") && item.has("name")) {
+            String roleLabel = SafeJson.string(item, "", "roleLabel", "role");
+            String email = SafeJson.string(item, "", "email");
+            return new FeatureItem(id,
+                    SafeJson.string(item, "Người dùng", "name"),
+                    roleLabel + (email.isEmpty() || roleLabel.isEmpty() ? email : " • " + email),
+                    "Hoạt động: " + shortTime(SafeJson.string(item, "", "lastActive")),
+                    "", item);
         }
         // Phiên đăng nhập: thiết bị + IP/vị trí + hoạt động gần nhất
         if (item.has("jti") && item.has("device")) {

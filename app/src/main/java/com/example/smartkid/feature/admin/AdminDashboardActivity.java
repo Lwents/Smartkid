@@ -180,7 +180,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         bindFeature(R.id.buttonAdminLearning, "admin_report_learning");
         bindFeature(R.id.buttonAdminHealth, "admin_health");
         bindFeature(R.id.cardAdminKpiDau, "admin_active_users");
-        bindFeature(R.id.cardAdminKpiSignups, "admin_report_users");
+        bindFeature(R.id.cardAdminKpiSignups, "admin_users");
         bindFeature(R.id.cardAdminKpiStudents, "admin_users");
         bindFeature(R.id.cardAdminKpiTeachers, "admin_users");
         bindFeature(R.id.cardAdminKpiCourses, "admin_courses");
@@ -195,9 +195,6 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         addSectionAction(users, "admin_active_users", getString(R.string.active_users_title),
                 getString(R.string.admin_action_active_users_description), R.drawable.admin_ic_users,
                 color(R.color.admin_green));
-        addSectionAction(users, "admin_report_users", "Báo cáo người dùng",
-                getString(R.string.admin_action_report_users_description), R.drawable.admin_ic_chart,
-                Color.rgb(115, 87, 232));
         addSectionAction(users, "admin_security", getString(R.string.security_overview_title),
                 getString(R.string.admin_action_security_description), R.drawable.role_ic_security,
                 color(R.color.admin_cyan));
@@ -402,9 +399,6 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         tools.add(tool("admin_backups", "Sao lưu hệ thống",
                 "Kiểm tra lịch sao lưu và khôi phục dữ liệu",
                 R.drawable.admin_ic_refresh, 0xFF0284C7, 0xFF38BDF8, ""));
-        tools.add(tool("admin_report_users", "Báo cáo người dùng",
-                "Phân tích tăng trưởng và người dùng hoạt động",
-                R.drawable.admin_ic_chart, 0xFF4F46E5, 0xFF818CF8, ""));
         tools.add(tool("admin_report_learning", "Báo cáo học tập",
                 "Tiến độ, điểm số và thời gian học tập",
                 R.drawable.role_ic_chart, 0xFFD97706, 0xFFFBBF24, ""));
