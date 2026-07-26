@@ -6,20 +6,21 @@
     style="@style/Widget.Smartkid.GlassInput"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
+    android:layout_marginTop="14dp"
     app:boxBackgroundColor="@color/admin_glass_soft"
-    app:boxCornerRadiusBottomEnd="18dp"
-    app:boxCornerRadiusBottomStart="18dp"
-    app:boxCornerRadiusTopEnd="18dp"
-    app:boxCornerRadiusTopStart="18dp">
+    app:boxCornerRadiusBottomEnd="12dp"
+    app:boxCornerRadiusBottomStart="12dp"
+    app:boxCornerRadiusTopEnd="12dp"
+    app:boxCornerRadiusTopStart="12dp">
 
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/inputManagementCreate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="56dp"
         android:paddingStart="16dp"
+        android:paddingTop="14dp"
         android:paddingEnd="16dp"
+        android:paddingBottom="14dp"
         android:textColor="@color/admin_text_primary"
         android:textColorHint="@color/admin_text_muted"
         android:textSize="14sp" />

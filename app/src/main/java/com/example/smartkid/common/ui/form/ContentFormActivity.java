@@ -108,6 +108,7 @@ public abstract class ContentFormActivity extends BaseActivity {
     private ActivityResultLauncher<String[]> thumbnailPicker;
     private ActivityResultLauncher<String[]> videoPicker;
     private ActivityResultLauncher<String[]> documentPicker;
+    private ActivityResultLauncher<String[]> aiDocumentPicker;
     private Uri selectedThumbnailUri;
     private Uri selectedVideoUri;
     private Uri selectedDocumentUri;
@@ -218,8 +219,8 @@ public abstract class ContentFormActivity extends BaseActivity {
         heading.setText(titleForKind());
         if (kind == ContentFormKind.TEACHER_COURSE) {
             icon.setImageResource(R.drawable.role_ic_course_filled);
-            subtitle.setText(R.string.management_create_course_subtitle);
-            submitButton.setText(R.string.create_course);
+            subtitle.setText(R.string.builder_create_course_subtitle);
+            submitButton.setText(R.string.builder_create_and_add_content);
         } else if (kind == ContentFormKind.TEACHER_MODULE) {
             icon.setImageResource(R.drawable.role_ic_course);
             subtitle.setText(parentTitle.isEmpty() ? R.string.management_create_module_subtitle
@@ -309,26 +310,7 @@ public abstract class ContentFormActivity extends BaseActivity {
                     R.string.management_course_basic_description);
             addInput("title", getString(R.string.management_course_title),
                     InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES, false);
-            addSpinner("subject_slug", getString(R.string.management_course_subject),
-                    new String[]{"Toán", "Tiếng Việt", "Tiếng Anh", "Khoa học", "Lịch sử"},
-                    new String[]{"math", "vietnamese", "english", "science", "history"});
             addGradeSelector();
-
-            addSection(R.string.management_course_content_section,
-                    R.string.management_course_content_description);
-            addInput("description", getString(R.string.management_course_short_description),
-                    InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE, true);
-            addInput("introduction", getString(R.string.management_course_introduction),
-                    InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE, true);
-
-            addSection(R.string.management_course_media_section,
-                    R.string.management_course_media_description);
-            addCourseFilePicker(true);
-            View videoSourceRow = addVideoSourceSelector();
-            videoUrlRow = addInput("video_url", getString(R.string.management_course_video_url),
-                    InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI, false);
-            videoFileRow = addCourseFilePicker(false);
-            bindVideoSourceSelector(videoSourceRow);
             return;
         }
 
@@ -395,7 +377,7 @@ public abstract class ContentFormActivity extends BaseActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(50));
         aiParams.setMargins(0, dp(8), 0, 0);
         aiQuestionButton.setLayoutParams(aiParams);
-        aiQuestionButton.setOnClickListener(view -> showAiQuestionDialog());
+        aiQuestionButton.setOnClickListener(view -> launchAiDocumentPicker());
         container.addView(aiQuestionButton);
         addQuestionCard();
     }
@@ -554,6 +536,8 @@ public abstract class ContentFormActivity extends BaseActivity {
                 uri -> handleSelectedFile(uri, false));
         documentPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
                 this::handleSelectedDocument);
+        aiDocumentPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
+                this::handleAiDocument);
     }
 
     private void bindLessonContentType() {
@@ -856,68 +840,57 @@ public abstract class ContentFormActivity extends BaseActivity {
         }
     }
 
-    private void showAiQuestionDialog() {
-        LinearLayout fields = new LinearLayout(this);
-        fields.setOrientation(LinearLayout.VERTICAL);
-        int padding = dp(20);
-        fields.setPadding(padding, dp(4), padding, 0);
-        EditText topic = new EditText(this);
-        topic.setHint(R.string.management_ai_topic_hint);
-        String currentTitle = value("title");
-        if (!currentTitle.isEmpty()) topic.setText(currentTitle);
-        fields.addView(topic, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-
-        TextView countLabel = new TextView(this);
-        countLabel.setText(R.string.management_ai_count);
-        countLabel.setPadding(0, dp(12), 0, 0);
-        fields.addView(countLabel);
-        Spinner count = new Spinner(this);
-        count.setAdapter(spinnerAdapter(new String[]{"3", "5", "10"}));
-        count.setSelection(1);
-        fields.addView(count);
-
-        TextView difficultyLabel = new TextView(this);
-        difficultyLabel.setText(R.string.management_ai_difficulty);
-        difficultyLabel.setPadding(0, dp(12), 0, 0);
-        fields.addView(difficultyLabel);
-        Spinner difficulty = new Spinner(this);
-        difficulty.setAdapter(spinnerAdapter(new String[]{"Dễ", "Trung bình", "Khó"}));
-        difficulty.setSelection(1);
-        fields.addView(difficulty);
-
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.management_generate_questions_ai)
-                .setView(fields)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.management_ai_generate_action, (dialog, which) -> {
-                    String[] difficulties = {"Dễ", "Trung bình", "Khó"};
-                    int selectedDifficulty = Math.max(0,
-                            Math.min(difficulty.getSelectedItemPosition(), difficulties.length - 1));
-                    int questionCount = Integer.parseInt(
-                            String.valueOf(count.getSelectedItem()));
-                    requestAiQuestions(topic.getText() == null ? ""
-                                    : topic.getText().toString().trim(),
-                            questionCount, difficulties[selectedDifficulty]);
-                })
-                .show();
+    private void launchAiDocumentPicker() {
+        try {
+            aiDocumentPicker.launch(new String[]{"application/pdf",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "text/plain"});
+        } catch (Exception exception) {
+            AppLogger.error(this, "ContentFormActivity",
+                    "Không thể mở bộ chọn tài liệu AI", exception);
+            showStatus(getString(R.string.management_ai_error));
+        }
     }
 
-    private void requestAiQuestions(String topic, int count, String difficulty) {
-        if (topic.isEmpty()) {
-            showStatus(getString(R.string.management_ai_topic_required));
+    private void handleAiDocument(Uri uri) {
+        if (uri == null) return;
+        try {
+            getContentResolver().takePersistableUriPermission(uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (Exception ignored) {
+            // The URI remains readable for this activity.
+        }
+        String name = fileDisplayName(uri);
+        String lowerName = name.toLowerCase(Locale.ROOT);
+        String mimeType = safe(getContentResolver().getType(uri)).toLowerCase(Locale.ROOT);
+        boolean valid = lowerName.endsWith(".pdf") || lowerName.endsWith(".docx")
+                || lowerName.endsWith(".txt")
+                || mimeType.equals("application/pdf")
+                || mimeType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                || mimeType.startsWith("text/");
+        if (!valid) {
+            showStatus(getString(R.string.management_ai_file_invalid));
             return;
         }
+        long size = fileSize(uri);
+        if (size > 20L * 1024L * 1024L) {
+            showStatus(getString(R.string.management_ai_file_too_large));
+            return;
+        }
+        requestAiQuestionsFromFile(uri);
+    }
+
+    private void requestAiQuestionsFromFile(Uri uri) {
         try {
             JSONObject body = new JSONObject();
-            body.put("title", topic);
-            body.put("description", topic);
-            body.put("count", Math.max(1, Math.min(count, 10)));
+            body.put("count", 5);
             body.put("level", selectedAiLevel());
-            body.put("hint", "Độ khó: " + difficulty);
+            List<MultipartFilePart> files = new ArrayList<>();
+            files.add(new MultipartFilePart("file", uri));
             setLoading(true);
             showStatus(getString(R.string.management_ai_generating));
-            repository.action(Request.Method.POST, "activities/ai/generate-questions/", body,
+            repository.multipartAction(Request.Method.POST,
+                    "activities/ai/generate-questions/", body, files,
                     new ApiCallback<JSONObject>() {
                         @Override
                         public void onSuccess(JSONObject data) {
@@ -1404,20 +1377,7 @@ public abstract class ContentFormActivity extends BaseActivity {
             String title = required("title");
             if (title == null) return null;
             body.put("title", title);
-            body.put("subject_slug", spinnerValue("subject_slug"));
             body.put("grade", selectedGrade);
-            body.put("description", value("description"));
-            body.put("introduction", value("introduction"));
-            if ("youtube".equals(videoSource)) {
-                String videoUrl = optionalHttpUrl("video_url");
-                if (videoUrl == null) return null;
-                if (!videoUrl.isEmpty() && !isYoutubeUrl(videoUrl)) {
-                    inputs.get("video_url").setError(
-                            getString(R.string.management_invalid_youtube_url));
-                    return null;
-                }
-                if (!videoUrl.isEmpty()) body.put("video_url", videoUrl);
-            }
             return body;
         }
 

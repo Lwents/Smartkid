@@ -18,7 +18,6 @@
     <string name="management_course_basic_section">Thông tin khóa học</string>
     <string name="management_course_basic_description">Các thông tin chính giúp học viên nhận biết khóa học.</string>
     <string name="management_course_title">Tên khóa học</string>
-    <string name="management_course_subject">Môn học</string>
     <string name="management_course_grade">Khối lớp</string>
     <string name="management_grade_one">Lớp 1</string>
     <string name="management_grade_two">Lớp 2</string>
@@ -111,13 +110,11 @@
     <string name="management_add_matching_pair">+ Thêm cặp nối</string>
     <string name="management_matching_pairs_required">Câu nối cặp cần ít nhất hai cặp đầy đủ</string>
     <string name="management_matching_pair_limit">Một câu có tối đa 10 cặp nối</string>
-    <string name="management_generate_questions_ai">✨ Tạo câu hỏi bằng AI</string>
-    <string name="management_ai_topic_hint">Chủ đề câu hỏi</string>
+    <string name="management_generate_questions_ai">📄 Tạo câu hỏi từ tài liệu (AI)</string>
     <string name="management_ai_count">Số câu hỏi</string>
-    <string name="management_ai_difficulty">Độ khó</string>
-    <string name="management_ai_generate_action">Tạo câu hỏi</string>
-    <string name="management_ai_topic_required">Hãy nhập chủ đề để AI tạo câu hỏi</string>
-    <string name="management_ai_generating">AI đang tạo câu hỏi, vui lòng chờ…</string>
+    <string name="management_ai_generating">AI đang đọc tài liệu và tạo câu hỏi, vui lòng chờ…</string>
+    <string name="management_ai_file_invalid">Chỉ hỗ trợ tài liệu PDF, Word (.docx) hoặc text (.txt)</string>
+    <string name="management_ai_file_too_large">Tài liệu quá lớn (tối đa 20MB)</string>
     <string name="management_ai_empty">AI chưa tạo được câu hỏi hợp lệ, vui lòng thử lại</string>
     <string name="management_ai_invalid_response">Phản hồi AI không đúng định dạng câu hỏi</string>
     <string name="management_ai_error">Không thể tạo câu hỏi bằng AI lúc này</string>
@@ -150,4 +147,31 @@
     <string name="management_exercise_invalid_data">Dữ liệu bài luyện tập không hợp lệ</string>
     <string name="management_missing_parent">Không tìm thấy khóa học, chương hoặc bài học liên kết</string>
     <string name="management_create_open_error">Không thể mở biểu mẫu tạo nội dung</string>
+
+    <!-- Course Builder (1 màn hình) -->
+    <string name="builder_create_and_add_content">Tạo và thêm nội dung</string>
+    <string name="builder_create_course_subtitle">Nhập thông tin cơ bản để tạo khóa học nhanh chóng.</string>
+    <string name="builder_add_module">+ Thêm chương</string>
+    <string name="builder_add_lesson_hint">Nhập tên bài học rồi nhấn Enter</string>
+    <string name="builder_add_module_hint">Nhập tên chương rồi nhấn Enter</string>
+    <string name="builder_autosaved">Đã tự động lưu</string>
+    <string name="builder_saving">Đang lưu…</string>
+    <string name="builder_save_error">Lưu thất bại, thử lại</string>
+    <string name="builder_reorder_hint">Kéo thả để sắp xếp chương và bài học</string>
+    <string name="builder_empty">Chưa có chương nào. Thêm chương để bắt đầu.</string>
+    <string name="builder_edit_title">Sửa tên</string>
+    <string name="builder_module_default_title">Chương mới</string>
+    <string name="builder_lesson_count">%1$d bài học</string>
+    <string name="builder_load_error">Không tải được nội dung khóa học</string>
+    <string name="builder_delete">Xóa</string>
+    <string name="builder_delete_module_confirm">Xóa chương này và toàn bộ bài học bên trong?</string>
+    <string name="builder_delete_lesson_confirm">Xóa bài học này?</string>
+
+    <!-- Lesson editor bottom sheet -->
+    <string name="sheet_lesson_note">Ghi chú bài học</string>
+    <string name="sheet_lesson_note_hint">Ghi chú ngắn gọn về bài học này</string>
+    <string name="sheet_done">Xong</string>
+    <string name="sheet_lesson_video_url_hint">URL video YouTube hoặc video trực tiếp</string>
+    <string name="sheet_lesson_saved">Đã lưu bài học</string>
+    <string name="sheet_lesson_saving">Đang lưu bài học…</string>
 </resources>
