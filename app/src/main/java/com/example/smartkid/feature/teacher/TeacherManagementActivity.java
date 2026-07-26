@@ -26,6 +26,7 @@ import com.example.smartkid.common.ui.FeatureItemAdapter;
 import com.example.smartkid.common.ui.FeatureSpec;
 import com.example.smartkid.common.ui.form.ExerciseScope;
 import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.local.SessionManager;
 import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.remote.ApiCallback;
@@ -198,6 +199,15 @@ public class TeacherManagementActivity extends BaseActivity {
     private void showItem(FeatureItem item) {
         if (item == null) return;
         try {
+            String specKey = spec == null ? "" : spec.getKey();
+            if ("teacher_notifications".equals(specKey)) {
+                showNotificationDetail(item);
+                return;
+            }
+            if ("teacher_qa".equals(specKey)) {
+                showQuestionDetail(item);
+                return;
+            }
             String json = item.getSource().length() == 0 ? ""
                     : item.getSource().toString(2);
             String message = item.getSubtitle() + "\n" + item.getDetail() + "\n"
@@ -213,6 +223,80 @@ public class TeacherManagementActivity extends BaseActivity {
             AppLogger.error(this, "TeacherManagementActivity", "Không thể hiện chi tiết", exception);
             showErrorDialog("Không thể đọc chi tiết dữ liệu");
         }
+    }
+
+    /** Thông báo: hiện nội dung thân thiện thay vì JSON thô, kèm ngữ cảnh khóa học/bài học. */
+    private void showNotificationDetail(FeatureItem item) {
+        JSONObject source = item.getSource();
+        JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
+        StringBuilder info = new StringBuilder();
+        appendInfoLine(info, "Học sinh", SafeJson.string(metadata, "", "student"));
+        appendInfoLine(info, "Khóa học", SafeJson.string(metadata, "", "course_title"));
+        appendInfoLine(info, "Bài học", SafeJson.string(metadata, "", "lesson_title"));
+        appendInfoLine(info, "Thời gian", readableTime(SafeJson.string(source, "", "created_at")));
+        String body = SafeJson.string(source, item.getDetail(), "message");
+        String message = body.isEmpty() ? info.toString()
+                : (info.length() == 0 ? body : body + "\n\n" + info);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(item.getTitle())
+                .setMessage(message.trim())
+                .setNegativeButton("Đóng", null);
+        if ("lesson_question".equals(SafeJson.string(source, "", "category"))) {
+            builder.setPositiveButton("Mở hỏi đáp", (dialog, which) -> openQaScreen());
+        }
+        builder.show();
+    }
+
+    /** Hỏi đáp: câu hỏi + bài học liên quan, trả lời học viên ngay trong dialog. */
+    private void showQuestionDetail(FeatureItem item) {
+        JSONObject source = item.getSource();
+        StringBuilder info = new StringBuilder();
+        appendInfoLine(info, "Khóa học", SafeJson.string(source, "", "course_title"));
+        appendInfoLine(info, "Bài học", SafeJson.string(source, "", "lesson_title"));
+        appendInfoLine(info, "Thời gian", readableTime(SafeJson.string(source, "", "created_at")));
+        JSONArray replies = source == null ? null : source.optJSONArray("replies");
+        int replyCount = replies == null ? 0 : replies.length();
+        appendInfoLine(info, "Phản hồi", replyCount == 0 ? "Chưa có" : replyCount + " phản hồi");
+        String content = SafeJson.string(source, item.getDetail(), "content");
+        String message = content.isEmpty() ? info.toString() : content + "\n\n" + info;
+        new AlertDialog.Builder(this)
+                .setTitle("Câu hỏi của " + SafeJson.string(source, item.getTitle(), "student"))
+                .setMessage(message.trim())
+                .setNegativeButton("Đóng", null)
+                .setPositiveButton("Trả lời học viên", (dialog, which) ->
+                        promptText("Trả lời học viên", "Nhập nội dung phản hồi", "Gửi",
+                                value -> performTextAction(item, "Trả lời học viên", value)))
+                .show();
+    }
+
+    private void appendInfoLine(StringBuilder target, String label, String value) {
+        if (value == null || value.trim().isEmpty()) return;
+        if (target.length() > 0) target.append('\n');
+        target.append(label).append(": ").append(value.trim());
+    }
+
+    /** "2026-07-25T18:11:34.845711+00:00" (UTC) -> "25/07/2026 18:11" theo giờ máy. */
+    private String readableTime(String isoValue) {
+        if (isoValue == null || isoValue.trim().isEmpty()) return "";
+        String raw = isoValue.trim();
+        try {
+            java.text.SimpleDateFormat parser = new java.text.SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US);
+            parser.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            java.util.Date parsed = parser.parse(raw.substring(0, Math.min(19, raw.length())));
+            java.text.SimpleDateFormat printer = new java.text.SimpleDateFormat(
+                    "dd/MM/yyyy HH:mm", java.util.Locale.US);
+            printer.setTimeZone(java.util.TimeZone.getDefault());
+            return parsed == null ? raw : printer.format(parsed);
+        } catch (Exception ignored) {
+            return raw.replace('T', ' ');
+        }
+    }
+
+    private void openQaScreen() {
+        Intent intent = new Intent(this, TeacherManagementActivity.class);
+        intent.putExtra(EXTRA_SPEC_KEY, "teacher_qa");
+        startActivity(intent);
     }
 
     private void showActions(FeatureItem item) {

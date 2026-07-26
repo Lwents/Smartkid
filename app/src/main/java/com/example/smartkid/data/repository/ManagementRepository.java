@@ -378,6 +378,11 @@ public class ManagementRepository {
         if (title.isEmpty()) title = "Mục " + id;
         String subtitle = SafeJson.string(item, "", "email", "role", "subject", "game_type_display",
                 "course_title", "plan_name", "category", "type");
+        // Hỏi đáp bài học: ghép "Khóa học • Bài học" để giáo viên biết câu hỏi thuộc video nào
+        String lessonTitle = SafeJson.string(item, "", "lesson_title");
+        if (!lessonTitle.isEmpty()) {
+            subtitle = subtitle.isEmpty() ? lessonTitle : subtitle + " • " + lessonTitle;
+        }
         String detail = SafeJson.string(item, "", "description", "message", "content", "bio",
                 "teacherName", "status_message", "gross", "net");
         String status = SafeJson.string(item, "", "status", "state", "role");
