@@ -32,6 +32,7 @@ import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.ManagementRepository;
 import com.example.smartkid.feature.teacher.course.TeacherCourseCreateActivity;
+import com.example.smartkid.feature.teacher.course.builder.TeacherCourseBuilderActivity;
 import com.example.smartkid.feature.teacher.exercise.TeacherExerciseEditorActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -291,9 +292,9 @@ public class TeacherManagementActivity extends BaseActivity {
             return;
         }
         try {
-            Intent intent = new Intent(this, TeacherCourseContentActivity.class);
-            intent.putExtra(TeacherCourseContentActivity.EXTRA_COURSE_ID, item.getId());
-            intent.putExtra(TeacherCourseContentActivity.EXTRA_COURSE_TITLE, item.getTitle());
+            Intent intent = new Intent(this, TeacherCourseBuilderActivity.class);
+            intent.putExtra(TeacherCourseBuilderActivity.EXTRA_COURSE_ID, item.getId());
+            intent.putExtra(TeacherCourseBuilderActivity.EXTRA_COURSE_TITLE, item.getTitle());
             startActivity(intent);
         } catch (Exception exception) {
             AppLogger.error(this, "TeacherManagementActivity",

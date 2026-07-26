@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/teacherCourseBuilderRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/admin_bg_screen">
+
+    <View
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="-110dp"
+        android:layout_marginEnd="-90dp"
+        android:background="@drawable/admin_bg_glow_purple" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbarTeacherCourseBuilder"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            app:navigationIcon="@drawable/common_ic_arrow_back"
+            app:navigationIconTint="@color/admin_text_primary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp">
+
+            <TextView
+                android:id="@+id/textTeacherBuilderTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/admin_text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/buttonTeacherBuilderEditTitle"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginStart="6dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/builder_edit_title"
+                android:padding="8dp"
+                android:src="@drawable/profile_ic_edit"
+                app:tint="@color/admin_primary" />
+
+            <LinearLayout
+                android:id="@+id/badgeTeacherBuilderAutosave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/teacher_bg_autosave_badge"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:visibility="invisible">
+
+                <ImageView
+                    android:id="@+id/iconTeacherBuilderAutosave"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/role_ic_check_circle"
+                    app:tint="@color/smartkid_success" />
+
+                <TextView
+                    android:id="@+id/textTeacherBuilderAutosave"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:text="@string/builder_autosaved"
+                    android:textColor="@color/smartkid_success"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textTeacherBuilderHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:paddingStart="18dp"
+            android:paddingEnd="18dp"
+            android:text="@string/builder_reorder_hint"
+            android:textColor="@color/admin_text_secondary"
+            android:textSize="12.5sp" />
+
+        <ProgressBar
+            android:id="@+id/progressTeacherBuilder"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="18dp"
+            android:layout_marginTop="6dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/admin_primary"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/textTeacherBuilderStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="18dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/admin_bg_error_message"
+            android:padding="12dp"
+            android:textColor="@color/smartkid_error"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/textTeacherBuilderEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:padding="22dp"
+            android:text="@string/builder_empty"
+            android:textColor="@color/admin_text_secondary"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerTeacherBuilder"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingStart="16dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="18dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonTeacherBuilderAddModule"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/builder_add_module"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            app:backgroundTint="@color/admin_primary"
+            app:cornerRadius="22dp" />
+    </LinearLayout>
+</FrameLayout>

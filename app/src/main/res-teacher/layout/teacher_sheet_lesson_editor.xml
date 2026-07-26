@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/teacher_bg_bottom_sheet"
+    android:maxHeight="640dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="18dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="20dp">
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="14dp"
+            android:background="@color/admin_text_secondary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textSheetLessonTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/admin_text_primary"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/buttonSheetLessonClose"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/cancel"
+                android:padding="7dp"
+                android:src="@drawable/course_ic_close"
+                app:tint="@color/admin_text_secondary" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:layout_marginStart="4dp"
+            android:text="@string/management_lesson_content_type"
+            android:textColor="@color/admin_text_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/admin_bg_chart_tabs"
+            android:orientation="vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp">
+
+            <Spinner
+                android:id="@+id/spinnerSheetLessonContentType"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:popupBackground="@color/white"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/groupSheetVideoSource"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="6dp"
+                android:text="@string/management_video_source_label"
+                android:textColor="@color/admin_text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleSheetVideoSource"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                app:checkedButton="@id/buttonSheetVideoYoutube"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonSheetVideoYoutube"
+                    style="@style/Widget.Smartkid.GlassButton.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="@string/management_video_source_youtube"
+                    android:textAllCaps="false"
+                    android:textColor="@color/admin_primary"
+                    app:cornerRadius="18dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonSheetVideoFile"
+                    style="@style/Widget.Smartkid.GlassButton.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/management_video_source_file"
+                    android:textAllCaps="false"
+                    android:textColor="@color/admin_text_secondary"
+                    app:cornerRadius="18dp" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <EditText
+                android:id="@+id/editSheetVideoUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/admin_bg_chart_tabs"
+                android:hint="@string/sheet_lesson_video_url_hint"
+                android:inputType="textUri"
+                android:maxLines="1"
+                android:minHeight="48dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textColor="@color/admin_text_primary"
+                android:textColorHint="@color/admin_text_secondary"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/rowSheetVideoFile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/admin_bg_chart_tabs"
+                android:gravity="center_vertical"
+                android:minHeight="52dp"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingEnd="10dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/textSheetVideoFile"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/management_course_video_file_hint"
+                    android:textColor="@color/admin_text_secondary"
+                    android:textSize="12.5sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonSheetVideoFilePick"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:minWidth="0dp"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="@string/management_choose_file"
+                    android:textAllCaps="false"
+                    android:textColor="@color/admin_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/admin_primary_light"
+                    app:cornerRadius="14dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:layout_marginStart="4dp"
+            android:text="@string/sheet_lesson_note"
+            android:textColor="@color/admin_text_secondary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/editSheetLessonNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/admin_bg_chart_tabs"
+            android:gravity="top"
+            android:hint="@string/sheet_lesson_note_hint"
+            android:inputType="textMultiLine|textCapSentences"
+            android:minHeight="72dp"
+            android:padding="14dp"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary"
+            android:textSize="13sp" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchSheetRequiresExercise"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/admin_bg_chart_tabs"
+            android:paddingStart="14dp"
+            android:paddingEnd="10dp"
+            android:text="@string/management_lesson_requires_exercise"
+            android:textColor="@color/admin_text_primary"
+            android:textSize="13sp" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchSheetPublished"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/admin_bg_chart_tabs"
+            android:paddingStart="14dp"
+            android:paddingEnd="10dp"
+            android:text="@string/management_lesson_publish_now"
+            android:textColor="@color/admin_text_primary"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/textSheetLessonStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/admin_bg_error_message"
+            android:padding="12dp"
+            android:textColor="@color/smartkid_error"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSheetLessonDone"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/sheet_done"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            app:backgroundTint="@color/admin_primary"
+            app:cornerRadius="22dp" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

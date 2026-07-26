@@ -5,11 +5,11 @@ import android.content.Intent;
 import com.example.smartkid.common.ui.form.ContentFormActivity;
 import com.example.smartkid.common.ui.form.ContentFormKind;
 import com.example.smartkid.common.util.AppLogger;
-import com.example.smartkid.feature.teacher.TeacherCourseContentActivity;
+import com.example.smartkid.feature.teacher.course.builder.TeacherCourseBuilderActivity;
 
 import org.json.JSONObject;
 
-/** Teacher-owned form for creating a course. Opens content management right after creation. */
+/** Teacher-owned form for creating a course. Opens the course builder right after creation. */
 public final class TeacherCourseCreateActivity extends ContentFormActivity {
 
     @Override
@@ -22,14 +22,14 @@ public final class TeacherCourseCreateActivity extends ContentFormActivity {
         String createdCourseId = data == null ? "" : safeString(data.optString("id", ""));
         if (createdCourseId.isEmpty()) return false;
         try {
-            Intent intent = new Intent(this, TeacherCourseContentActivity.class);
-            intent.putExtra(TeacherCourseContentActivity.EXTRA_COURSE_ID, createdCourseId);
-            intent.putExtra(TeacherCourseContentActivity.EXTRA_COURSE_TITLE, currentTitle());
+            Intent intent = new Intent(this, TeacherCourseBuilderActivity.class);
+            intent.putExtra(TeacherCourseBuilderActivity.EXTRA_COURSE_ID, createdCourseId);
+            intent.putExtra(TeacherCourseBuilderActivity.EXTRA_COURSE_TITLE, currentTitle());
             startActivity(intent);
             return true;
         } catch (Exception exception) {
             AppLogger.error(this, "TeacherCourseCreateActivity",
-                    "Không thể mở nội dung khóa học vừa tạo", exception);
+                    "Không thể mở trình dựng khóa học vừa tạo", exception);
             return false;
         }
     }

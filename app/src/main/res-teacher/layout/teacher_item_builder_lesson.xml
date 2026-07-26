@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="14dp"
+    android:layout_marginTop="7dp"
+    android:layout_marginEnd="2dp"
+    android:background="@drawable/admin_bg_chart_tabs"
+    android:gravity="center_vertical"
+    android:minHeight="56dp"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingTop="6dp"
+    android:paddingEnd="6dp"
+    android:paddingBottom="6dp">
+
+    <ImageView
+        android:id="@+id/handleTeacherBuilderLesson"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="@null"
+        android:src="@drawable/teacher_ic_drag_handle"
+        app:tint="@color/admin_text_secondary" />
+
+    <ImageView
+        android:id="@+id/imageTeacherBuilderLessonType"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="6dp"
+        android:background="@drawable/admin_bg_quick_blue"
+        android:contentDescription="@null"
+        android:padding="7dp"
+        android:src="@drawable/role_ic_course"
+        app:tint="@color/admin_blue" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="9dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textTeacherBuilderLessonTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/admin_text_primary"
+            android:textSize="13.5sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textTeacherBuilderLessonMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/admin_text_secondary"
+            android:textSize="10.5sp" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iconTeacherBuilderLessonChevron"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:contentDescription="@null"
+        android:padding="7dp"
+        android:src="@drawable/profile_ic_edit"
+        app:tint="@color/admin_text_secondary" />
+</LinearLayout>

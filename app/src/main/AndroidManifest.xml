@@ -44,6 +44,7 @@
         <activity android:name=".feature.admin.AdminDashboardActivity" android:exported="false" />
         <activity android:name=".common.navigation.UnsupportedRoleActivity" android:exported="false" />
         <activity android:name=".feature.teacher.TeacherCourseContentActivity" android:exported="false" />
+        <activity android:name=".feature.teacher.course.builder.TeacherCourseBuilderActivity" android:exported="false" />
         <activity android:name=".feature.teacher.TeacherDashboardActivity" android:exported="false" />
         <activity android:name=".feature.student.profile.ParentActivity" android:exported="false" />
         <activity android:name=".feature.shared.profile.ChangePasswordActivity" android:exported="false" />
