@@ -65,6 +65,7 @@ public class LessonPlayerActivity extends BaseActivity {
     private String courseId;
     private String lessonId;
     private boolean previewMode;
+    private boolean youtubeFallbackTried;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -261,6 +262,7 @@ public class LessonPlayerActivity extends BaseActivity {
 
     private void prepareYoutube(String videoId) {
         try {
+            youtubeFallbackTried = false;
             youtubePlayerView.setVisibility(View.VISIBLE);
             IFramePlayerOptions options = new IFramePlayerOptions.Builder()
                     .controls(1)
@@ -276,6 +278,14 @@ public class LessonPlayerActivity extends BaseActivity {
                 public void onError(YouTubePlayer youTubePlayer,
                                     PlayerConstants.PlayerError error) {
                     youtubePlayerView.setVisibility(View.GONE);
+                    if (!youtubeFallbackTried) {
+                        // Trình phát thư viện bị chặn: thử nhúng lại bằng WebView
+                        // (nhiều video chỉ chặn iframe của thư viện, không chặn trang nhúng).
+                        youtubeFallbackTried = true;
+                        statusText.setText(R.string.video_retry_embed);
+                        prepareEmbeddedVideo("https://www.youtube.com/watch?v=" + videoId);
+                        return;
+                    }
                     statusText.setText(R.string.video_embed_blocked);
                     openExternalButton.setVisibility(View.VISIBLE);
                 }
