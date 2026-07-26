@@ -61,7 +61,8 @@ public final class ApiClient {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final Object refreshLock = new Object();
     private final List<Runnable> pendingRetries = new ArrayList<>();
-    private final List<Runnable> pendingRefreshFailures = new ArrayList<>();
+    private final List<java.util.function.Consumer<ApiError>> pendingRefreshFailures =
+            new ArrayList<>();
     private boolean refreshingToken;
 
     private ApiClient(Context context) {
@@ -196,8 +197,7 @@ public final class ApiClient {
                     mainHandler.post(() -> queueForTokenRefresh(
                             () -> executeMultipart(method, endpoint, fields, files,
                                     true, false, callback),
-                            () -> deliverError(callback,
-                                    new ApiError(401, "Phiên đăng nhập đã hết hạn", true))));
+                            refreshError -> deliverError(callback, refreshError)));
                 } else {
                     ApiError apiError = responseError(statusCode, raw);
                     mainHandler.post(() -> deliverError(callback, apiError));
@@ -334,8 +334,7 @@ public final class ApiClient {
                                 && !endpoint.contains(AppConstants.REFRESH_ENDPOINT)) {
                             queueForTokenRefresh(() -> execute(method, endpoint, body,
                                             true, false, callback),
-                                    () -> deliverError(callback,
-                                            new ApiError(401, "Phiên đăng nhập đã hết hạn", true)));
+                                    refreshError -> deliverError(callback, refreshError));
                         } else {
                             deliverError(callback, apiError);
                         }
@@ -388,8 +387,7 @@ public final class ApiClient {
                         if (authenticated && allowRefresh && apiError.getStatusCode() == 401
                                 && !endpoint.contains(AppConstants.REFRESH_ENDPOINT)) {
                             queueForTokenRefresh(() -> executeArray(endpoint, true, false, callback),
-                                    () -> deliverArrayError(callback,
-                                            new ApiError(401, "Phiên đăng nhập đã hết hạn", true)));
+                                    refreshError -> deliverArrayError(callback, refreshError));
                         } else {
                             deliverArrayError(callback, apiError);
                         }
@@ -426,8 +424,7 @@ public final class ApiClient {
                         ApiError apiError = mapError(volleyError);
                         if (authenticated && allowRefresh && apiError.getStatusCode() == 401) {
                             queueForTokenRefresh(() -> executeValue(endpoint, true, false, callback),
-                                    () -> deliverValueError(callback,
-                                            new ApiError(401, "Phiên đăng nhập đã hết hạn", true)));
+                                    refreshError -> deliverValueError(callback, refreshError));
                         } else {
                             deliverValueError(callback, apiError);
                         }
@@ -441,7 +438,8 @@ public final class ApiClient {
         }
     }
 
-    private void queueForTokenRefresh(Runnable retry, Runnable failure) {
+    private void queueForTokenRefresh(Runnable retry,
+                                      java.util.function.Consumer<ApiError> failure) {
         boolean shouldStartRefresh = false;
         synchronized (refreshLock) {
             pendingRetries.add(retry);
@@ -459,7 +457,7 @@ public final class ApiClient {
     private void refreshAccessToken() {
         String refreshToken = sessionManager.getRefreshToken();
         if (refreshToken.isEmpty()) {
-            finishRefreshFailure(new ApiError(401, "Phiên đăng nhập đã hết hạn", true));
+            finishRefreshFailure(new ApiError(401, "Phiên đăng nhập đã hết hạn", true), true);
             return;
         }
 
@@ -472,19 +470,33 @@ public final class ApiClient {
                         String accessToken = SafeJson.string(response, "", "access", "access_token");
                         if (accessToken.isEmpty()) {
                             finishRefreshFailure(new ApiError(401,
-                                    "Server không trả về access token mới", true));
+                                    "Server không trả về access token mới", true), true);
                             return;
                         }
-                        sessionManager.updateAccessToken(accessToken);
+                        String rotatedRefresh = SafeJson.string(response, "",
+                                "refresh", "refresh_token");
+                        sessionManager.updateTokens(accessToken, rotatedRefresh);
                         finishRefreshSuccess();
-                    }, error -> finishRefreshFailure(new ApiError(401,
-                    "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại", true)));
+                    }, error -> {
+                        NetworkResponse networkResponse =
+                                error == null ? null : error.networkResponse;
+                        if (networkResponse == null) {
+                            // Lỗi mạng tạm thời (timeout, mất kết nối): không hủy phiên,
+                            // chỉ báo lỗi để người dùng thử lại.
+                            finishRefreshFailure(new ApiError(0,
+                                    "Không thể làm mới phiên do mất kết nối, vui lòng thử lại",
+                                    false), false);
+                            return;
+                        }
+                        finishRefreshFailure(new ApiError(401,
+                                "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại", true), true);
+                    });
             request.setRetryPolicy(new DefaultRetryPolicy(
                     AppConstants.NETWORK_TIMEOUT_MS, 0, 1f));
             requestQueue.add(request);
         } catch (Exception exception) {
             AppLogger.error(appContext, "ApiClient", "Không thể refresh token", exception);
-            finishRefreshFailure(new ApiError(401, "Không thể làm mới phiên đăng nhập", true));
+            finishRefreshFailure(new ApiError(0, "Không thể làm mới phiên đăng nhập", false), false);
         }
     }
 
@@ -505,18 +517,20 @@ public final class ApiClient {
         }
     }
 
-    private void finishRefreshFailure(ApiError error) {
-        List<Runnable> failures;
+    private void finishRefreshFailure(ApiError error, boolean clearSession) {
+        List<java.util.function.Consumer<ApiError>> failures;
         synchronized (refreshLock) {
             failures = new ArrayList<>(pendingRefreshFailures);
             pendingRetries.clear();
             pendingRefreshFailures.clear();
             refreshingToken = false;
         }
-        sessionManager.clear();
-        for (Runnable failure : failures) {
+        if (clearSession) {
+            sessionManager.clear();
+        }
+        for (java.util.function.Consumer<ApiError> failure : failures) {
             try {
-                failure.run();
+                failure.accept(error);
             } catch (Exception exception) {
                 AppLogger.error(appContext, "ApiClient", "Không thể báo lỗi refresh", exception);
             }

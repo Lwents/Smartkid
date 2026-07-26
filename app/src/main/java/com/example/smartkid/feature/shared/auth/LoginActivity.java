@@ -30,6 +30,9 @@ public class LoginActivity extends BaseActivity {
     private ProgressBar progressBar;
     private TextView statusText;
     private AuthRepository authRepository;
+    private boolean otpRequired;
+
+    private static final String STATE_OTP_REQUIRED = "state_otp_required";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,11 @@ public class LoginActivity extends BaseActivity {
             String identifier = getIntent() == null ? null : getIntent().getStringExtra("identifier");
             if (identifier != null && !identifier.trim().isEmpty()) {
                 identifierInput.setText(identifier.trim());
+            }
+            if (savedInstanceState != null
+                    && savedInstanceState.getBoolean(STATE_OTP_REQUIRED, false)) {
+                otpRequired = true;
+                otpLayout.setVisibility(View.VISIBLE);
             }
             loginButton.setOnClickListener(view -> safelyLogin());
             findViewById(R.id.buttonForgotPassword).setOnClickListener(view ->
@@ -117,6 +125,7 @@ public class LoginActivity extends BaseActivity {
                 }
                 setLoading(false);
                 if (result.isRequiresOtp()) {
+                    otpRequired = true;
                     otpLayout.setVisibility(View.VISIBLE);
                     statusText.setText(result.getMessage());
                     statusText.setVisibility(View.VISIBLE);
@@ -140,6 +149,12 @@ public class LoginActivity extends BaseActivity {
                 statusText.setVisibility(View.VISIBLE);
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_OTP_REQUIRED, otpRequired);
     }
 
     private void setLoading(boolean loading) {

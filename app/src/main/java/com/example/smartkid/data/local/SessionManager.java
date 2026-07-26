@@ -48,6 +48,20 @@ public class SessionManager {
         }
     }
 
+    /** Cập nhật cả hai token khi server xoay vòng refresh token (ROTATE_REFRESH_TOKENS). */
+    public synchronized void updateTokens(String accessToken, String refreshToken) {
+        try {
+            SharedPreferences.Editor editor = preferences.edit()
+                    .putString(KEY_ACCESS, safe(accessToken));
+            if (refreshToken != null && !refreshToken.isEmpty()) {
+                editor.putString(KEY_REFRESH, refreshToken);
+            }
+            editor.apply();
+        } catch (Exception exception) {
+            AppLogger.error(appContext, "SessionManager", "Không thể cập nhật token", exception);
+        }
+    }
+
     public synchronized void updateUser(User user) {
         try {
             SharedPreferences.Editor editor = preferences.edit();

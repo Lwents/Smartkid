@@ -1,5 +1,6 @@
 package com.example.smartkid.feature.student.profile;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -266,7 +267,10 @@ public class StudentProfileFragment extends Fragment {
                 @Override
                 public void onError(ApiError error) {
                     // Repository luôn xóa phiên cục bộ; nhánh này là hàng rào an toàn cuối.
-                    new SessionManager(requireContext()).clear();
+                    Context context = getContext();
+                    if (context != null) {
+                        new SessionManager(context).clear();
+                    }
                     openLogin();
                 }
             });

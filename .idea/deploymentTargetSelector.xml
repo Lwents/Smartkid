@@ -16,10 +16,10 @@
       </SelectionState>
       <SelectionState runConfigName="androidTest">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-07-25T15:04:42.950627330Z">
+        <DropdownSelection timestamp="2026-07-26T09:24:12.605304930Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=42183a49" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/home/lwent/.android/avd/Pixel_6.avd" />
             </handle>
           </Target>
         </DropdownSelection>

@@ -125,7 +125,9 @@ public final class BusinessRules {
             return "";
         }
         String withoutMarks = Normalizer.normalize(value, Normalizer.Form.NFD)
-                .replaceAll("\\p{M}+", "");
+                .replaceAll("\\p{M}+", "")
+                .replace('đ', 'd')
+                .replace('Đ', 'D');
         return withoutMarks.toLowerCase(Locale.ROOT).trim();
     }
 }

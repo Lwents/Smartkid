@@ -60,6 +60,17 @@ public class BusinessRulesTest {
     }
 
     @Test
+    public void filterCourses_matchesLetterDWithStroke() {
+        List<Course> courses = Arrays.asList(
+                course("1", "Đại số cơ bản", "Toán", "Thầy Đức"),
+                course("2", "Hình học", "Toán", "Cô Lan")
+        );
+
+        assertEquals(1, BusinessRules.filterCourses(courses, "dai so").size());
+        assertEquals(1, BusinessRules.filterCourses(courses, "thay duc").size());
+    }
+
+    @Test
     public void sortCourses_createsSortedCopyWithoutChangingSource() {
         Course beta = course("2", "Beta", "", "");
         Course alpha = course("1", "Alpha", "", "");
@@ -75,6 +86,6 @@ public class BusinessRulesTest {
 
     private Course course(String id, String title, String subject, String teacher) {
         return new Course(id, title, "Lớp 5", subject, teacher,
-                10, 25, 0, "", "", true);
+                10, 25, "", "", true);
     }
 }
