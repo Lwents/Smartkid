@@ -101,19 +101,9 @@
             android:padding="17dp">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="“"
-                android:textColor="@color/smartkid_accent"
-                android:textSize="30sp"
-                android:textStyle="bold" />
-
-            <TextView
                 android:id="@+id/textNotificationSheetMessage"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="7dp"
-                android:layout_weight="1"
                 android:lineSpacingExtra="4dp"
                 android:textColor="@color/smartkid_text"
                 android:textSize="18sp" />
