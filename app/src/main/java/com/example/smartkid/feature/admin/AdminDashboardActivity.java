@@ -5,6 +5,8 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,12 +25,14 @@ import android.content.Intent;
 import com.example.smartkid.R;
 import com.example.smartkid.common.ui.FeatureSpec;
 import com.example.smartkid.common.ui.LiquidGlassUi;
+import com.example.smartkid.common.ui.NotificationBadgeController;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.model.User;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.feature.admin.data.AdminDashboardRepository;
 import com.example.smartkid.feature.admin.model.AdminDashboardData;
+import com.example.smartkid.data.repository.NotificationBadgeRepository;
 import com.example.smartkid.common.ui.chart.ActivityChartView;
 import com.example.smartkid.common.navigation.UserRole;
 import com.example.smartkid.common.ui.RoleDashboardActivity;
@@ -54,10 +58,21 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     private static final String API_DATE_PATTERN = "yyyy-MM-dd";
     private static final String SHORT_DATE_PATTERN = "dd/MM";
     private static final long DAY_MILLIS = 86_400_000L;
+    private static final long NOTIFICATION_REFRESH_MS = 20_000L;
     private static final TimeInterpolator NAVIGATION_INTERPOLATOR =
             new PathInterpolator(0.2f, 0f, 0f, 1f);
 
     private AdminDashboardRepository repository;
+    private NotificationBadgeRepository notificationRepository;
+    private NotificationBadgeController notificationBadge;
+    private final Handler notificationHandler = new Handler(Looper.getMainLooper());
+    private final Runnable notificationRefreshTask = new Runnable() {
+        @Override
+        public void run() {
+            loadNotificationBadge();
+            notificationHandler.postDelayed(this, NOTIFICATION_REFRESH_MS);
+        }
+    };
     private ProgressBar progressBar;
     private TextView statusText;
     private NestedScrollView dashboardScroll;
@@ -84,6 +99,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                     R.drawable.admin_bg_screen, true);
             findViewById(R.id.adminDashboardRoot).setBackgroundResource(R.drawable.admin_bg_screen);
             repository = new AdminDashboardRepository(this);
+            notificationRepository = new NotificationBadgeRepository(this);
             bindViews();
             bindIdentity();
             bindNavigation();
@@ -96,12 +112,38 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
             int initialPage = Math.max(PAGE_OVERVIEW, Math.min(PAGE_SETTINGS, restoredPage));
             selectPage(initialPage, false);
             renderAdminTools(null);
-            loadDashboard();
+            refreshDashboard();
             loadChartPeriod("7_days", 7, getString(R.string.admin_chart_7_days));
         } catch (Exception exception) {
             AppLogger.error(this, "AdminDashboardActivity", "Không thể tạo dashboard", exception);
             showErrorDialog("Không thể mở bảng điều khiển quản trị");
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if (repository != null) refreshDashboard();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        notificationHandler.removeCallbacks(notificationRefreshTask);
+        notificationHandler.postDelayed(notificationRefreshTask, NOTIFICATION_REFRESH_MS);
+    }
+
+    @Override
+    protected void onPause() {
+        notificationHandler.removeCallbacks(notificationRefreshTask);
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        notificationHandler.removeCallbacks(notificationRefreshTask);
+        if (notificationBadge != null) notificationBadge.clear();
+        super.onDestroy();
     }
 
     private void bindViews() {
@@ -126,13 +168,20 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 || navigationIndicator == null || activityChart == null) {
             throw new IllegalStateException("Dashboard quản trị thiếu thành phần bắt buộc");
         }
+        View notificationButton = findViewById(R.id.buttonAdminNotifications);
+        TextView notificationBadgeView = findViewById(R.id.textAdminNotificationBadge);
+        if (notificationButton == null || notificationBadgeView == null) {
+            throw new IllegalStateException("Chuông thông báo quản trị chưa đầy đủ");
+        }
+        notificationBadge = new NotificationBadgeController(
+                this, notificationButton, notificationBadgeView);
         refreshLayouts = new androidx.swiperefreshlayout.widget.SwipeRefreshLayout[]{
                 findViewById(R.id.refreshAdminDashboard),
                 findViewById(R.id.refreshAdminUsers),
                 findViewById(R.id.refreshAdminContent),
                 findViewById(R.id.refreshAdminSettings)};
         for (androidx.swiperefreshlayout.widget.SwipeRefreshLayout layout : refreshLayouts) {
-            if (layout != null) layout.setOnRefreshListener(this::loadDashboard);
+            if (layout != null) layout.setOnRefreshListener(this::refreshDashboard);
         }
     }
 
@@ -324,6 +373,28 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 if (error != null && error.isSessionExpired()) handleApiError(error);
             }
         });
+    }
+
+    private void refreshDashboard() {
+        loadDashboard();
+        loadNotificationBadge();
+    }
+
+    private void loadNotificationBadge() {
+        if (notificationRepository == null || notificationBadge == null) return;
+        notificationRepository.loadUnreadCount(
+                "admin/notifications/?limit=1", new ApiCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer unread) {
+                        if (!isUsable()) return;
+                        notificationBadge.render(unread == null ? 0 : unread);
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        if (error != null && error.isSessionExpired()) handleApiError(error);
+                    }
+                });
     }
 
     private void render(AdminDashboardData data) {

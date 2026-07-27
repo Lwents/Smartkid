@@ -3,6 +3,8 @@ package com.example.smartkid.feature.teacher;
 import android.animation.TimeInterpolator;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +20,7 @@ import androidx.core.widget.NestedScrollView;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.ui.LiquidGlassUi;
+import com.example.smartkid.common.ui.NotificationBadgeController;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.model.User;
 import com.example.smartkid.data.remote.ApiCallback;
@@ -33,6 +36,7 @@ import com.example.smartkid.feature.teacher.course.TeacherCourseCreateActivity;
 import com.example.smartkid.feature.teacher.exercise.TeacherExerciseEditorActivity;
 import com.example.smartkid.feature.teacher.data.TeacherDashboardRepository;
 import com.example.smartkid.feature.teacher.model.TeacherDashboardData;
+import com.example.smartkid.data.repository.NotificationBadgeRepository;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -46,10 +50,21 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
     private static final int PAGE_EXAMS = 2;
     private static final int PAGE_STUDENTS = 3;
     private static final String STATE_SELECTED_PAGE = "teacher_selected_page";
+    private static final long NOTIFICATION_REFRESH_MS = 20_000L;
     private static final TimeInterpolator NAVIGATION_INTERPOLATOR =
             new PathInterpolator(0.2f, 0f, 0f, 1f);
 
     private TeacherDashboardRepository repository;
+    private NotificationBadgeRepository notificationRepository;
+    private NotificationBadgeController notificationBadge;
+    private final Handler notificationHandler = new Handler(Looper.getMainLooper());
+    private final Runnable notificationRefreshTask = new Runnable() {
+        @Override
+        public void run() {
+            loadNotificationBadge();
+            notificationHandler.postDelayed(this, NOTIFICATION_REFRESH_MS);
+        }
+    };
     private ProgressBar progressBar;
     private TextView statusText;
     private LinearLayout coursesContainer;
@@ -77,6 +92,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
             findViewById(R.id.teacherDashboardRoot).setBackgroundResource(
                     R.drawable.admin_bg_screen);
             repository = new TeacherDashboardRepository(this);
+            notificationRepository = new NotificationBadgeRepository(this);
             bindViews();
             bindHeader();
             bindActions();
@@ -84,7 +100,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
             int restoredPage = savedInstanceState == null ? PAGE_OVERVIEW
                     : savedInstanceState.getInt(STATE_SELECTED_PAGE, PAGE_OVERVIEW);
             selectPage(Math.max(PAGE_OVERVIEW, Math.min(PAGE_STUDENTS, restoredPage)), false);
-            loadDashboard();
+            refreshDashboard();
         } catch (Exception exception) {
             AppLogger.error(this, "TeacherDashboardActivity", "Không thể tạo dashboard", exception);
             showErrorDialog("Không thể mở bảng điều khiển giáo viên");
@@ -94,7 +110,27 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        if (repository != null) loadDashboard();
+        if (repository != null) refreshDashboard();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        notificationHandler.removeCallbacks(notificationRefreshTask);
+        notificationHandler.postDelayed(notificationRefreshTask, NOTIFICATION_REFRESH_MS);
+    }
+
+    @Override
+    protected void onPause() {
+        notificationHandler.removeCallbacks(notificationRefreshTask);
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        notificationHandler.removeCallbacks(notificationRefreshTask);
+        if (notificationBadge != null) notificationBadge.clear();
+        super.onDestroy();
     }
 
     private void bindViews() {
@@ -121,6 +157,13 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                 || navigationIndicator == null) {
             throw new IllegalStateException("Dashboard giáo viên thiếu thành phần bắt buộc");
         }
+        View notificationButton = findViewById(R.id.buttonTeacherNotifications);
+        TextView notificationBadgeView = findViewById(R.id.textTeacherNotificationBadge);
+        if (notificationButton == null || notificationBadgeView == null) {
+            throw new IllegalStateException("Chuông thông báo giáo viên chưa đầy đủ");
+        }
+        notificationBadge = new NotificationBadgeController(
+                this, notificationButton, notificationBadgeView);
     }
 
     private void bindHeader() {
@@ -161,14 +204,14 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
     }
 
     private void bindActions() {
-        findViewById(R.id.buttonTeacherRefresh).setOnClickListener(view -> loadDashboard());
+        findViewById(R.id.buttonTeacherRefresh).setOnClickListener(view -> refreshDashboard());
         refreshLayouts = new androidx.swiperefreshlayout.widget.SwipeRefreshLayout[]{
                 findViewById(R.id.refreshTeacherOverview),
                 findViewById(R.id.refreshTeacherCourses),
                 findViewById(R.id.refreshTeacherExams),
                 findViewById(R.id.refreshTeacherStudents)};
         for (androidx.swiperefreshlayout.widget.SwipeRefreshLayout layout : refreshLayouts) {
-            if (layout != null) layout.setOnRefreshListener(this::loadDashboard);
+            if (layout != null) layout.setOnRefreshListener(this::refreshDashboard);
         }
         findViewById(R.id.buttonTeacherNotifications).setOnClickListener(view ->
                 openManagementFeature("teacher_notifications"));
@@ -327,6 +370,28 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                 if (error != null && error.isSessionExpired()) handleApiError(error);
             }
         });
+    }
+
+    private void refreshDashboard() {
+        loadDashboard();
+        loadNotificationBadge();
+    }
+
+    private void loadNotificationBadge() {
+        if (notificationRepository == null || notificationBadge == null) return;
+        notificationRepository.loadUnreadCount(
+                "teacher/notifications/?limit=1", new ApiCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer unread) {
+                        if (!isUsable()) return;
+                        notificationBadge.render(unread == null ? 0 : unread);
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        if (error != null && error.isSessionExpired()) handleApiError(error);
+                    }
+                });
     }
 
     private void render(TeacherDashboardData data) {

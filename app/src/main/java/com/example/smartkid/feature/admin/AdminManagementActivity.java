@@ -158,6 +158,9 @@ public class AdminManagementActivity extends BaseActivity {
     private void showItem(FeatureItem item) {
         if (item == null) return;
         try {
+            if ("admin_notifications".equals(spec.getKey())) {
+                markNotificationRead(item);
+            }
             AlertDialog.Builder builder = new AlertDialog.Builder(this)
                     .setTitle(item.getTitle())
                     .setMessage(friendlyDetail(item))
@@ -170,6 +173,23 @@ public class AdminManagementActivity extends BaseActivity {
             AppLogger.error(this, "AdminManagementActivity", "Không thể hiện chi tiết", exception);
             showErrorDialog("Không thể đọc chi tiết dữ liệu");
         }
+    }
+
+    private void markNotificationRead(FeatureItem item) {
+        if (item == null || item.getId().isEmpty()
+                || SafeJson.bool(item.getSource(), false, "is_read", "isRead")) return;
+        repository.action(Request.Method.PATCH,
+                "admin/notifications/" + item.getId() + "/read/", new JSONObject(),
+                new ApiCallback<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject data) {
+                        try { item.getSource().put("is_read", true); }
+                        catch (Exception ignored) { }
+                        if (adapter != null) adapter.notifyDataSetChanged();
+                    }
+
+                    @Override public void onError(ApiError error) { }
+                });
     }
 
     /** Chi tiết dạng "Nhãn: giá trị" thay vì dump JSON thô. */

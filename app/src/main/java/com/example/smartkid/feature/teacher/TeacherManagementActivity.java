@@ -303,7 +303,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 // qua hộp thoại rồi bấm thêm một lần nữa.
                 String category = SafeJson.string(item.getSource(), "", "category");
                 if (category.startsWith("lesson_question")) {
-                    if (!item.getId().isEmpty()) markNotificationRead(item.getId());
+                    markNotificationRead(item);
                     openQaScreen();
                     return;
                 }
@@ -406,11 +406,18 @@ public class TeacherManagementActivity extends BaseActivity {
 
     /** Thông báo: hiện nội dung thân thiện thay vì JSON thô, kèm ngữ cảnh khóa học/bài học. */
     /** Đánh dấu đã đọc thông báo (chạy nền, không chặn việc mở màn hỏi đáp). */
-    private void markNotificationRead(String notificationId) {
-        repository.action(Request.Method.POST,
-                "teacher/notifications/" + notificationId + "/read/", new JSONObject(),
+    private void markNotificationRead(FeatureItem item) {
+        if (item == null || item.getId().isEmpty()
+                || SafeJson.bool(item.getSource(), false, "is_read", "isRead")) return;
+        repository.action(Request.Method.PATCH,
+                "teacher/notifications/" + item.getId() + "/read/", new JSONObject(),
                 new ApiCallback<JSONObject>() {
-                    @Override public void onSuccess(JSONObject data) { }
+                    @Override
+                    public void onSuccess(JSONObject data) {
+                        try { item.getSource().put("is_read", true); }
+                        catch (Exception ignored) { }
+                        if (adapter != null) adapter.notifyDataSetChanged();
+                    }
                     @Override public void onError(ApiError error) { }
                 });
     }
@@ -433,7 +440,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 .setMessage(message.trim())
                 .setPositiveButton("Đóng", null)
                 .show();
-        if (!item.getId().isEmpty()) markNotificationRead(item.getId());
+        markNotificationRead(item);
     }
 
     /** Hỏi đáp: đọc toàn bộ cuộc trò chuyện và trả lời ngay trong bottom sheet. */

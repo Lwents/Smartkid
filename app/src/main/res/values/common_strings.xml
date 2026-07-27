@@ -42,6 +42,7 @@
     <string name="new_password_hint">Mật khẩu mới</string>
     <string name="reset_password">Đổi mật khẩu</string>
     <string name="open_notifications">Mở thông báo</string>
+    <string name="role_notification_badge_description">Có %1$d thông báo mới</string>
     <string name="create_on_server">Tạo trên máy chủ</string>
     <string name="email">Email</string>
     <string name="phone">Số điện thoại</string>
