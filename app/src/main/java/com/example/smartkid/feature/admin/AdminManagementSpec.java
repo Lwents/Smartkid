@@ -16,7 +16,7 @@ public final class AdminManagementSpec {
         add(specs, "admin_dashboard", "Bảng điều khiển", "admin/dashboard/", "");
         add(specs, "admin_active_users", "Người dùng đang hoạt động", "admin/dashboard/active-users/", "");
         add(specs, "admin_users", "Quản lý người dùng", "account/admin/users/?page=1&pageSize=100", "admin_users");
-        add(specs, "admin_courses", "Khóa học và bài học", "admin/courses/?page=1&pageSize=100", "");
+        add(specs, "admin_courses", "Khóa học và video", "admin/courses/?page=1&pageSize=100", "admin_courses");
         add(specs, "admin_health", "Sức khỏe hệ thống", "admin/system/health/", "");
         add(specs, "admin_activity", "Nhật ký hoạt động", "admin/activity-logs/", "");
         add(specs, "admin_security", "Bảo mật", "admin/security/policy/", "");

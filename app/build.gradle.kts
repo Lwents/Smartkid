@@ -78,7 +78,6 @@ android {
                 "src/main/res-course",
                 "src/main/res-exam",
                 "src/main/res-ai",
-                "src/main/res-payment",
                 "src/main/res-role-common",
                 "src/main/res-content-authoring",
                 "src/main/res-teacher",

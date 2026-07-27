@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -28,9 +29,11 @@ import com.example.smartkid.data.repository.ManagementRepository;
 import com.example.smartkid.feature.admin.users.AdminUserCreateActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.example.smartkid.common.util.SwipeRefreshFix;
 
@@ -45,6 +48,7 @@ public class AdminManagementActivity extends BaseActivity {
     private TextView emptyText;
     private View refreshButton;
     private SwipeRefreshLayout refreshLayout;
+    private String currentSearchQuery = "";
 
     @Override
     public void finish() {
@@ -68,6 +72,11 @@ public class AdminManagementActivity extends BaseActivity {
             UserRole role = UserRole.fromString(new SessionManager(this).getUser().getRole());
             if (spec == null || !spec.isAvailable() || !spec.isAllowedForRole(role)) {
                 showErrorDialog("Chức năng quản lý không hợp lệ");
+                finish();
+                return;
+            }
+            if (AdminSettingsRules.supports(key)) {
+                startActivity(AdminSettingsActivity.createIntent(this, key));
                 finish();
                 return;
             }
@@ -96,7 +105,8 @@ public class AdminManagementActivity extends BaseActivity {
             search.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
                 @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    adapter.filter(s == null ? "" : s.toString());
+                    currentSearchQuery = s == null ? "" : s.toString();
+                    adapter.filter(currentSearchQuery);
                 }
                 @Override public void afterTextChanged(Editable s) { }
             });
@@ -156,6 +166,7 @@ public class AdminManagementActivity extends BaseActivity {
                 if (!isUsable()) return;
                 setLoading(false);
                 adapter.setItems(data);
+                adapter.filter(currentSearchQuery);
             }
 
             @Override
@@ -170,6 +181,10 @@ public class AdminManagementActivity extends BaseActivity {
     private void showItem(FeatureItem item) {
         if (item == null) return;
         try {
+            if ("admin_courses".equals(spec.getActionKind())) {
+                openCourseVideos(item);
+                return;
+            }
             if ("admin_notifications".equals(spec.getKey())) {
                 markNotificationRead(item);
             }
@@ -188,6 +203,23 @@ public class AdminManagementActivity extends BaseActivity {
         } catch (Exception exception) {
             AppLogger.error(this, "AdminManagementActivity", "Không thể hiện chi tiết", exception);
             showErrorDialog("Không thể đọc chi tiết dữ liệu");
+        }
+    }
+
+    private void openCourseVideos(FeatureItem course) {
+        if (course == null || course.getId().isEmpty()) {
+            showErrorDialog(getString(R.string.admin_course_video_invalid_course));
+            return;
+        }
+        try {
+            Intent intent = new Intent(this, AdminCourseVideosActivity.class);
+            intent.putExtra(AdminCourseVideosActivity.EXTRA_COURSE_ID, course.getId());
+            intent.putExtra(AdminCourseVideosActivity.EXTRA_COURSE_TITLE, course.getTitle());
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "AdminManagementActivity",
+                    "Không thể mở video khóa học", exception);
+            showErrorDialog(getString(R.string.admin_course_video_open_error));
         }
     }
 
@@ -270,6 +302,7 @@ public class AdminManagementActivity extends BaseActivity {
     private String roleLabel(String role) {
         switch (role) {
             case "admin": return "Quản trị viên";
+            case "teacher":
             case "instructor": return "Giáo viên";
             case "student": return "Học sinh";
             default: return role;
@@ -296,10 +329,171 @@ public class AdminManagementActivity extends BaseActivity {
 
     private void showActions(FeatureItem item) {
         if (item == null || !"admin_users".equals(spec.getActionKind())) return;
-        String[] labels = new String[]{"Khóa tài khoản", "Mở khóa tài khoản"};
-        new AlertDialog.Builder(this).setTitle("Chọn thao tác")
-                .setItems(labels, (dialog, which) -> confirmAction(item, labels[which]))
+        boolean active = SafeJson.bool(item.getSource(), true, "is_active", "isActive");
+        List<String> labels = new ArrayList<>();
+        List<String> actions = new ArrayList<>();
+        labels.add(getString(active ? R.string.admin_user_lock : R.string.admin_user_unlock));
+        actions.add(active ? "lock" : "unlock");
+        labels.add(getString(R.string.admin_user_change_role));
+        actions.add("role");
+        labels.add(getString(R.string.admin_user_reset_password));
+        actions.add("password");
+
+        new AlertDialog.Builder(this).setTitle(R.string.admin_user_actions_title)
+                .setItems(labels.toArray(new String[0]), (dialog, which) -> {
+                    String action = actions.get(which);
+                    if ("role".equals(action)) {
+                        showRoleChooser(item);
+                    } else if ("password".equals(action)) {
+                        showPasswordReset(item);
+                    } else {
+                        confirmStatusChange(item, "unlock".equals(action));
+                    }
+                })
                 .show();
+    }
+
+    private void showRoleChooser(FeatureItem item) {
+        String[] roles = {
+                AdminUserActions.ROLE_STUDENT,
+                AdminUserActions.ROLE_INSTRUCTOR,
+                AdminUserActions.ROLE_ADMIN,
+        };
+        String[] labels = {
+                getString(R.string.admin_user_role_student),
+                getString(R.string.admin_user_role_instructor),
+                getString(R.string.admin_user_role_admin),
+        };
+        String current = normalizeRole(SafeJson.string(item.getSource(), "student", "role"));
+        int selected = 0;
+        for (int index = 0; index < roles.length; index++) {
+            if (roles[index].equals(current)) selected = index;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.admin_user_role_title)
+                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (roles[which].equals(current)) {
+                        showShortMessage(getString(R.string.admin_user_role_unchanged));
+                    } else {
+                        confirmRoleChange(item, roles[which], labels[which]);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void confirmRoleChange(FeatureItem item, String role, String roleName) {
+        String message = getString(R.string.admin_user_role_confirm, item.getTitle(), roleName);
+        if (AdminUserActions.ROLE_ADMIN.equals(role)) {
+            message += "\n\n" + getString(R.string.admin_user_role_admin_warning);
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.admin_user_role_confirm_title)
+                .setMessage(message)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.admin_course_confirm_action,
+                        (dialog, which) -> updateUserRole(item, role))
+                .show();
+    }
+
+    private void updateUserRole(FeatureItem item, String role) {
+        if (!AdminUserActions.isSupportedRole(role)) return;
+        try {
+            JSONObject body = new JSONObject();
+            body.put("role", role);
+            setLoading(true);
+            repository.action(Request.Method.PATCH,
+                    AdminUserActions.userEndpoint(item.getId()), body,
+                    new ApiCallback<JSONObject>() {
+                        @Override
+                        public void onSuccess(JSONObject data) {
+                            if (!isUsable()) return;
+                            showShortMessage(getString(R.string.admin_user_role_updated));
+                            loadSafely();
+                        }
+
+                        @Override
+                        public void onError(ApiError error) {
+                            handleUserActionError(error);
+                        }
+                    });
+        } catch (Exception exception) {
+            failUserAction("Không thể chuẩn bị thay đổi vai trò", exception);
+        }
+    }
+
+    private void showPasswordReset(FeatureItem item) {
+        View form = LayoutInflater.from(this).inflate(
+                R.layout.admin_dialog_reset_password, null, false);
+        TextInputLayout newPasswordLayout = form.findViewById(R.id.layoutAdminNewPassword);
+        TextInputLayout confirmPasswordLayout = form.findViewById(R.id.layoutAdminConfirmPassword);
+        TextInputEditText newPasswordInput = form.findViewById(R.id.inputAdminNewPassword);
+        TextInputEditText confirmPasswordInput = form.findViewById(R.id.inputAdminConfirmPassword);
+        if (newPasswordLayout == null || confirmPasswordLayout == null
+                || newPasswordInput == null || confirmPasswordInput == null) {
+            showErrorDialog(getString(R.string.admin_user_action_error));
+            return;
+        }
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.admin_user_password_title, item.getTitle()))
+                .setView(form)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.admin_user_password_submit, null)
+                .create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(view -> {
+                    String password = inputText(newPasswordInput);
+                    String confirmation = inputText(confirmPasswordInput);
+                    AdminUserActions.PasswordIssue issue =
+                            AdminUserActions.validatePassword(password, confirmation);
+                    newPasswordLayout.setError(null);
+                    confirmPasswordLayout.setError(null);
+                    if (issue == AdminUserActions.PasswordIssue.REQUIRED) {
+                        newPasswordLayout.setError(
+                                getString(R.string.admin_user_password_required));
+                        return;
+                    }
+                    if (issue == AdminUserActions.PasswordIssue.TOO_SHORT) {
+                        newPasswordLayout.setError(
+                                getString(R.string.admin_user_password_short));
+                        return;
+                    }
+                    if (issue == AdminUserActions.PasswordIssue.MISMATCH) {
+                        confirmPasswordLayout.setError(
+                                getString(R.string.admin_user_password_mismatch));
+                        return;
+                    }
+                    dialog.dismiss();
+                    resetUserPassword(item, password);
+                }));
+        dialog.show();
+    }
+
+    private void resetUserPassword(FeatureItem item, String password) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("new_password", password);
+            setLoading(true);
+            repository.action(Request.Method.POST,
+                    AdminUserActions.passwordEndpoint(item.getId()), body,
+                    new ApiCallback<JSONObject>() {
+                        @Override
+                        public void onSuccess(JSONObject data) {
+                            if (!isUsable()) return;
+                            setLoading(false);
+                            showShortMessage(getString(R.string.admin_user_password_updated));
+                        }
+
+                        @Override
+                        public void onError(ApiError error) {
+                            handleUserActionError(error);
+                        }
+                    });
+        } catch (Exception exception) {
+            failUserAction("Không thể chuẩn bị đặt lại mật khẩu", exception);
+        }
     }
 
     private void confirmCreateBackup() {
@@ -364,41 +558,68 @@ public class AdminManagementActivity extends BaseActivity {
                 });
     }
 
-    private void confirmAction(FeatureItem item, String label) {
+    private void confirmStatusChange(FeatureItem item, boolean activate) {
+        String label = getString(activate
+                ? R.string.admin_user_unlock : R.string.admin_user_lock);
         new AlertDialog.Builder(this).setTitle(label)
-                .setMessage("Thực hiện “" + label + "” với “" + item.getTitle() + "”? Dữ liệu sẽ được cập nhật trên server.")
+                .setMessage(getString(R.string.admin_user_status_confirm,
+                        label, item.getTitle()))
                 .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton("Xác nhận", (dialog, which) -> performAction(item, label))
+                .setPositiveButton(R.string.admin_course_confirm_action,
+                        (dialog, which) -> updateUserStatus(item, activate))
                 .show();
     }
 
-    private void performAction(FeatureItem item, String label) {
+    private void updateUserStatus(FeatureItem item, boolean activate) {
         try {
             if (!"admin_users".equals(spec.getActionKind())) return;
-            String endpoint = "account/admin/users/" + item.getId() + "/";
             JSONObject body = new JSONObject();
-            body.put("is_active", label.startsWith("Mở"));
+            body.put("is_active", activate);
             setLoading(true);
-            repository.action(Request.Method.PATCH, endpoint, body, new ApiCallback<JSONObject>() {
+            repository.action(Request.Method.PATCH,
+                    AdminUserActions.userEndpoint(item.getId()), body,
+                    new ApiCallback<JSONObject>() {
                 @Override
                 public void onSuccess(JSONObject data) {
                     if (!isUsable()) return;
-                    showShortMessage("Đã cập nhật trên server");
+                    showShortMessage(getString(R.string.admin_user_status_updated));
                     loadSafely();
                 }
 
                 @Override
                 public void onError(ApiError error) {
-                    if (!isUsable()) return;
-                    setLoading(false);
-                    handleApiError(error);
+                    handleUserActionError(error);
                 }
             });
         } catch (Exception exception) {
-            AppLogger.error(this, "AdminManagementActivity", "Không thể thao tác", exception);
-            setLoading(false);
-            showErrorDialog("Không thể chuẩn bị thao tác quản lý");
+            failUserAction("Không thể chuẩn bị thay đổi trạng thái", exception);
         }
+    }
+
+    private void handleUserActionError(ApiError error) {
+        if (!isUsable()) return;
+        setLoading(false);
+        if (error == null) {
+            showErrorDialog(getString(R.string.admin_user_action_error));
+        } else {
+            handleApiError(error);
+        }
+    }
+
+    private void failUserAction(String logMessage, Exception exception) {
+        AppLogger.error(this, "AdminManagementActivity", logMessage, exception);
+        setLoading(false);
+        showErrorDialog(getString(R.string.admin_user_action_error));
+    }
+
+    private static String inputText(TextInputEditText input) {
+        Editable value = input == null ? null : input.getText();
+        return value == null ? "" : value.toString();
+    }
+
+    private static String normalizeRole(String role) {
+        if ("teacher".equalsIgnoreCase(role)) return AdminUserActions.ROLE_INSTRUCTOR;
+        return role == null ? "" : role.trim().toLowerCase(java.util.Locale.ROOT);
     }
 
     private void setLoading(boolean loading) {

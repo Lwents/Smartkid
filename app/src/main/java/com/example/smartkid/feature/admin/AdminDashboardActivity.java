@@ -451,10 +451,10 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         tools.add(tool("admin_active_users", "Người dùng đang hoạt động",
                 "Theo dõi người dùng trực tuyến trong " + window + " phút gần nhất",
                 R.drawable.admin_ic_users, 0xFF3B82F6, 0xFF60A5FA, active + " online"));
-        tools.add(tool("admin_users", "Quản lý người dùng", "Phân quyền, khóa và quản lý tài khoản",
+        tools.add(tool("admin_users", "Quản lý người dùng", "Phân quyền, đặt lại mật khẩu và khóa tài khoản",
                 R.drawable.admin_ic_users, 0xFF635BFF, 0xFF818CF8, ""));
         tools.add(tool("admin_courses", "Quản lý khóa học",
-                "Theo dõi khóa học và nội dung do giáo viên tự xuất bản",
+                "Duyệt, xuất bản, lưu trữ khóa học và xử lý video vi phạm",
                 R.drawable.admin_ic_course, 0xFF10B981, 0xFF34D399, ""));
         tools.add(tool("admin_health", "Sức khỏe hệ thống",
                 "CPU " + cpu + "% • RAM " + ram + "% • Disk " + disk + "%",
@@ -620,8 +620,10 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
             return;
         }
         try {
-            Intent intent = new Intent(this, AdminManagementActivity.class);
-            intent.putExtra(AdminManagementActivity.EXTRA_SPEC_KEY, key);
+            Intent intent = AdminSettingsRules.supports(key)
+                    ? AdminSettingsActivity.createIntent(this, key)
+                    : new Intent(this, AdminManagementActivity.class)
+                            .putExtra(AdminManagementActivity.EXTRA_SPEC_KEY, key);
             startActivity(intent);
         } catch (Exception exception) {
             AppLogger.error(this, "AdminDashboardActivity", "Không thể mở chức năng", exception);

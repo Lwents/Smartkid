@@ -8,16 +8,20 @@ PostgreSQL và không dựng dữ liệu giả khi server trả lỗi.
 
 - Xác thực: đăng nhập username/email, OTP, JWT/refresh token, đăng ký học viên,
   quên mật khẩu, deep link đặt lại mật khẩu, đổi mật khẩu và đăng xuất.
-- Học viên: dashboard, khóa học của tôi, danh mục, ghi danh, giỏ hàng, thanh toán
-  MoMo, lịch sử thanh toán, trình phát bài học, video/tài liệu/TTS, tiến độ, lộ
-  trình, đề thi, kết quả/xếp hạng/chứng chỉ, trò chơi, thông báo, hồ sơ/phụ huynh.
+- Học viên: dashboard, khóa học của tôi, danh mục, ghi danh miễn phí, trình phát
+  bài học, video/tài liệu/TTS, tiến độ, lộ trình, đề thi, kết quả/xếp hạng/chứng
+  chỉ, trò chơi, thông báo, hồ sơ/phụ huynh.
 - Tương tác học tập: hỏi đáp theo bài học, phản hồi/reaction/report, AI Tutor,
   phân tích học tập, đánh giá đầu vào và khôi phục streak qua API thật.
 - Giáo viên: dashboard, hỏi đáp, khóa học/thư viện, tạo khóa học, tạo đề và câu
   hỏi, xuất bản đề, thống kê/lượt nộp, tạo trò chơi/câu hỏi/cặp ghép từ, học viên,
   tiến độ, phản hồi và thông báo.
-- Quản trị: dashboard, người dùng, tạo/khóa/mở tài khoản, duyệt khóa học, sức khỏe
-  hệ thống, nhật ký, chính sách bảo mật, cấu hình, báo cáo, giao dịch và thông báo.
+- Quản trị: dashboard, người dùng, tạo/khóa/mở tài khoản, quản lý khóa học, sức
+  khỏe hệ thống, nhật ký, chính sách bảo mật, cấu hình, báo cáo và thông báo.
+
+SmartKid hiện không bán hoặc thu phí khóa học. Mọi khóa học đã xuất bản đều được
+ghi danh miễn phí; không thêm lại giỏ hàng, giá khóa học hoặc cổng thanh toán nếu
+chưa có yêu cầu sản phẩm mới.
 
 ## Kiến trúc
 
@@ -28,7 +32,7 @@ com.example.smartkid
 │   ├── ui/            thành phần giao diện dùng chung
 │   └── util/          hằng số, log và xử lý JSON an toàn
 ├── data/
-│   ├── local/         SharedPreferences cho JWT/session và ID giỏ hàng
+│   ├── local/         SharedPreferences cho JWT/session
 │   ├── model/         model Java
 │   ├── remote/        Volley, refresh token, chuẩn hóa lỗi
 │   └── repository/    truy cập API và ánh xạ JSON
@@ -40,8 +44,8 @@ com.example.smartkid
     └── admin/         dashboard và vận hành hệ thống
 ```
 
-`SharedPreferences` chỉ giữ phiên và lựa chọn giỏ hàng; dữ liệu nghiệp vụ luôn
-được đồng bộ lại từ PostgreSQL thông qua backend.
+`SharedPreferences` chỉ giữ phiên đăng nhập; dữ liệu nghiệp vụ luôn được đồng bộ
+lại từ PostgreSQL thông qua backend.
 
 Tài nguyên Android được tách theo miền (`res-auth`, `res-course`, `res-exam`,
 `res-teacher`, `res-admin`, ...) và được khai báo trong `sourceSets` để tránh một
@@ -86,5 +90,5 @@ GitHub Actions chạy unit test, Android Lint và build debug trên mọi push h
 request vào `main`. Bản release sử dụng R8 và resource shrinking.
 
 AI Tutor/câu hỏi AI cần `OPENROUTER_API_KEY` hoặc provider tương ứng trong
-`backend/.env`. Thanh toán thật cần cấu hình đầy đủ các biến `MOMO_*`. Khi thiếu
-cấu hình, server trả lỗi rõ ràng và Android hiển thị lỗi thay vì dựng kết quả giả.
+`backend/.env`. Khi thiếu cấu hình, server trả lỗi rõ ràng và Android hiển thị lỗi
+thay vì dựng kết quả giả.

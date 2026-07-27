@@ -31,7 +31,7 @@ public class ManagementRepository {
             "id", "uuid", "user_id", "course_id", "jti"
     };
     private static final String[] ARRAY_KEYS = {
-            "results", "items", "courses", "users", "students", "transactions",
+            "results", "items", "courses", "users", "students",
             "logs", "notifications", "backups", "sessions", "data", "questions", "feedback",
             "recent"
     };
@@ -54,7 +54,6 @@ public class ManagementRepository {
             // Cấu hình / bảo mật
             {"brand", "Thương hiệu"},
             {"domainEmail", "Tên miền và Email"},
-            {"payment", "Thanh toán"},
             {"integrations", "Tích hợp"},
             {"twoFA", "Xác thực 2 lớp"},
             {"rateLimit", "Giới hạn đăng nhập sai"},

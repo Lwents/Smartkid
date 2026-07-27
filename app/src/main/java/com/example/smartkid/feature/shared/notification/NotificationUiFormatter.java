@@ -23,7 +23,6 @@ final class NotificationUiFormatter {
             case "teacher_feedback": return "Lời nhắn từ thầy cô";
             case "course": return "Khóa học";
             case "exam": return "Bài kiểm tra";
-            case "payment": return "Thanh toán";
             case "achievement": return "Thành tích";
             case "system": return "Hệ thống";
             default: return "Thông báo học tập";

@@ -495,7 +495,7 @@ public class LessonPlayerActivity extends BaseActivity {
             player.setOnPreparedListener(prepared -> {
                 if (isFinishing() || isDestroyed()) return;
                 fitVideoToFrame(prepared.getVideoWidth(), prepared.getVideoHeight());
-                statusText.setText(previewMode ? "Chế độ xem trước của giáo viên"
+                statusText.setText(previewMode ? getString(R.string.lesson_teacher_preview)
                         : (lessonContent != null && lessonContent.isCompleted()
                         ? getString(R.string.lesson_completed)
                         : getString(R.string.lesson_not_completed)));

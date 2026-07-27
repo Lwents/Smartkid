@@ -52,7 +52,7 @@
     <string name="lesson_matching_instruction">Ghép mỗi mục bên trái với đáp án phù hợp.</string>
     <string name="lesson_matching_unavailable">Câu nối cặp chưa có đủ dữ liệu để hiển thị.</string>
     <string name="lesson_matching_choose_answer">Chọn đáp án</string>
-    <string name="lesson_teacher_preview">Chế độ xem trước của giáo viên</string>
+    <string name="lesson_teacher_preview">Chế độ xem trước nội dung</string>
     <string name="lesson_open_conversation">Mở cuộc trò chuyện</string>
     <plurals name="lesson_reply_count">
         <item quantity="one">Xem %1$d phản hồi</item>

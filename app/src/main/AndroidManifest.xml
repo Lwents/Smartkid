@@ -46,6 +46,11 @@
         <activity android:name=".feature.teacher.course.TeacherLessonCreateActivity" android:exported="false" />
         <activity android:name=".feature.teacher.exercise.TeacherExerciseEditorActivity" android:exported="false" />
         <activity android:name=".feature.admin.AdminManagementActivity" android:exported="false" />
+        <activity
+            android:name=".feature.admin.AdminSettingsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".feature.admin.AdminCourseVideosActivity" android:exported="false" />
         <activity android:name=".feature.admin.users.AdminUserCreateActivity" android:exported="false" />
         <activity android:name=".feature.admin.AdminDashboardActivity" android:exported="false" />
         <activity android:name=".common.navigation.UnsupportedRoleActivity" android:exported="false" />
