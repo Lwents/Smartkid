@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="discussion_card_surface">#FDFDFF</color>
+    <color name="discussion_card_stroke">#E1E5F1</color>
+    <color name="discussion_student_surface">#EEF0FF</color>
+    <color name="discussion_student_stroke">#CDD0FF</color>
+    <color name="discussion_student_avatar">#DCDDFF</color>
+    <color name="discussion_friend_avatar">#DDF5F2</color>
+    <color name="discussion_teacher_surface">#FFF7DE</color>
+    <color name="discussion_teacher_stroke">#F5D98A</color>
+    <color name="discussion_teacher_avatar">#FFE6A3</color>
+    <color name="discussion_answered_surface">#E8F8EE</color>
+    <color name="discussion_answered_text">#16833A</color>
+    <color name="discussion_pending_surface">#FFF3D8</color>
+    <color name="discussion_pending_text">#9A6200</color>
+    <color name="discussion_sheet_surface">#FFFCFDFF</color>
+    <color name="discussion_empty_surface">#F5F7FC</color>
+</resources>

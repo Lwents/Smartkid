@@ -34,7 +34,10 @@
             android:name=".feature.student.ai.AITutorActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".feature.student.course.LessonDiscussionActivity" android:exported="false" />
+        <activity
+            android:name=".feature.student.course.LessonDiscussionActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".feature.student.ai.LearningAnalysisActivity" android:exported="false" />
         <activity android:name=".feature.student.ai.AssessmentActivity" android:exported="false" />
         <activity android:name=".feature.teacher.TeacherManagementActivity" android:exported="false" />

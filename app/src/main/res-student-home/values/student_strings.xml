@@ -35,8 +35,8 @@
     <string name="lesson_exercise_result_saved">Đã hoàn thành • Điểm %1$.1f • Tiến độ đã được lưu</string>
     <string name="lesson_exercise_result_not_saved">Đã nộp bài • Điểm %1$.1f • Chưa lưu được tiến độ</string>
     <string name="no_suggested_lessons">Chưa có bài học được gợi ý</string>
-    <string name="no_discussion_questions">Chưa có câu hỏi nào</string>
-    <string name="discussion_question_hint">Nhập câu hỏi cho giáo viên</string>
+    <string name="no_discussion_questions">Chưa có câu hỏi nào. Em hãy hỏi thầy cô nhé!</string>
+    <string name="discussion_question_hint">Viết câu hỏi của em ở đây</string>
     <string name="view_course">Xem khóa học  →</string>
     <string name="numbered_question">%1$d. %2$s</string>
     <string name="exam_info_format">%1$s • %2$s • Điểm đạt %3$s</string>

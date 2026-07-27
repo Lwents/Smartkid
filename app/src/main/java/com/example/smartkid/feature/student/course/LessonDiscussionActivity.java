@@ -1,13 +1,18 @@
 package com.example.smartkid.feature.student.course;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.smartkid.R;
@@ -19,8 +24,8 @@ import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.StudentFeatureRepository;
 import com.example.smartkid.common.ui.BaseActivity;
-import com.example.smartkid.common.ui.FeatureItemAdapter;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONArray;
@@ -33,7 +38,7 @@ import com.example.smartkid.common.util.SwipeRefreshFix;
 /** Hỏi đáp theo bài học, đọc và cập nhật trực tiếp trên PostgreSQL qua API. */
 public class LessonDiscussionActivity extends BaseActivity {
     private StudentFeatureRepository repository;
-    private FeatureItemAdapter adapter;
+    private LessonQuestionAdapter adapter;
     private ProgressBar progressBar;
     private TextView emptyText;
     private TextView statusText;
@@ -61,9 +66,10 @@ public class LessonDiscussionActivity extends BaseActivity {
             toolbar.setNavigationOnClickListener(view -> finish());
             String title = getIntent().getStringExtra(AppConstants.EXTRA_LESSON_TITLE);
             if (title != null && !title.trim().isEmpty()) toolbar.setSubtitle(title.trim());
+            keepComposerAboveKeyboard();
             ListView list = findViewById(R.id.listLessonQuestions);
             if (list == null) throw new IllegalStateException("Thiếu danh sách hỏi đáp");
-            adapter = new FeatureItemAdapter(this);
+            adapter = new LessonQuestionAdapter(this);
             list.setAdapter(adapter);
             list.setEmptyView(emptyText);
             list.setOnItemClickListener((parent, row, position, id) ->
@@ -91,6 +97,25 @@ public class LessonDiscussionActivity extends BaseActivity {
         refreshLayout.setOnRefreshListener(this::loadSafely);
     }
 
+    /** Edge-to-edge needs explicit IME padding so the question box remains visible. */
+    private void keepComposerAboveKeyboard() {
+        View root = findViewById(R.id.rootLessonDiscussion);
+        if (root == null) return;
+        int left = root.getPaddingLeft();
+        int top = root.getPaddingTop();
+        int right = root.getPaddingRight();
+        int bottom = root.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+            Insets ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime());
+            Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            int keyboardPadding = windowInsets.isVisible(WindowInsetsCompat.Type.ime())
+                    ? Math.max(0, ime.bottom - bars.bottom) : 0;
+            view.setPadding(left, top, right, bottom + keyboardPadding);
+            return windowInsets;
+        });
+        ViewCompat.requestApplyInsets(root);
+    }
+
     private void loadSafely() {
         try {
             setLoading(true);
@@ -101,7 +126,8 @@ public class LessonDiscussionActivity extends BaseActivity {
                     setLoading(false);
                     adapter.setItems(data == null ? new ArrayList<>() : data);
                     showStatus(data == null || data.isEmpty()
-                            ? "Chưa có câu hỏi nào cho bài học này" : "Đã tải hỏi đáp từ server");
+                            ? "Chưa có câu hỏi nào. Em hãy hỏi thầy cô nhé!"
+                            : "Chạm vào một câu hỏi để xem thầy cô trả lời");
                 }
 
                 @Override
@@ -133,52 +159,104 @@ public class LessonDiscussionActivity extends BaseActivity {
         if (item == null) return;
         try {
             JSONObject source = item.getSource();
-            String message = item.getDetail() + formatReplies(SafeJson.array(source, "replies"));
-            new AlertDialog.Builder(this)
-                    .setTitle(item.getTitle())
-                    .setMessage(message)
-                    .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton("Thao tác", (dialog, which) -> showActions(item))
-                    .show();
+            JSONArray replies = SafeJson.array(source, "replies");
+            BottomSheetDialog sheet = new BottomSheetDialog(
+                    this, R.style.ThemeOverlay_Smartkid_NotificationSheet);
+            View content = getLayoutInflater().inflate(R.layout.course_sheet_lesson_question, null);
+            sheet.setContentView(content);
+
+            bindText(content, R.id.textDiscussionQuestionAuthor,
+                    LessonDiscussionUiFormatter.questionAuthor(source) + " đã hỏi:");
+            bindText(content, R.id.textDiscussionQuestionTime,
+                    LessonDiscussionUiFormatter.timeLabel(source));
+            bindText(content, R.id.textDiscussionQuestionContent, item.getDetail());
+            bindText(content, R.id.textDiscussionRepliesTitle,
+                    LessonDiscussionUiFormatter.repliesTitle(replies));
+            bindReplies(content, replies);
+
+            boolean owner = SafeJson.bool(source, false, "is_owner");
+            boolean reacted = SafeJson.bool(source, false, "reacted");
+            int likes = SafeJson.integer(source, 0, "reactions_count");
+            TextView likeButton = content.findViewById(R.id.buttonDiscussionLike);
+            likeButton.setText(reacted
+                    ? "Đã thích" + (likes > 0 ? " · " + likes : "")
+                    : "Thích" + (likes > 0 ? " · " + likes : ""));
+
+            View editButton = content.findViewById(R.id.buttonDiscussionEdit);
+            View deleteButton = content.findViewById(R.id.buttonDiscussionDelete);
+            View reportButton = content.findViewById(R.id.buttonDiscussionReport);
+            editButton.setVisibility(owner ? View.VISIBLE : View.GONE);
+            deleteButton.setVisibility(owner ? View.VISIBLE : View.GONE);
+            reportButton.setVisibility(owner ? View.GONE : View.VISIBLE);
+
+            content.findViewById(R.id.buttonDiscussionReply).setOnClickListener(view -> {
+                sheet.dismiss();
+                performAction(item, "Trả lời");
+            });
+            likeButton.setOnClickListener(view -> {
+                sheet.dismiss();
+                performAction(item, reacted ? "Bỏ thích" : "Thích");
+            });
+            editButton.setOnClickListener(view -> {
+                sheet.dismiss();
+                performAction(item, "Sửa câu hỏi");
+            });
+            deleteButton.setOnClickListener(view -> {
+                sheet.dismiss();
+                performAction(item, "Xóa câu hỏi");
+            });
+            reportButton.setOnClickListener(view -> {
+                sheet.dismiss();
+                performAction(item, "Báo cáo nội dung");
+            });
+            content.findViewById(R.id.buttonDiscussionCloseTop)
+                    .setOnClickListener(view -> sheet.dismiss());
+            sheet.show();
         } catch (Exception exception) {
             AppLogger.error(this, "LessonDiscussionActivity", "Không thể hiện câu hỏi", exception);
             showErrorDialog("Không thể đọc nội dung hỏi đáp");
         }
     }
 
-    private String formatReplies(JSONArray replies) {
-        if (replies == null || replies.length() == 0) return "\n\nChưa có phản hồi.";
-        StringBuilder text = new StringBuilder("\n\nPhản hồi:");
+    private void bindReplies(View content, JSONArray replies) {
+        LinearLayout container = content.findViewById(R.id.layoutDiscussionReplies);
+        TextView empty = content.findViewById(R.id.textDiscussionNoReplies);
+        container.removeAllViews();
+        if (replies == null || replies.length() == 0) {
+            empty.setVisibility(View.VISIBLE);
+            return;
+        }
+        empty.setVisibility(View.GONE);
+        LayoutInflater inflater = LayoutInflater.from(this);
         for (int index = 0; index < replies.length(); index++) {
             JSONObject reply = replies.optJSONObject(index);
             if (reply == null) continue;
-            text.append("\n\n• ")
-                    .append(SafeJson.string(reply, "Người dùng", "user"));
-            if (SafeJson.bool(reply, false, "is_teacher")) text.append(" (Giáo viên)");
-            text.append(": ").append(SafeJson.string(reply, "", "content"));
-            int likes = SafeJson.integer(reply, 0, "reactions_count");
-            if (likes > 0) text.append("  ♥ ").append(likes);
+            View row = inflater.inflate(R.layout.course_item_lesson_reply, container, false);
+            boolean teacher = LessonDiscussionUiFormatter.isTeacherReply(reply);
+            TextView avatar = row.findViewById(R.id.textLessonReplyAvatar);
+            TextView author = row.findViewById(R.id.textLessonReplyAuthor);
+            TextView time = row.findViewById(R.id.textLessonReplyTime);
+            TextView message = row.findViewById(R.id.textLessonReplyContent);
+            String authorLabel = LessonDiscussionUiFormatter.replyAuthor(reply);
+            avatar.setText(teacher ? "GV" : authorLabel);
+            avatar.setBackgroundResource(teacher
+                    ? R.drawable.discussion_bg_avatar_teacher
+                    : R.drawable.discussion_bg_avatar_student);
+            author.setText(teacher ? "Thầy/Cô trả lời" : authorLabel + " trả lời");
+            time.setText(LessonDiscussionUiFormatter.timeLabel(reply));
+            time.setVisibility(time.getText().length() == 0 ? View.GONE : View.VISIBLE);
+            message.setText(SafeJson.string(reply, "Không có nội dung", "content"));
+            message.setBackgroundResource(teacher
+                    ? R.drawable.discussion_bg_reply_teacher
+                    : R.drawable.discussion_bg_reply_student);
+            container.addView(row);
         }
-        return text.toString();
     }
 
-    private void showActions(FeatureItem item) {
-        JSONObject source = item.getSource();
-        boolean owner = SafeJson.bool(source, false, "is_owner");
-        boolean reacted = SafeJson.bool(source, false, "reacted");
-        List<String> labels = new ArrayList<>();
-        labels.add("Trả lời");
-        labels.add(reacted ? "Bỏ thích" : "Thích");
-        if (owner) {
-            labels.add("Sửa câu hỏi");
-            labels.add("Xóa câu hỏi");
-        } else {
-            labels.add("Báo cáo nội dung");
-        }
-        String[] actions = labels.toArray(new String[0]);
-        new AlertDialog.Builder(this).setTitle("Chọn thao tác")
-                .setItems(actions, (dialog, which) -> performAction(item, actions[which]))
-                .show();
+    private void bindText(View root, int viewId, String value) {
+        TextView view = root.findViewById(viewId);
+        view.setText(value == null ? "" : value);
+        view.setVisibility(view.getText().length() == 0 ? View.GONE : View.VISIBLE);
     }
 
     private void performAction(FeatureItem item, String action) {
@@ -205,8 +283,8 @@ public class LessonDiscussionActivity extends BaseActivity {
 
     private void confirmDelete(FeatureItem item) {
         new AlertDialog.Builder(this).setTitle("Xóa câu hỏi")
-                .setMessage("Câu hỏi và các phản hồi liên quan sẽ bị xóa trên server.")
-                .setNegativeButton(R.string.cancel, null)
+                .setMessage("Em có chắc muốn xóa câu hỏi này không? Các câu trả lời cũng sẽ bị xóa.")
+                .setNegativeButton("Giữ lại", null)
                 .setPositiveButton("Xóa", (dialog, which) -> {
                     setLoading(true);
                     repository.deleteLessonQuestion(item.getId(),

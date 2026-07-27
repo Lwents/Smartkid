@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLessonDiscussion"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/smartkid_background"
     android:orientation="vertical">
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbarLessonDiscussion"
@@ -26,11 +28,12 @@
         android:id="@+id/textLessonDiscussionStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="18dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="6dp"
         android:textColor="@color/smartkid_text_secondary"
-        android:textSize="13sp"
+        android:textSize="14sp"
         android:visibility="gone" />
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/refreshLessonDiscussion"
@@ -46,8 +49,11 @@
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:divider="@android:color/transparent"
-            android:dividerHeight="8dp"
-            android:padding="12dp" />
+            android:dividerHeight="12dp"
+            android:paddingStart="16dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp" />
         <TextView
             android:background="@null"
             android:id="@+id/textLessonDiscussionEmpty"
@@ -59,28 +65,59 @@
             android:textColor="@color/smartkid_text_secondary" />
     </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.Smartkid.GlassInput"
+
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
-        android:hint="@string/discussion_question_hint">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/inputLessonQuestion"
+        android:layout_marginBottom="12dp"
+        app:cardBackgroundColor="@color/glass_surface_strong"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="5dp"
+        app:strokeColor="@color/glass_stroke"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapSentences|textMultiLine"
-            android:maxLength="2000"
-            android:maxLines="4" />
-    </com.google.android.material.textfield.TextInputLayout>
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonSendLessonQuestion"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="12dp"
-        android:text="@string/send_question" />
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="4dp"
+                android:paddingBottom="8dp"
+                android:text="Em chưa hiểu chỗ nào?"
+                android:textColor="@color/smartkid_text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Smartkid.GlassInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/discussion_question_hint">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputLessonQuestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLength="2000"
+                    android:maxLines="4" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonSendLessonQuestion"
+                style="@style/Widget.Smartkid.GlassButton"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="9dp"
+                android:text="@string/send_question"
+                app:icon="@drawable/notification_ic_reply"
+                app:iconGravity="textStart" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 </LinearLayout>
