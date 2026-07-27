@@ -750,13 +750,17 @@ private void registerFilePickers() {
     }
 
     private QuestionFields addQuestionCard() {
+        return addQuestionCard(true);
+    }
+
+    private QuestionFields addQuestionCard(boolean updateNumbers) {
         View row = LayoutInflater.from(this).inflate(
                 R.layout.management_item_exam_question, questionsContainer, false);
         QuestionFields fields = new QuestionFields(row);
         fields.delete.setOnClickListener(view -> removeQuestion(fields));
         questions.add(fields);
         questionsContainer.addView(row);
-        updateQuestionNumbers();
+        if (updateNumbers) updateQuestionNumbers();
         return fields;
     }
 
@@ -824,7 +828,7 @@ private void registerFilePickers() {
     }
 
     private void showAiQuestionCountDialog(Uri uri) {
-        int[] counts = {5, 10, 20, 30};
+        int[] counts = {5, 10, 20, 30, 50};
         String[] labels = new String[counts.length];
         for (int index = 0; index < counts.length; index++) {
             labels[index] = getString(R.string.management_ai_count_option, counts[index]);
@@ -961,7 +965,7 @@ private void registerFilePickers() {
                 correctIndex = source.optBoolean("correct_answer", false) ? 0 : 1;
             }
             if (prompt.isEmpty() || options == null || options.length() < 2) continue;
-            QuestionFields fields = addQuestionCard();
+            QuestionFields fields = addQuestionCard(false);
             fields.setQuestionType("mcq");
             fields.prompt.setText(prompt);
             double points = source.optDouble("points", source.optDouble("score", 1d));
