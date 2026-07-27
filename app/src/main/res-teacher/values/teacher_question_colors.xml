@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="teacher_question_card_surface">#FDFDFF</color>
+    <color name="teacher_question_card_stroke">#E0E5F0</color>
+    <color name="teacher_question_student_avatar">#DDE8FF</color>
+    <color name="teacher_question_pending_surface">#FFF2D7</color>
+    <color name="teacher_question_pending_text">#986000</color>
+    <color name="teacher_question_answered_surface">#E5F8EC</color>
+    <color name="teacher_question_answered_text">#137B35</color>
+    <color name="teacher_question_bubble_surface">#F3F5FF</color>
+    <color name="teacher_question_bubble_stroke">#D6DAFF</color>
+    <color name="teacher_question_teacher_surface">#EDEEFF</color>
+    <color name="teacher_question_teacher_stroke">#C9CBFF</color>
+    <color name="teacher_question_student_surface">#FFF6DF</color>
+    <color name="teacher_question_student_stroke">#F2D78C</color>
+    <color name="teacher_question_sheet_surface">#FFFCFDFF</color>
+    <color name="teacher_question_empty_surface">#F4F6FB</color>
+</resources>

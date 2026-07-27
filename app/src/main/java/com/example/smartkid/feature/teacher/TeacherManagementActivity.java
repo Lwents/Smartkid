@@ -1,11 +1,14 @@
 package com.example.smartkid.feature.teacher;
 
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.InputType;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -37,6 +40,7 @@ import com.example.smartkid.feature.teacher.course.TeacherCourseCreateActivity;
 import com.example.smartkid.feature.teacher.course.builder.TeacherCourseBuilderActivity;
 import com.example.smartkid.feature.teacher.exercise.TeacherExerciseEditorActivity;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONArray;
@@ -52,8 +56,10 @@ public class TeacherManagementActivity extends BaseActivity {
     private FeatureSpec spec;
     private ManagementRepository repository;
     private FeatureItemAdapter adapter;
+    private TeacherQuestionAdapter questionAdapter;
     private ProgressBar progressBar;
     private TextView emptyText;
+    private TextView questionSummary;
     private View refreshButton;
     private SwipeRefreshLayout refreshLayout;
 
@@ -73,19 +79,23 @@ public class TeacherManagementActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            setContentView(R.layout.common_activity_feature_list);
             String key = getIntent() == null ? null : getIntent().getStringExtra(EXTRA_SPEC_KEY);
             spec = TeacherManagementSpec.get(key);
             UserRole role = UserRole.fromString(new SessionManager(this).getUser().getRole());
             if (spec == null || !spec.isAvailable() || !spec.isAllowedForRole(role)) {
+                setContentView(R.layout.common_activity_feature_list);
                 showErrorDialog("Chức năng quản lý không hợp lệ");
                 finish();
                 return;
             }
+            setContentView(isQaFeature()
+                    ? R.layout.teacher_activity_lesson_questions
+                    : R.layout.common_activity_feature_list);
             repository = new ManagementRepository(this);
             MaterialToolbar toolbar = findViewById(R.id.toolbarFeatureList);
             progressBar = findViewById(R.id.progressFeatureList);
             emptyText = findViewById(R.id.textFeatureListEmpty);
+            questionSummary = findViewById(R.id.textTeacherQuestionSummary);
             refreshButton = findViewById(R.id.buttonFeatureAction);
             refreshLayout = findViewById(R.id.refreshFeatureList);
             SwipeRefreshFix.attach(refreshLayout);
@@ -102,18 +112,23 @@ public class TeacherManagementActivity extends BaseActivity {
             emptyText.setText(isQaFeature()
                     ? R.string.teacher_no_lesson_questions
                     : R.string.no_server_data);
-            adapter = new FeatureItemAdapter(this);
-            list.setAdapter(adapter);
+            if (isQaFeature()) {
+                questionAdapter = new TeacherQuestionAdapter(this);
+                list.setAdapter(questionAdapter);
+            } else {
+                adapter = new FeatureItemAdapter(this);
+                list.setAdapter(adapter);
+            }
             list.setEmptyView(emptyText);
             list.setOnItemClickListener((parent, row, position, id) -> {
-                FeatureItem item = adapter.getItem(position);
+                FeatureItem item = itemAt(position);
                 if ("teacher_courses".equals(spec.getActionKind())) showActions(item);
                 else showItem(item);
             });
             search.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
                 @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    adapter.filter(s == null ? "" : s.toString());
+                    filterItems(s == null ? "" : s.toString());
                 }
                 @Override public void afterTextChanged(Editable s) { }
             });
@@ -170,7 +185,7 @@ public class TeacherManagementActivity extends BaseActivity {
             public void onSuccess(List<FeatureItem> data) {
                 if (!isUsable()) return;
                 setLoading(false);
-                adapter.setItems(filterForCurrentFeature(data));
+                setItems(filterForCurrentFeature(data));
             }
 
             @Override
@@ -180,6 +195,39 @@ public class TeacherManagementActivity extends BaseActivity {
                 handleApiError(error);
             }
         });
+    }
+
+    private FeatureItem itemAt(int position) {
+        return questionAdapter != null
+                ? questionAdapter.getItem(position)
+                : (adapter == null ? null : adapter.getItem(position));
+    }
+
+    private void setItems(List<FeatureItem> items) {
+        if (questionAdapter != null) {
+            questionAdapter.setItems(items);
+            updateQuestionSummary();
+        } else if (adapter != null) {
+            adapter.setItems(items);
+        }
+    }
+
+    private void filterItems(String keyword) {
+        if (questionAdapter != null) questionAdapter.filter(keyword);
+        else if (adapter != null) adapter.filter(keyword);
+    }
+
+    private void updateQuestionSummary() {
+        if (questionSummary == null || questionAdapter == null) return;
+        int total = questionAdapter.getTotalCount();
+        int pending = questionAdapter.getPendingCount();
+        if (total == 0) {
+            questionSummary.setText("Chưa có câu hỏi mới từ học sinh");
+        } else if (pending == 0) {
+            questionSummary.setText(total + " câu hỏi • Đã trả lời tất cả");
+        } else {
+            questionSummary.setText(total + " câu hỏi • " + pending + " câu đang chờ trả lời");
+        }
     }
 
     private List<FeatureItem> filterForCurrentFeature(List<FeatureItem> data) {
@@ -343,31 +391,130 @@ public class TeacherManagementActivity extends BaseActivity {
         if (!item.getId().isEmpty()) markNotificationRead(item.getId());
     }
 
-    /** Hỏi đáp: câu hỏi + bài học liên quan, trả lời học viên ngay trong dialog. */
+    /** Hỏi đáp: đọc toàn bộ cuộc trò chuyện và trả lời ngay trong bottom sheet. */
     private void showQuestionDetail(FeatureItem item) {
-        JSONObject source = item.getSource();
-        StringBuilder info = new StringBuilder();
-        appendInfoLine(info, "Khóa học", SafeJson.string(source, "", "course_title"));
-        appendInfoLine(info, "Bài học", SafeJson.string(source, "", "lesson_title"));
-        appendInfoLine(info, "Thời gian", readableTime(SafeJson.string(source, "", "created_at")));
-        JSONArray replies = source == null ? null : source.optJSONArray("replies");
-        int replyCount = replies == null ? 0 : replies.length();
-        appendInfoLine(info, "Phản hồi", replyCount == 0 ? "Chưa có" : replyCount + " phản hồi");
-        String content = SafeJson.string(source, item.getDetail(), "content");
-        String message = content.isEmpty() ? info.toString() : content + "\n\n" + info;
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle("Câu hỏi của " + SafeJson.string(source, item.getTitle(), "student"))
-                .setMessage(message.trim())
-                .setNegativeButton("Đóng", null)
-                .setPositiveButton("Trả lời học viên", (dialog, which) ->
-                        promptText("Trả lời học viên", "Nhập nội dung phản hồi", "Gửi",
-                                value -> performTextAction(item, "Trả lời học viên", value)));
-        String lessonId = SafeJson.string(source, "", "lesson_id");
-        if (!lessonId.isEmpty()) {
-            builder.setNeutralButton("Xem bài học", (dialog, which) ->
-                    openLessonPreview(lessonId, SafeJson.string(source, "", "lesson_title")));
+        if (item == null) return;
+        try {
+            JSONObject source = item.getSource();
+            JSONArray replies = SafeJson.array(source, "replies");
+            int teacherReplies = TeacherQuestionUiFormatter.teacherReplyCount(replies);
+            BottomSheetDialog sheet = new BottomSheetDialog(
+                    this, R.style.ThemeOverlay_Smartkid_NotificationSheet);
+            View content = getLayoutInflater().inflate(R.layout.teacher_sheet_lesson_question, null);
+            sheet.setContentView(content);
+
+            bindText(content, R.id.textTeacherQuestionSheetAvatar,
+                    TeacherQuestionUiFormatter.studentInitial(source));
+            bindText(content, R.id.textTeacherQuestionSheetStudent,
+                    TeacherQuestionUiFormatter.studentName(source));
+            bindText(content, R.id.textTeacherQuestionSheetTime,
+                    TeacherQuestionUiFormatter.timeLabel(source));
+            bindText(content, R.id.textTeacherQuestionSheetContent,
+                    SafeJson.string(source, item.getDetail(), "content"));
+            bindText(content, R.id.textTeacherQuestionSheetContext,
+                    TeacherQuestionUiFormatter.contextLabel(source));
+
+            TextView status = content.findViewById(R.id.textTeacherQuestionSheetStatus);
+            status.setText(TeacherQuestionUiFormatter.statusLabel(source));
+            status.setBackgroundResource(teacherReplies == 0
+                    ? R.drawable.teacher_bg_question_pending
+                    : R.drawable.teacher_bg_question_answered);
+            status.setTextColor(androidx.core.content.ContextCompat.getColor(this,
+                    teacherReplies == 0 ? R.color.teacher_question_pending_text
+                            : R.color.teacher_question_answered_text));
+            bindQuestionReplies(content, source, replies);
+
+            TextInputEditText replyInput = content.findViewById(R.id.inputTeacherQuestionReply);
+            View sendReply = content.findViewById(R.id.buttonTeacherQuestionSendReply);
+            sendReply.setOnClickListener(view -> {
+                String value = textOf(replyInput);
+                if (value.length() < 2) {
+                    replyInput.setError("Câu trả lời phải có ít nhất 2 ký tự");
+                    replyInput.requestFocus();
+                    return;
+                }
+                sheet.dismiss();
+                performTextAction(item, "Trả lời học viên", value);
+            });
+
+            String lessonId = SafeJson.string(source, "", "lesson_id");
+            View openLesson = content.findViewById(R.id.buttonTeacherQuestionOpenLesson);
+            openLesson.setVisibility(lessonId.isEmpty() ? View.GONE : View.VISIBLE);
+            openLesson.setOnClickListener(view -> {
+                sheet.dismiss();
+                openLessonPreview(lessonId, SafeJson.string(source, "", "lesson_title"));
+            });
+            content.findViewById(R.id.buttonTeacherQuestionClose)
+                    .setOnClickListener(view -> sheet.dismiss());
+            keepQuestionComposerAboveKeyboard(content, sheet, replyInput);
+            sheet.show();
+        } catch (Exception exception) {
+            AppLogger.error(this, "TeacherManagementActivity",
+                    "Không thể hiện cuộc trò chuyện học viên", exception);
+            showErrorDialog("Không thể đọc câu hỏi của học sinh");
         }
-        builder.show();
+    }
+
+    private void bindQuestionReplies(View content, JSONObject question, JSONArray replies) {
+        LinearLayout container = content.findViewById(R.id.layoutTeacherQuestionReplies);
+        TextView empty = content.findViewById(R.id.textTeacherQuestionNoReplies);
+        TextView title = content.findViewById(R.id.textTeacherQuestionRepliesTitle);
+        container.removeAllViews();
+        int replyCount = replies == null ? 0 : replies.length();
+        title.setText(replyCount == 0
+                ? "Lịch sử trao đổi" : "Lịch sử trao đổi • " + replyCount + " phản hồi");
+        if (replyCount == 0) {
+            empty.setVisibility(View.VISIBLE);
+            return;
+        }
+        empty.setVisibility(View.GONE);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        String studentName = TeacherQuestionUiFormatter.studentName(question);
+        for (int index = 0; index < replies.length(); index++) {
+            JSONObject reply = replies.optJSONObject(index);
+            if (reply == null) continue;
+            boolean teacher = SafeJson.bool(reply, false, "is_teacher");
+            View row = inflater.inflate(R.layout.teacher_item_question_reply, container, false);
+            TextView avatar = row.findViewById(R.id.textTeacherReplyAvatar);
+            TextView author = row.findViewById(R.id.textTeacherReplyAuthor);
+            TextView time = row.findViewById(R.id.textTeacherReplyTime);
+            TextView message = row.findViewById(R.id.textTeacherReplyContent);
+            avatar.setText(teacher ? "GV" : TeacherQuestionUiFormatter.studentInitial(question));
+            author.setText(teacher ? "Bạn đã trả lời" : studentName + " phản hồi");
+            time.setText(TeacherQuestionUiFormatter.timeLabel(reply));
+            time.setVisibility(time.getText().length() == 0 ? View.GONE : View.VISIBLE);
+            message.setText(SafeJson.string(reply, "Không có nội dung", "content"));
+            message.setBackgroundResource(teacher
+                    ? R.drawable.teacher_bg_question_reply_teacher
+                    : R.drawable.teacher_bg_question_reply_student);
+            container.addView(row);
+        }
+    }
+
+    private void bindText(View root, int viewId, String value) {
+        TextView view = root.findViewById(viewId);
+        view.setText(value == null ? "" : value);
+        view.setVisibility(view.getText().length() == 0 ? View.GONE : View.VISIBLE);
+    }
+
+    private void keepQuestionComposerAboveKeyboard(View content, BottomSheetDialog sheet,
+                                                   TextInputEditText input) {
+        ScrollView root = content.findViewById(R.id.rootTeacherQuestionSheet);
+        if (root == null) return;
+        input.setOnFocusChangeListener((view, focused) -> {
+            if (focused) input.postDelayed(() -> {
+                Rect rectangle = new Rect();
+                input.getDrawingRect(rectangle);
+                root.offsetDescendantRectToMyCoords(input, rectangle);
+                int margin = (int) (20 * getResources().getDisplayMetrics().density);
+                root.smoothScrollTo(0, Math.max(0, rectangle.top - margin));
+            }, 320);
+        });
+        sheet.setOnShowListener(ignored -> {
+            if (sheet.getWindow() != null) {
+                sheet.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            }
+        });
     }
 
     /** Mở bài học ngay trong app (trình phát của LessonPlayerActivity, chế độ xem trước). */
