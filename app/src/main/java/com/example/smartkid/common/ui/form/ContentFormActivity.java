@@ -820,18 +820,34 @@ private void registerFilePickers() {
             showStatus(getString(R.string.management_ai_file_too_large));
             return;
         }
-        requestAiQuestionsFromFile(uri);
+        showAiQuestionCountDialog(uri);
     }
 
-    private void requestAiQuestionsFromFile(Uri uri) {
+    private void showAiQuestionCountDialog(Uri uri) {
+        int[] counts = {5, 10, 20, 30};
+        String[] labels = new String[counts.length];
+        for (int index = 0; index < counts.length; index++) {
+            labels[index] = getString(R.string.management_ai_count_option, counts[index]);
+        }
+        int[] selected = {1};
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.management_ai_count_title)
+                .setSingleChoiceItems(labels, selected[0], (dialog, which) -> selected[0] = which)
+                .setPositiveButton(R.string.management_ai_generate, (dialog, which) ->
+                        requestAiQuestionsFromFile(uri, counts[selected[0]]))
+                .setNegativeButton(R.string.cancel, null)
+                .show();
+    }
+
+    private void requestAiQuestionsFromFile(Uri uri, int requestedCount) {
         try {
             JSONObject body = new JSONObject();
-            body.put("count", 5);
+            body.put("count", requestedCount);
             body.put("level", selectedAiLevel());
             List<MultipartFilePart> files = new ArrayList<>();
             files.add(new MultipartFilePart("file", uri));
             setLoading(true);
-            showStatus(getString(R.string.management_ai_generating));
+            showStatus(getString(R.string.management_ai_generating_count, requestedCount));
             repository.multipartAction(Request.Method.POST,
                     "activities/ai/generate-questions/", body, files,
                     new ApiCallback<JSONObject>() {
@@ -841,9 +857,14 @@ private void registerFilePickers() {
                             try {
                                 JSONArray generated = extractAiQuestions(data);
                                 int added = applyGeneratedQuestions(generated);
+                                int expected = SafeJson.integer(data, requestedCount,
+                                        "requestedCount", "requested_count");
                                 setLoading(false);
                                 if (added == 0) {
                                     showStatus(getString(R.string.management_ai_empty));
+                                } else if (added < expected) {
+                                    showStatus(getString(R.string.management_ai_partial,
+                                            added, expected));
                                 } else {
                                     statusText.setVisibility(View.GONE);
                                     showShortMessage(getResources().getQuantityString(
@@ -957,6 +978,7 @@ private void registerFilePickers() {
             int optionCount = Math.min(options.length(), fields.choices.size());
             for (int optionIndex = 0; optionIndex < optionCount; optionIndex++) {
                 Object rawOption = options.opt(optionIndex);
+                if (rawOption == null || rawOption == JSONObject.NULL) continue;
                 JSONObject optionObject = rawOption instanceof JSONObject
                         ? (JSONObject) rawOption : null;
                 String optionText = optionObject == null ? safe(String.valueOf(rawOption))

@@ -2,6 +2,7 @@ package com.example.smartkid.data.remote;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
@@ -180,7 +181,6 @@ public final class ApiClient {
                 connection.setDoInput(true);
                 connection.setDoOutput(true);
                 connection.setUseCaches(false);
-                connection.setChunkedStreamingMode(64 * 1024);
                 connection.setRequestProperty("Accept", "application/json");
                 connection.setRequestProperty("Content-Type",
                         "multipart/form-data; boundary=" + boundary);
@@ -189,6 +189,12 @@ public final class ApiClient {
                     if (!accessToken.isEmpty()) {
                         connection.setRequestProperty("Authorization", "Bearer " + accessToken);
                     }
+                }
+                long contentLength = multipartLength(boundary, fields, files);
+                if (contentLength >= 0) {
+                    connection.setFixedLengthStreamingMode(contentLength);
+                } else {
+                    connection.setChunkedStreamingMode(64 * 1024);
                 }
 
                 try (OutputStream output = new BufferedOutputStream(connection.getOutputStream())) {
@@ -266,6 +272,65 @@ public final class ApiClient {
             }
             writeUtf8(output, "\r\n");
         }
+    }
+
+    /** Tính trước kích thước để các WSGI server đọc được multipart mà không cần chunked body. */
+    private long multipartLength(String boundary, JSONObject fields,
+                                 List<MultipartFilePart> files) {
+        long total = utf8Length("--" + boundary + "--\r\n");
+        JSONArray names = fields == null ? null : fields.names();
+        if (names != null) {
+            for (int index = 0; index < names.length(); index++) {
+                String name = names.optString(index, "");
+                if (name.isEmpty() || fields.isNull(name)) continue;
+                total += utf8Length("--" + boundary + "\r\n");
+                total += utf8Length("Content-Disposition: form-data; name=\""
+                        + headerValue(name) + "\"\r\n\r\n");
+                total += utf8Length(String.valueOf(fields.opt(name)));
+                total += utf8Length("\r\n");
+            }
+        }
+        if (files == null) return total;
+        ContentResolver resolver = appContext.getContentResolver();
+        for (MultipartFilePart part : files) {
+            if (part == null || part.getUri() == null || part.getFieldName().isEmpty()) continue;
+            Uri uri = part.getUri();
+            long fileLength = contentLength(resolver, uri);
+            if (fileLength < 0) return -1;
+            String mimeType = resolver.getType(uri);
+            if (mimeType == null || mimeType.trim().isEmpty()) {
+                mimeType = "application/octet-stream";
+            }
+            total += utf8Length("--" + boundary + "\r\n");
+            total += utf8Length("Content-Disposition: form-data; name=\""
+                    + headerValue(part.getFieldName()) + "\"; filename=\""
+                    + headerValue(displayName(resolver, uri)) + "\"\r\n");
+            total += utf8Length("Content-Type: " + mimeType + "\r\n\r\n");
+            total += fileLength + utf8Length("\r\n");
+        }
+        return total;
+    }
+
+    private long contentLength(ContentResolver resolver, Uri uri) {
+        try (AssetFileDescriptor descriptor = resolver.openAssetFileDescriptor(uri, "r")) {
+            if (descriptor != null && descriptor.getLength() >= 0) return descriptor.getLength();
+        } catch (Exception ignored) {
+            // Some document providers only expose the size through metadata.
+        }
+        try (Cursor cursor = resolver.query(uri,
+                new String[]{OpenableColumns.SIZE}, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int column = cursor.getColumnIndex(OpenableColumns.SIZE);
+                if (column >= 0 && !cursor.isNull(column)) return cursor.getLong(column);
+            }
+        } catch (Exception ignored) {
+            // Unknown sizes continue to use chunked transfer mode.
+        }
+        return -1;
+    }
+
+    private int utf8Length(String value) {
+        return value.getBytes(StandardCharsets.UTF_8).length;
     }
 
     /** Lấy tên file người dùng chọn để gửi kèm lên server. */

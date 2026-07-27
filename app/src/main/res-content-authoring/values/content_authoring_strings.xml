@@ -112,12 +112,17 @@
     <string name="management_matching_pair_limit">Một câu có tối đa 10 cặp nối</string>
     <string name="management_generate_questions_ai">📄 Tạo câu hỏi từ tài liệu (AI)</string>
     <string name="management_ai_count">Số câu hỏi</string>
+    <string name="management_ai_count_title">Bạn muốn tạo bao nhiêu câu?</string>
+    <string name="management_ai_count_option">%1$d câu hỏi</string>
+    <string name="management_ai_generate">Bắt đầu tạo</string>
     <string name="management_ai_generating">AI đang đọc tài liệu và tạo câu hỏi, vui lòng chờ…</string>
+    <string name="management_ai_generating_count">AI đang đọc tài liệu và tạo %1$d câu hỏi. Quá trình này có thể mất một chút thời gian…</string>
     <string name="management_ai_file_invalid">Chỉ hỗ trợ tài liệu PDF, Word (.docx) hoặc text (.txt)</string>
     <string name="management_ai_file_too_large">Tài liệu quá lớn (tối đa 20MB)</string>
     <string name="management_ai_empty">AI chưa tạo được câu hỏi hợp lệ, vui lòng thử lại</string>
     <string name="management_ai_invalid_response">Phản hồi AI không đúng định dạng câu hỏi</string>
     <string name="management_ai_error">Không thể tạo câu hỏi bằng AI lúc này</string>
+    <string name="management_ai_partial">AI tạo được %1$d/%2$d câu hợp lệ. Bạn có thể giữ các câu này hoặc thử lại với tài liệu rõ ràng hơn.</string>
     <string name="management_boolean_true">Đúng</string>
     <string name="management_boolean_false">Sai</string>
     <plurals name="management_ai_questions_added">
