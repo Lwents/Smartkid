@@ -6,7 +6,6 @@
     <dimen name="space_lg">16dp</dimen>
     <dimen name="space_xl">20dp</dimen>
     <dimen name="space_2xl">24dp</dimen>
-    <dimen name="space_3xl">32dp</dimen>
 
     <dimen name="screen_padding">20dp</dimen>
     <dimen name="screen_padding_compact">16dp</dimen>
@@ -18,7 +17,6 @@
     <dimen name="glass_elevation_high">12dp</dimen>
     <dimen name="button_height">54dp</dimen>
     <dimen name="touch_target">48dp</dimen>
-    <dimen name="floating_nav_margin">10dp</dimen>
     <dimen name="floating_nav_margin_horizontal">10dp</dimen>
     <dimen name="floating_nav_margin_bottom">8dp</dimen>
     <dimen name="floating_nav_height">66dp</dimen>

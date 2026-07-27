@@ -10,11 +10,17 @@
     <string name="analysis_stat_average">Điểm trung bình</string>
     <string name="analysis_stat_goal">Mục tiêu hôm nay</string>
     <string name="analysis_stat_streak">Chuỗi học</string>
-    <string name="analysis_streak_days">%d ngày</string>
+    <plurals name="analysis_streak_days">
+        <item quantity="one">%d ngày</item>
+        <item quantity="other">%d ngày</item>
+    </plurals>
 
     <string name="analysis_encourage_title">Bạn đang làm rất tốt!</string>
     <string name="analysis_encourage_done_title">Hoàn thành mục tiêu hôm nay!</string>
-    <string name="analysis_encourage_remaining">Chỉ còn %d bài nữa để hoàn thành mục tiêu hôm nay.</string>
+    <plurals name="analysis_encourage_remaining">
+        <item quantity="one">Chỉ còn %d bài nữa để hoàn thành mục tiêu hôm nay.</item>
+        <item quantity="other">Chỉ còn %d bài nữa để hoàn thành mục tiêu hôm nay.</item>
+    </plurals>
     <string name="analysis_encourage_done">Bạn đã học đủ số bài đặt ra cho hôm nay.</string>
     <string name="analysis_encourage_start">Học một bài ngay hôm nay để bắt đầu chuỗi nhé.</string>
 

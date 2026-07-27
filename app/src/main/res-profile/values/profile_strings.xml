@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_student_code_format">Mã học sinh: %1$s</string>
+    <string name="profile_courses_label">Khóa học</string>
+    <string name="profile_completed_label">Hoàn thành</string>
+    <string name="profile_average_score_label">Điểm trung bình</string>
+    <string name="profile_personal_information">Thông tin cá nhân</string>
+    <string name="profile_student_code_label">Mã học sinh</string>
+    <string name="profile_zero">0</string>
+    <string name="profile_zero_percent">0%</string>
+    <string name="profile_score_percent">%1$d%%</string>
+    <string name="profile_load_error">Không thể tải hồ sơ</string>
+    <string name="profile_default_initial">S</string>
+</resources>

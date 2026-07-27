@@ -28,7 +28,7 @@
         android:layout_width="28dp"
         android:layout_height="48dp"
         android:gravity="center"
-        android:text="→"
+        android:text="@string/management_matching_arrow"
         android:textColor="@color/admin_text_secondary"
         android:textSize="17sp" />
 
@@ -57,7 +57,7 @@
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:text="×"
+        android:text="@string/management_remove_symbol"
         android:textColor="@color/admin_red"
         android:textSize="22sp" />
 </LinearLayout>

@@ -86,7 +86,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Khởi động không thành công. Vui lòng thử lại."
+            android:text="@string/splash_load_failed"
             android:textColor="@color/smartkid_error"
             android:textSize="14sp" />
 

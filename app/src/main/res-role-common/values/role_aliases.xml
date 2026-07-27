@@ -19,7 +19,6 @@
     <!-- Drawable aliases (a values alias does not duplicate the asset). -->
     <item name="role_bg_screen" type="drawable">@drawable/admin_bg_screen</item>
     <item name="role_bg_chart_tabs" type="drawable">@drawable/admin_bg_chart_tabs</item>
-    <item name="role_bg_chart_tab_selected" type="drawable">@drawable/admin_bg_chart_tab_selected</item>
     <item name="role_ic_course_filled" type="drawable">@drawable/admin_ic_course</item>
     <item name="role_ic_user_add_filled" type="drawable">@drawable/admin_ic_user_add</item>
 </resources>

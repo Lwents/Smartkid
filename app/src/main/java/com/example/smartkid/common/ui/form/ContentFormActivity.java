@@ -39,6 +39,7 @@ import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.remote.MultipartFilePart;
 import com.example.smartkid.data.repository.ManagementRepository;
+import com.example.smartkid.domain.AiQuestionPolicy;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
@@ -358,7 +359,7 @@ public abstract class ContentFormActivity extends BaseActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(50));
         addParams.setMargins(0, dp(12), 0, 0);
         addQuestionButton.setLayoutParams(addParams);
-        addQuestionButton.setOnClickListener(view -> addQuestionCard());
+        addQuestionButton.setOnClickListener(view -> addQuestionFromButton());
         container.addView(addQuestionButton);
         aiQuestionButton = new MaterialButton(this);
         aiQuestionButton.setText(R.string.management_generate_questions_ai);
@@ -598,7 +599,9 @@ private void registerFilePickers() {
         }
         selectedDocumentUri = uri;
         statusText.setVisibility(View.GONE);
-        documentFileName.setText(name + (size > 0 ? " · " + readableSize(size) : ""));
+        documentFileName.setText(size > 0
+                ? getString(R.string.management_file_with_size, name, readableSize(size))
+                : name);
         documentFileButton.setText(R.string.management_replace_file);
         documentClearButton.setVisibility(View.VISIBLE);
     }
@@ -753,6 +756,14 @@ private void registerFilePickers() {
         return addQuestionCard(true);
     }
 
+    private void addQuestionFromButton() {
+        if (AiQuestionPolicy.remainingCapacity(questions.size()) == 0) {
+            showShortMessage(getString(R.string.management_question_limit));
+            return;
+        }
+        addQuestionCard();
+    }
+
     private QuestionFields addQuestionCard(boolean updateNumbers) {
         View row = LayoutInflater.from(this).inflate(
                 R.layout.management_item_exam_question, questionsContainer, false);
@@ -788,6 +799,10 @@ private void registerFilePickers() {
     }
 
     private void launchAiDocumentPicker() {
+        if (AiQuestionPolicy.remainingCapacity(questions.size()) == 0) {
+            showShortMessage(getString(R.string.management_question_limit));
+            return;
+        }
         try {
             aiDocumentPicker.launch(new String[]{"application/pdf",
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -820,7 +835,7 @@ private void registerFilePickers() {
             return;
         }
         long size = fileSize(uri);
-        if (size > 20L * 1024L * 1024L) {
+        if (!AiQuestionPolicy.acceptsDocumentSize(size)) {
             showStatus(getString(R.string.management_ai_file_too_large));
             return;
         }
@@ -828,10 +843,11 @@ private void registerFilePickers() {
     }
 
     private void showAiQuestionCountDialog(Uri uri) {
-        int[] counts = {5, 10, 20, 30, 50};
+        int[] counts = AiQuestionPolicy.allowedCounts();
         String[] labels = new String[counts.length];
         for (int index = 0; index < counts.length; index++) {
-            labels[index] = getString(R.string.management_ai_count_option, counts[index]);
+            labels[index] = getResources().getQuantityString(
+                    R.plurals.management_ai_count_option, counts[index], counts[index]);
         }
         int[] selected = {1};
         new AlertDialog.Builder(this)
@@ -844,6 +860,10 @@ private void registerFilePickers() {
     }
 
     private void requestAiQuestionsFromFile(Uri uri, int requestedCount) {
+        if (!AiQuestionPolicy.isAllowedCount(requestedCount)) {
+            showStatus(getString(R.string.management_ai_error));
+            return;
+        }
         try {
             JSONObject body = new JSONObject();
             body.put("count", requestedCount);
@@ -851,7 +871,10 @@ private void registerFilePickers() {
             List<MultipartFilePart> files = new ArrayList<>();
             files.add(new MultipartFilePart("file", uri));
             setLoading(true);
-            showStatus(getString(R.string.management_ai_generating_count, requestedCount));
+            showStatus(getResources().getQuantityString(
+                    R.plurals.management_ai_generating_count,
+                    requestedCount,
+                    requestedCount));
             repository.multipartAction(Request.Method.POST,
                     "activities/ai/generate-questions/", body, files,
                     new ApiCallback<JSONObject>() {
@@ -867,8 +890,11 @@ private void registerFilePickers() {
                                 if (added == 0) {
                                     showStatus(getString(R.string.management_ai_empty));
                                 } else if (added < expected) {
-                                    showStatus(getString(R.string.management_ai_partial,
-                                            added, expected));
+                                    showStatus(getResources().getQuantityString(
+                                            R.plurals.management_ai_partial,
+                                            added,
+                                            added,
+                                            expected));
                                 } else {
                                     statusText.setVisibility(View.GONE);
                                     showShortMessage(getResources().getQuantityString(
@@ -948,7 +974,11 @@ private void registerFilePickers() {
             questions.clear();
         }
         int added = 0;
-        for (int index = 0; index < generated.length(); index++) {
+        int generatedCount = Math.min(
+                AiQuestionPolicy.clampGeneratedCount(generated.length()),
+                AiQuestionPolicy.remainingCapacity(questions.size())
+        );
+        for (int index = 0; index < generatedCount; index++) {
             JSONObject source = generated.optJSONObject(index);
             if (source == null) continue;
             String prompt = safe(source.optString("text",

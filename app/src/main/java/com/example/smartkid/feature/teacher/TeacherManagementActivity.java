@@ -1,5 +1,6 @@
 package com.example.smartkid.feature.teacher;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -245,11 +246,17 @@ public class TeacherManagementActivity extends BaseActivity {
         int total = questionAdapter.getTotalCount();
         int pending = questionAdapter.getPendingCount();
         if (total == 0) {
-            questionSummary.setText("Chưa có câu hỏi mới từ học sinh");
+            questionSummary.setText(R.string.teacher_question_summary_empty);
         } else if (pending == 0) {
-            questionSummary.setText(total + " câu hỏi • Đã trả lời tất cả");
+            questionSummary.setText(getResources().getQuantityString(
+                    R.plurals.teacher_question_summary_done, total, total));
         } else {
-            questionSummary.setText(total + " câu hỏi • " + pending + " câu đang chờ trả lời");
+            questionSummary.setText(getResources().getQuantityString(
+                    R.plurals.teacher_question_summary_pending,
+                    total,
+                    total,
+                    pending
+            ));
         }
     }
 
@@ -259,20 +266,26 @@ public class TeacherManagementActivity extends BaseActivity {
         int published = examAdapter.getPublishedCount();
         int drafts = Math.max(0, total - published);
         if (total == 0) {
-            examSummary.setText("Chưa có bài kiểm tra nào");
+            examSummary.setText(R.string.teacher_exam_summary_empty);
         } else if (drafts == 0) {
-            examSummary.setText(total + " bài kiểm tra  •  Tất cả đang mở");
+            examSummary.setText(getResources().getQuantityString(
+                    R.plurals.teacher_exam_summary_open, total, total));
         } else {
-            examSummary.setText(total + " bài kiểm tra  •  " + published
-                    + " đang mở  •  " + drafts + " bản nháp");
+            examSummary.setText(getResources().getQuantityString(
+                    R.plurals.teacher_exam_summary_mixed,
+                    total,
+                    total,
+                    published,
+                    drafts
+            ));
         }
     }
 
     private void updateEmptyMessage() {
         if (emptyText == null || !isExamFeature()) return;
         emptyText.setText(currentSearchQuery.trim().isEmpty()
-                ? "Chưa có bài kiểm tra.\nHãy tạo bài đầu tiên cho học sinh."
-                : "Không tìm thấy bài kiểm tra phù hợp.\nHãy thử từ khóa khác.");
+                ? R.string.teacher_exam_empty
+                : R.string.teacher_exam_search_empty);
     }
 
     private List<FeatureItem> filterForCurrentFeature(List<FeatureItem> data) {
@@ -444,6 +457,7 @@ public class TeacherManagementActivity extends BaseActivity {
     }
 
     /** Hỏi đáp: đọc toàn bộ cuộc trò chuyện và trả lời ngay trong bottom sheet. */
+    @SuppressLint("InflateParams")
     private void showQuestionDetail(FeatureItem item) {
         if (item == null) return;
         try {
@@ -655,6 +669,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 .show();
     }
 
+    @SuppressLint("InflateParams")
     private void showExamActions(FeatureItem item) {
         try {
             JSONObject source = item.getSource();
@@ -686,8 +701,10 @@ public class TeacherManagementActivity extends BaseActivity {
             });
 
             MaterialButton publishButton = content.findViewById(R.id.buttonTeacherExamPublish);
-            String publishAction = published ? "Gỡ xuất bản" : "Xuất bản";
-            publishButton.setText(published ? "Tạm đóng" : "Xuất bản");
+            String publishAction = getString(published
+                    ? R.string.teacher_unpublish : R.string.teacher_publish);
+            publishButton.setText(published
+                    ? R.string.teacher_pause_exam : R.string.teacher_publish);
             publishButton.setIconResource(published
                     ? R.drawable.teacher_ic_unpublish : R.drawable.teacher_ic_publish);
             TextView hint = content.findViewById(R.id.textTeacherExamPublishHint);
@@ -695,10 +712,10 @@ public class TeacherManagementActivity extends BaseActivity {
             publishButton.setEnabled(!publishBlocked);
             if (publishBlocked) {
                 hint.setVisibility(View.VISIBLE);
-                hint.setText("Bài này chưa có câu hỏi. Hãy chỉnh sửa nội dung trước khi xuất bản.");
+                hint.setText(R.string.teacher_publish_blocked);
             } else if (published) {
                 hint.setVisibility(View.VISIBLE);
-                hint.setText("Tạm đóng sẽ ẩn bài này khỏi danh sách làm bài của học sinh.");
+                hint.setText(R.string.teacher_unpublish_hint);
                 hint.setTextColor(androidx.core.content.ContextCompat.getColor(this,
                         R.color.smartkid_text_secondary));
             }
@@ -947,6 +964,7 @@ public class TeacherManagementActivity extends BaseActivity {
         });
     }
 
+    @SuppressLint("InflateParams")
     private void showExamStatistics(FeatureItem item, JSONObject data) {
         try {
             BottomSheetDialog sheet = new BottomSheetDialog(

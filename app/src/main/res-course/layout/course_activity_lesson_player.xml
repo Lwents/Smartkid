@@ -5,8 +5,10 @@
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:ignore="MergeRootFrame">
 
   <LinearLayout
     android:layout_width="match_parent"
@@ -135,7 +137,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="6dp"
                             android:layout_weight="1"
-                            android:text="0:00 / 0:00"
+                            android:text="@string/video_time_placeholder"
                             android:textColor="@android:color/white"
                             android:textSize="12sp" />
 

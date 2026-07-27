@@ -1,5 +1,6 @@
 package com.example.smartkid.feature.admin;
 
+import android.annotation.SuppressLint;
 import android.animation.TimeInterpolator;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -197,6 +198,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         setText(R.id.textAdminSettingsEmail, email);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void bindNavigation() {
         navItems[0].setOnClickListener(view -> selectPage(PAGE_OVERVIEW, true));
         navItems[1].setOnClickListener(view -> selectPage(PAGE_USERS, true));
@@ -207,6 +209,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                 swipeStartX = event.getX();
             } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+                view.performClick();
                 float distance = event.getX() - swipeStartX;
                 if (Math.abs(distance) > dp(64)) {
                     int target = selectedPage + (distance < 0 ? 1 : -1);

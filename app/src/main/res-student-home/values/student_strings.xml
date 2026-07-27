@@ -28,15 +28,41 @@
     <string name="lesson_locked">Bài học đang bị khóa. Hãy hoàn thành bài học trước đó.</string>
     <string name="lesson_exercise_open_error">Không thể mở bài luyện tập</string>
     <string name="lesson_exercise_start">Bắt đầu luyện tập</string>
-    <string name="lesson_exercise_info_format">%1$d câu hỏi • %2$d phút</string>
+    <plurals name="lesson_exercise_info_format">
+        <item quantity="one">%1$d câu hỏi • %2$d phút</item>
+        <item quantity="other">%1$d câu hỏi • %2$d phút</item>
+    </plurals>
     <string name="lesson_exercise_empty">Bài luyện tập chưa có câu hỏi</string>
     <string name="lesson_exercise_answer_hint">Nhập câu trả lời</string>
     <string name="lesson_exercise_submit_confirm">Nộp bài luyện tập và ghi nhận tiến độ bài học?</string>
     <string name="lesson_exercise_result_saved">Đã hoàn thành • Điểm %1$.1f • Tiến độ đã được lưu</string>
     <string name="lesson_exercise_result_not_saved">Đã nộp bài • Điểm %1$.1f • Chưa lưu được tiến độ</string>
-    <string name="no_suggested_lessons">Chưa có bài học được gợi ý</string>
     <string name="no_discussion_questions">Chưa có câu hỏi nào. Em hãy hỏi thầy cô nhé!</string>
     <string name="discussion_question_hint">Viết câu hỏi của em ở đây</string>
+    <string name="discussion_prompt">Em chưa hiểu chỗ nào?</string>
+    <string name="lesson_conversation_title">Cuộc trò chuyện bài học</string>
+    <string name="lesson_teacher_reply_pending">Thầy cô chưa trả lời. Em chờ một chút nhé!</string>
+    <string name="lesson_write_reply">Viết phản hồi</string>
+    <string name="lesson_like">Thích</string>
+    <string name="lesson_edit_question">Sửa câu hỏi</string>
+    <string name="lesson_report_question">Báo cáo</string>
+    <string name="lesson_delete_question">Xóa câu hỏi</string>
+    <string name="video_time_placeholder">0:00 / 0:00</string>
+    <string name="navigation_chevron">›</string>
+    <string name="lesson_matching_instruction">Ghép mỗi mục bên trái với đáp án phù hợp.</string>
+    <string name="lesson_matching_unavailable">Câu nối cặp chưa có đủ dữ liệu để hiển thị.</string>
+    <string name="lesson_matching_choose_answer">Chọn đáp án</string>
+    <string name="lesson_teacher_preview">Chế độ xem trước của giáo viên</string>
+    <string name="lesson_open_conversation">Mở cuộc trò chuyện</string>
+    <plurals name="lesson_reply_count">
+        <item quantity="one">Xem %1$d phản hồi</item>
+        <item quantity="other">Xem %1$d phản hồi</item>
+    </plurals>
+    <plurals name="lesson_like_count">
+        <item quantity="one">%1$d lượt thích</item>
+        <item quantity="other">%1$d lượt thích</item>
+    </plurals>
+    <string name="student_role_value">student</string>
     <string name="view_course">Xem khóa học  →</string>
     <string name="numbered_question">%1$d. %2$s</string>
     <string name="exam_info_format">%1$s • %2$s • Điểm đạt %3$s</string>
@@ -52,8 +78,6 @@
         <item quantity="other">%1$d phút</item>
     </plurals>
     <string name="search_course_hint">Tìm theo tên, môn học, giáo viên</string>
-    <string name="sort_az">Sắp xếp A–Z</string>
-    <string name="sort_za">Sắp xếp Z–A</string>
     <string name="no_courses">Bé chưa có khóa học nào</string>
     <string name="no_courses_hint">Bấm nút bên dưới để chọn khóa học và bắt đầu học nhé!</string>
     <string name="browse_catalog_button">Tìm khóa học để học</string>
@@ -85,7 +109,6 @@
     <string name="lesson_content">Nội dung bài học</string>
     <string name="content_type_format">Loại nội dung: %1$s</string>
     <string name="no_text_content">Bài học này không có nội dung văn bản.</string>
-    <string name="open_content">Mở tài liệu / video</string>
     <string name="lesson_intro_title">Giới thiệu bài học</string>
     <string name="video_fullscreen">Toàn màn hình</string>
     <string name="lesson_discussion_hint">Đặt câu hỏi với giáo viên</string>
@@ -96,7 +119,6 @@
     <string name="lesson_next">Bài tiếp</string>
     <string name="lesson_is_first">Đây là bài học đầu tiên</string>
     <string name="lesson_is_last">Đây là bài học cuối cùng</string>
-    <string name="speak_content">Đọc nội dung</string>
     <string name="mark_completed">Đánh dấu hoàn thành</string>
     <string name="video_error_code">Không phát được video (mã %1$d/%2$d). Bạn có thể mở bằng ứng dụng ngoài.</string>
     <string name="cannot_play_video">Thiết bị không thể phát video này.</string>
@@ -113,23 +135,20 @@
     <string name="progress_saved">Đã lưu tiến độ</string>
     <string name="ai_tutor">Gia Sư AI</string>
     <string name="home_streak_loading">Chuỗi học</string>
-    <string name="home_streak_days">%1$d ngày liên tiếp</string>
+    <plurals name="home_streak_days">
+        <item quantity="one">%1$d ngày liên tiếp</item>
+        <item quantity="other">%1$d ngày liên tiếp</item>
+    </plurals>
     <string name="ai_question_hint">Hỏi AI về bài học</string>
     <string name="send_question">Gửi câu hỏi</string>
     <string name="lesson_discussion">Hỏi đáp bài học</string>
     <string name="student_default_name">Học viên SmartKid</string>
-    <string name="username_format">Tên đăng nhập: %1$s</string>
-    <string name="email_format">Email: %1$s</string>
-    <string name="class_format">Lớp: %1$s</string>
-    <string name="role_format">Vai trò: %1$s</string>
     <string name="server_format">Máy chủ API: %1$s</string>
     <string name="profile_updated">Hồ sơ đã được cập nhật</string>
     <string name="profile_saved">Đã lưu hồ sơ lên server</string>
-    <string name="student_features">Chức năng học viên</string>
     <string name="edit_profile">Chỉnh sửa hồ sơ</string>
     <string name="full_name_hint">Họ và tên</string>
     <string name="class_hint">Lớp</string>
-    <string name="bio_hint">Giới thiệu bản thân</string>
     <string name="address_hint">Địa chỉ</string>
     <string name="change_password">Đổi mật khẩu</string>
     <string name="current_password_hint">Mật khẩu hiện tại</string>
@@ -150,8 +169,10 @@
     <string name="learning_analysis">Phân tích học tập</string>
     <string name="entry_assessment">Đánh giá đầu vào</string>
     <string name="submit_assessment">Nộp bài đánh giá</string>
-    <string name="restore_streak">Khôi phục chuỗi học</string>
     <string name="no_learning_path">Bạn chưa có khóa học trong lộ trình</string>
     <!-- Số bài của một chương, hiện bên phải tên chương trong chi tiết khóa học. -->
-    <string name="section_lesson_count">%1$d bài</string>
+    <plurals name="section_lesson_count">
+        <item quantity="one">%1$d bài</item>
+        <item quantity="other">%1$d bài</item>
+    </plurals>
 </resources>

@@ -37,7 +37,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Kết quả bài kiểm tra"
+                    android:text="@string/teacher_exam_results_title"
                     android:textColor="@color/smartkid_text"
                     android:textSize="21sp"
                     android:textStyle="bold" />
@@ -58,7 +58,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Đóng"
+                android:contentDescription="@string/close"
                 android:padding="12dp"
                 android:src="@drawable/course_ic_close"
                 app:tint="@color/smartkid_text_secondary" />
@@ -67,6 +67,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:baselineAligned="false"
             android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
@@ -92,7 +93,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:gravity="center"
-                    android:text="Bài đã nộp"
+                    android:text="@string/teacher_submissions"
                     android:textColor="@color/smartkid_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -120,7 +121,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:gravity="center"
-                    android:text="Điểm trung bình"
+                    android:text="@string/teacher_average_score"
                     android:textColor="@color/smartkid_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -148,7 +149,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:gravity="center"
-                    android:text="Tỷ lệ đạt"
+                    android:text="@string/teacher_pass_rate"
                     android:textColor="@color/smartkid_text_secondary"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -158,7 +159,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
-            android:text="Học sinh nổi bật"
+            android:text="@string/teacher_top_students"
             android:textColor="@color/smartkid_text"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -180,6 +181,6 @@
             android:layout_width="match_parent"
             android:layout_height="54dp"
             android:layout_marginTop="16dp"
-            android:text="Đã xem" />
+            android:text="@string/teacher_viewed" />
     </LinearLayout>
 </ScrollView>

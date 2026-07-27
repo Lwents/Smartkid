@@ -73,7 +73,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Đóng"
+                android:contentDescription="@string/close"
                 android:padding="12dp"
                 android:src="@drawable/course_ic_close"
                 app:tint="@color/smartkid_text_secondary" />
@@ -98,7 +98,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="22dp"
-            android:text="Chỉnh sửa nội dung"
+            android:text="@string/teacher_edit_content"
             app:icon="@drawable/profile_ic_edit"
             app:iconGravity="textStart" />
 
@@ -114,7 +114,7 @@
                 android:layout_width="0dp"
                 android:layout_height="54dp"
                 android:layout_weight="1"
-                android:text="Kết quả"
+                android:text="@string/teacher_results"
                 app:icon="@drawable/role_ic_chart"
                 app:iconGravity="textStart" />
 
@@ -125,7 +125,7 @@
                 android:layout_height="54dp"
                 android:layout_marginStart="9dp"
                 android:layout_weight="1"
-                android:text="Xuất bản"
+                android:text="@string/teacher_publish"
                 app:icon="@drawable/teacher_ic_publish"
                 app:iconGravity="textStart" />
         </LinearLayout>
@@ -146,7 +146,7 @@
             android:layout_height="52dp"
             android:layout_marginTop="14dp"
             android:backgroundTint="@color/teacher_exam_danger_surface"
-            android:text="Xóa bài kiểm tra"
+            android:text="@string/teacher_delete_exam"
             android:textColor="@color/smartkid_error"
             app:cornerRadius="18dp"
             app:icon="@drawable/teacher_ic_delete"

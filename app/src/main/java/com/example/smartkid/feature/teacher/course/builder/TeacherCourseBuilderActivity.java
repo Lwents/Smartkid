@@ -129,7 +129,11 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                     @Override
                     public void onSuccess(List<FeatureItem> loaded) {
                         if (!isUsable() || generation != loadGeneration) return;
+                        int previousCount = modules.size();
                         modules.clear();
+                        if (previousCount > 0) {
+                            adapter.notifyItemRangeRemoved(0, previousCount);
+                        }
                         if (loaded != null) {
                             for (FeatureItem item : loaded) {
                                 if (item != null && !item.getId().isEmpty()) {
@@ -137,7 +141,9 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                                 }
                             }
                         }
-                        adapter.notifyDataSetChanged();
+                        if (!modules.isEmpty()) {
+                            adapter.notifyItemRangeInserted(0, modules.size());
+                        }
                         updateEmpty();
                         if (modules.isEmpty()) {
                             setLoading(false);

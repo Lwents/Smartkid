@@ -149,7 +149,8 @@ public class LessonAdapter extends BaseAdapter {
         }
         ((TextView) convertView.findViewById(R.id.textSectionTitle)).setText(dong.tieuDeChuong);
         ((TextView) convertView.findViewById(R.id.textSectionCount)).setText(dong.daMoKhoa
-                ? parent.getContext().getString(R.string.section_lesson_count, dong.soBai)
+                ? parent.getResources().getQuantityString(
+                        R.plurals.section_lesson_count, dong.soBai, dong.soBai)
                 : parent.getContext().getString(R.string.section_locked));
         convertView.setAlpha(dong.daMoKhoa ? 1f : 0.55f);
         return convertView;

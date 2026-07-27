@@ -88,8 +88,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingStart="4dp"
+                android:paddingEnd="4dp"
                 android:paddingBottom="8dp"
-                android:text="Em chưa hiểu chỗ nào?"
+                android:text="@string/discussion_prompt"
                 android:textColor="@color/smartkid_text"
                 android:textSize="15sp"
                 android:textStyle="bold" />

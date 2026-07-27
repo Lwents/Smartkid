@@ -174,7 +174,8 @@ public class LearningAnalysisActivity extends BaseActivity {
         fillStat(statGoal, String.valueOf(done), "/ " + target);
 
         int streak = SafeJson.integer(daily, 0, "streak");
-        fillStat(statStreak, getString(R.string.analysis_streak_days, streak), "");
+        fillStat(statStreak, getResources().getQuantityString(
+                R.plurals.analysis_streak_days, streak, streak), "");
 
         bindEncourage(done, target);
         bindSuggestions(SafeJson.array(data, "suggestions"));
@@ -191,7 +192,8 @@ public class LearningAnalysisActivity extends BaseActivity {
             encourageMessage.setText(R.string.analysis_encourage_done);
         } else {
             encourageTitle.setText(R.string.analysis_encourage_title);
-            encourageMessage.setText(getString(R.string.analysis_encourage_remaining, remaining));
+            encourageMessage.setText(getResources().getQuantityString(
+                    R.plurals.analysis_encourage_remaining, remaining, remaining));
         }
         encourageCard.setVisibility(View.VISIBLE);
     }

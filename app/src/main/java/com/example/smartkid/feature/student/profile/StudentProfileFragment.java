@@ -201,7 +201,10 @@ public class StudentProfileFragment extends Fragment {
                         org.json.JSONObject analysis = data.optJSONObject("analysis");
                         double score = com.example.smartkid.common.util.SafeJson
                                 .decimal(analysis == null ? data : analysis, 0, "avg_score");
-                        statScoreText.setText(Math.round(score) + "%");
+                        statScoreText.setText(getString(
+                                R.string.profile_score_percent,
+                                Math.round(score)
+                        ));
                     }
 
                     @Override
@@ -244,7 +247,7 @@ public class StudentProfileFragment extends Fragment {
         } catch (Exception exception) {
             AppLogger.error(getContext(), "StudentProfileFragment", "Không thể tải hồ sơ", exception);
             setLoading(false);
-            showStatus("Không thể tải hồ sơ");
+            showStatus(getString(R.string.profile_load_error));
         }
     }
 
@@ -257,21 +260,22 @@ public class StudentProfileFragment extends Fragment {
         fullNameText.setText(displayName);
 
         String username = valueOrUpdating(safeUser.getUsername());
-        usernameText.setText("Mã học sinh: " + username);
+        usernameText.setText(getString(R.string.profile_student_code_format, username));
         if (studentCodeText != null) {
             studentCodeText.setText(username);
         }
         emailText.setText(valueOrUpdating(safeUser.getEmail()));
         classText.setText(valueOrUpdating(safeUser.getClassName()));
         if (roleText != null) {
-            roleText.setText(safeUser.getRole().isEmpty() ? "student" : safeUser.getRole());
+            roleText.setText(safeUser.getRole().isEmpty()
+                    ? getString(R.string.student_role_value) : safeUser.getRole());
         }
     }
 
     private String initialOf(String value) {
         String normalized = value == null ? "" : value.trim();
         if (normalized.isEmpty()) {
-            return "S";
+            return getString(R.string.profile_default_initial);
         }
         return normalized.substring(0, 1).toUpperCase(java.util.Locale.getDefault());
     }

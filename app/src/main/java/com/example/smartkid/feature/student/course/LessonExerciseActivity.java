@@ -120,7 +120,10 @@ public final class LessonExerciseActivity extends BaseActivity {
                 durationSeconds = Math.max(60, SafeJson.integer(settings, 1800,
                         "duration_seconds", "time_limit_seconds"));
                 int count = SafeJson.array(data, "questions").length();
-                info.setText(getString(R.string.lesson_exercise_info_format, count,
+                info.setText(getResources().getQuantityString(
+                        R.plurals.lesson_exercise_info_format,
+                        count,
+                        count,
                         Math.max(1, durationSeconds / 60)));
                 startButton.setEnabled(count > 0);
             }
@@ -243,7 +246,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         container.setPadding(0, dp(8), 0, 0);
 
         TextView instruction = new TextView(this);
-        instruction.setText("Ghép mỗi mục bên trái với đáp án phù hợp.");
+        instruction.setText(R.string.lesson_matching_instruction);
         instruction.setTextColor(getColor(R.color.smartkid_text_secondary));
         instruction.setTextSize(14f);
         container.addView(instruction);
@@ -252,13 +255,13 @@ public final class LessonExerciseActivity extends BaseActivity {
         if (!definition.scorable || definition.leftItems.isEmpty()
                 || definition.rightItems.isEmpty()) {
             TextView unavailable = new TextView(this);
-            unavailable.setText("Câu nối cặp chưa có đủ dữ liệu để hiển thị.");
+            unavailable.setText(R.string.lesson_matching_unavailable);
             unavailable.setTextColor(getColor(R.color.smartkid_error));
             unavailable.setPadding(0, dp(8), 0, 0);
             container.addView(unavailable);
         } else {
             List<String> rightLabels = new ArrayList<>();
-            rightLabels.add("Chọn đáp án");
+            rightLabels.add(getString(R.string.lesson_matching_choose_answer));
             for (MatchingItem item : definition.rightItems) {
                 rightLabels.add(item.text);
             }

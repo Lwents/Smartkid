@@ -46,14 +46,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:textColor="@color/admin_text_secondary"
-                android:textSize="10.5sp" />
+                android:textSize="11sp" />
         </LinearLayout>
 
         <TextView
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:gravity="center"
-            android:text="›"
+            android:text="@string/navigation_chevron"
             android:textColor="@color/admin_primary"
             android:textSize="26sp" />
     </LinearLayout>

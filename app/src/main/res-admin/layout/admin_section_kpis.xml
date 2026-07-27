@@ -30,11 +30,11 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
                     <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_blue" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_users" app:tint="@color/white" />
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_today" android:textColor="@color/admin_blue" android:textSize="9.5sp" android:textStyle="bold" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_today" android:textColor="@color/admin_blue" android:textSize="11sp" android:textStyle="bold" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_dau_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_dau_label" android:textColor="@color/admin_text_secondary" android:textSize="11sp" />
                 <TextView android:id="@+id/textAdminDau" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
-                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_active_description" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_active_description" android:textColor="@color/admin_text_muted" android:textSize="11sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -49,11 +49,11 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
                     <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_green" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_user_add" app:tint="@color/white" />
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_seven_days" android:textColor="@color/admin_green" android:textSize="9.5sp" android:textStyle="bold" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_seven_days" android:textColor="@color/admin_green" android:textSize="11sp" android:textStyle="bold" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_signups_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_signups_label" android:textColor="@color/admin_text_secondary" android:textSize="11sp" />
                 <TextView android:id="@+id/textAdminSignups" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
-                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_new_accounts_description" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_new_accounts_description" android:textColor="@color/admin_text_muted" android:textSize="11sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -68,11 +68,11 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
                     <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_cyan" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_users" app:tint="@color/white" />
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_active" android:textColor="@color/admin_cyan" android:textSize="9.5sp" android:textStyle="bold" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_active" android:textColor="@color/admin_cyan" android:textSize="11sp" android:textStyle="bold" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_students_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_students_label" android:textColor="@color/admin_text_secondary" android:textSize="11sp" />
                 <TextView android:id="@+id/textAdminStudents" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
-                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_students_description" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_students_description" android:textColor="@color/admin_text_muted" android:textSize="11sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -87,11 +87,11 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
                     <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_orange" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_user_add" app:tint="@color/white" />
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_active" android:textColor="@color/admin_orange" android:textSize="9.5sp" android:textStyle="bold" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_active" android:textColor="@color/admin_orange" android:textSize="11sp" android:textStyle="bold" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_teachers_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_teachers_label" android:textColor="@color/admin_text_secondary" android:textSize="11sp" />
                 <TextView android:id="@+id/textAdminTeachers" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
-                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_teachers_description" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_teachers_description" android:textColor="@color/admin_text_muted" android:textSize="11sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -106,11 +106,11 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
                     <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_purple" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_course" app:tint="@color/white" />
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_total" android:textColor="@color/admin_primary" android:textSize="9.5sp" android:textStyle="bold" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_total" android:textColor="@color/admin_primary" android:textSize="11sp" android:textStyle="bold" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_courses_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_courses_label" android:textColor="@color/admin_text_secondary" android:textSize="11sp" />
                 <TextView android:id="@+id/textAdminCourses" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
-                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_courses_description" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_courses_description" android:textColor="@color/admin_text_muted" android:textSize="11sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -125,11 +125,11 @@
             <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="9dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="30dp" android:gravity="center_vertical" android:orientation="horizontal">
                     <ImageView android:layout_width="30dp" android:layout_height="30dp" android:background="@drawable/admin_bg_icon_red" android:contentDescription="@null" android:padding="7dp" android:src="@drawable/admin_ic_course" app:tint="@color/white" />
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_total" android:textColor="@color/admin_red" android:textSize="9.5sp" android:textStyle="bold" />
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:gravity="end" android:text="@string/admin_kpi_total" android:textColor="@color/admin_red" android:textSize="11sp" android:textStyle="bold" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_lessons_label" android:textColor="@color/admin_text_secondary" android:textSize="10.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="28dp" android:layout_marginTop="5dp" android:gravity="center_vertical" android:maxLines="2" android:text="@string/admin_lessons_label" android:textColor="@color/admin_text_secondary" android:textSize="11sp" />
                 <TextView android:id="@+id/textAdminLessons" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/dashboard_zero" android:textColor="@color/admin_text_primary" android:textSize="16sp" android:textStyle="bold" />
-                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_lessons_description" android:textColor="@color/admin_text_muted" android:textSize="9.5sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="14dp" android:ellipsize="end" android:maxLines="1" android:text="@string/admin_kpi_lessons_description" android:textColor="@color/admin_text_muted" android:textSize="11sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </GridLayout>

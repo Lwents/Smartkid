@@ -1,5 +1,6 @@
 package com.example.smartkid.feature.teacher.course.builder;
 
+import android.annotation.SuppressLint;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.KeyEvent;
@@ -56,6 +57,7 @@ final class BuilderModuleAdapter extends RecyclerView.Adapter<BuilderModuleAdapt
     }
 
     @Override
+    @SuppressLint("ClickableViewAccessibility")
     public void onBindViewHolder(@NonNull ModuleViewHolder holder, int position) {
         BuilderModule module = modules.get(position);
         holder.title.setText(module.title);
@@ -85,9 +87,13 @@ final class BuilderModuleAdapter extends RecyclerView.Adapter<BuilderModuleAdapt
         holder.menu.setOnClickListener(v -> {
             if (listener != null) listener.onModuleMenuClicked(module);
         });
+        holder.handle.setOnClickListener(v -> {
+            if (listener != null) listener.onModuleDragStart(holder);
+        });
         holder.handle.setOnTouchListener((v, event) -> {
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN && listener != null) {
-                listener.onModuleDragStart(holder);
+                v.performClick();
+                return true;
             }
             return false;
         });

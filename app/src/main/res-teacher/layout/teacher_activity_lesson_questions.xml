@@ -29,6 +29,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:baselineAligned="false"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="16dp">
@@ -57,7 +58,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Câu hỏi cần xử lý"
+                    android:text="@string/teacher_questions_pending"
                     android:textColor="@color/smartkid_text"
                     android:textSize="17sp"
                     android:textStyle="bold" />
@@ -67,7 +68,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="Đang tải câu hỏi của học sinh…"
+                    android:text="@string/teacher_questions_loading"
                     android:textColor="@color/smartkid_text_secondary"
                     android:textSize="13sp" />
             </LinearLayout>
@@ -89,7 +90,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Tìm câu hỏi"
+            android:hint="@string/teacher_questions_search"
             app:startIconDrawable="@drawable/common_ic_search">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -106,7 +107,7 @@
             android:layout_width="wrap_content"
             android:layout_height="56dp"
             android:layout_marginStart="8dp"
-            android:text="Làm mới" />
+            android:text="@string/refresh" />
     </LinearLayout>
 
     <ProgressBar

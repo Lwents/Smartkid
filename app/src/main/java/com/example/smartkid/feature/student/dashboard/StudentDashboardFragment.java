@@ -207,13 +207,15 @@ public class StudentDashboardFragment extends Fragment {
                         if (daily == null) daily = data.optJSONObject("daily");
                         int streak = com.example.smartkid.common.util.SafeJson
                                 .integer(daily, 0, "streak");
-                        streakText.setText(getString(R.string.home_streak_days, streak));
+                        streakText.setText(getResources().getQuantityString(
+                                R.plurals.home_streak_days, streak, streak));
                     }
 
                     @Override
                     public void onError(ApiError error) {
                         if (!isAdded() || streakText == null) return;
-                        streakText.setText(getString(R.string.home_streak_days, 0));
+                        streakText.setText(getResources().getQuantityString(
+                                R.plurals.home_streak_days, 0, 0));
                     }
                 });
     }

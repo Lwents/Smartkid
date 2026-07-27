@@ -310,7 +310,8 @@ public final class TeacherCourseContentActivity extends BaseActivity {
             return;
         }
 
-        exerciseStatus.setText(getString(R.string.teacher_exercise_multiple_format, count));
+        exerciseStatus.setText(getResources().getQuantityString(
+                R.plurals.teacher_exercise_multiple_format, count, count));
         exerciseButton.setOnClickListener(view -> showExercisePicker(
                 lesson, exercises, exerciseButton));
     }

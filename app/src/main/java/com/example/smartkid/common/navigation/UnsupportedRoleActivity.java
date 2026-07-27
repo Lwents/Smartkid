@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.smartkid.R;
 import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.common.util.AppLogger;
 import com.example.smartkid.data.local.SessionManager;
@@ -48,7 +49,7 @@ public final class UnsupportedRoleActivity extends BaseActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         TextView title = new TextView(this);
-        title.setText("Vai trò tài khoản không hợp lệ");
+        title.setText(R.string.unsupported_role_title);
         title.setTextSize(20f);
         title.setTextColor(Color.parseColor("#0F172A"));
         title.setGravity(Gravity.CENTER);
@@ -56,9 +57,7 @@ public final class UnsupportedRoleActivity extends BaseActivity {
         root.addView(title);
 
         TextView message = new TextView(this);
-        message.setText("Tài khoản của bạn không thuộc nhóm Học viên, Giáo viên hoặc "
-                + "Quản trị viên. Vui lòng đăng nhập bằng tài khoản hợp lệ hoặc liên hệ "
-                + "quản trị viên để được hỗ trợ.");
+        message.setText(R.string.unsupported_role_message);
         message.setTextSize(14f);
         message.setTextColor(Color.parseColor("#475569"));
         message.setGravity(Gravity.CENTER);
@@ -69,7 +68,7 @@ public final class UnsupportedRoleActivity extends BaseActivity {
         root.addView(message);
 
         Button loginButton = new Button(this);
-        loginButton.setText("Quay về đăng nhập");
+        loginButton.setText(R.string.return_to_login);
         loginButton.setAllCaps(false);
         LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

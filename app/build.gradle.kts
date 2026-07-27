@@ -50,9 +50,12 @@ android {
 
     buildTypes {
         release {
-            optimization {
-                enable = false
-            }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -65,7 +68,8 @@ android {
 
     sourceSets {
         getByName("main") {
-            res.srcDirs(
+            res.directories.clear()
+            res.directories.addAll(listOf(
                 "src/main/res",
                 "src/main/res-auth",
                 "src/main/res-profile",
@@ -79,7 +83,7 @@ android {
                 "src/main/res-content-authoring",
                 "src/main/res-teacher",
                 "src/main/res-admin"
-            )
+            ))
         }
     }
 }

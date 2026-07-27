@@ -25,6 +25,10 @@ public final class ActivityChartView extends View {
     private final Path fillPath = new Path();
     private List<String> labels = Collections.emptyList();
     private List<Float> values = Collections.emptyList();
+    private float[] pointXs = new float[0];
+    private float[] pointYs = new float[0];
+    private Shader fillShader;
+    private Shader lineShader;
 
     public ActivityChartView(Context context) {
         super(context);
@@ -43,7 +47,27 @@ public final class ActivityChartView extends View {
                 ? Collections.emptyList() : new ArrayList<>(chartLabels);
         values = chartValues == null
                 ? Collections.emptyList() : new ArrayList<>(chartValues);
+        if (pointXs.length != values.size()) {
+            pointXs = new float[values.size()];
+            pointYs = new float[values.size()];
+        }
         invalidate();
+    }
+
+    @Override
+    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+        float top = dp(25);
+        float bottom = height - dp(30);
+        float left = dp(15);
+        float right = width - dp(15);
+        fillShader = new LinearGradient(0, top, 0, bottom,
+                new int[]{Color.argb(89, 99, 91, 255), Color.argb(20, 56, 189, 248),
+                        Color.TRANSPARENT},
+                new float[]{0f, 0.7f, 1f}, Shader.TileMode.CLAMP);
+        lineShader = new LinearGradient(left, 0, right, 0,
+                new int[]{Color.rgb(99, 91, 255), Color.rgb(59, 130, 246),
+                        Color.rgb(56, 189, 248)}, null, Shader.TileMode.CLAMP);
     }
 
     @Override
@@ -71,51 +95,44 @@ public final class ActivityChartView extends View {
         for (float value : values) maxValue = Math.max(maxValue, value);
         float maxY = maxValue == 0 ? 10 : maxValue * 1.25f;
         float stepX = values.size() > 1 ? chartWidth / (values.size() - 1f) : chartWidth / 2f;
-        List<Float> xs = new ArrayList<>();
-        List<Float> ys = new ArrayList<>();
         for (int index = 0; index < values.size(); index++) {
-            xs.add(left + index * stepX);
-            ys.add(top + chartHeight * (1f - values.get(index) / maxY));
+            pointXs[index] = left + index * stepX;
+            pointYs[index] = top + chartHeight * (1f - values.get(index) / maxY);
         }
 
         linePath.reset();
         fillPath.reset();
-        linePath.moveTo(xs.get(0), ys.get(0));
-        fillPath.moveTo(xs.get(0), bottom);
-        fillPath.lineTo(xs.get(0), ys.get(0));
+        linePath.moveTo(pointXs[0], pointYs[0]);
+        fillPath.moveTo(pointXs[0], bottom);
+        fillPath.lineTo(pointXs[0], pointYs[0]);
         for (int index = 0; index < values.size() - 1; index++) {
-            float currentX = xs.get(index);
-            float currentY = ys.get(index);
-            float nextX = xs.get(index + 1);
-            float nextY = ys.get(index + 1);
+            float currentX = pointXs[index];
+            float currentY = pointYs[index];
+            float nextX = pointXs[index + 1];
+            float nextY = pointYs[index + 1];
             float control1 = currentX + (nextX - currentX) * 0.4f;
             float control2 = currentX + (nextX - currentX) * 0.6f;
             linePath.cubicTo(control1, currentY, control2, nextY, nextX, nextY);
             fillPath.cubicTo(control1, currentY, control2, nextY, nextX, nextY);
         }
-        fillPath.lineTo(xs.get(xs.size() - 1), bottom);
+        fillPath.lineTo(pointXs[pointXs.length - 1], bottom);
         fillPath.close();
 
         paint.setStyle(Paint.Style.FILL);
-        paint.setShader(new LinearGradient(0, top, 0, bottom,
-                new int[]{Color.argb(89, 99, 91, 255), Color.argb(20, 56, 189, 248),
-                        Color.TRANSPARENT},
-                new float[]{0f, 0.7f, 1f}, Shader.TileMode.CLAMP));
+        paint.setShader(fillShader);
         canvas.drawPath(fillPath, paint);
 
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(dp(3.5f));
         paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setShader(new LinearGradient(left, 0, right, 0,
-                new int[]{Color.rgb(99, 91, 255), Color.rgb(59, 130, 246),
-                        Color.rgb(56, 189, 248)}, null, Shader.TileMode.CLAMP));
+        paint.setShader(lineShader);
         canvas.drawPath(linePath, paint);
         paint.setShader(null);
 
         paint.setTextAlign(Paint.Align.CENTER);
         for (int index = 0; index < values.size(); index++) {
-            float x = xs.get(index);
-            float y = ys.get(index);
+            float x = pointXs[index];
+            float y = pointYs[index];
             paint.setStyle(Paint.Style.FILL);
             paint.setColor(Color.argb(46, 99, 91, 255));
             canvas.drawCircle(x, y, dp(8), paint);

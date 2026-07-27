@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="@color/admin_text_secondary"
-            android:textSize="10.5sp" />
+            android:textSize="11sp" />
 
         <TextView
             android:id="@+id/textTeacherLessonExerciseStatus"
@@ -57,7 +57,7 @@
             android:maxLines="2"
             android:text="@string/teacher_exercise_loading_status"
             android:textColor="@color/admin_primary"
-            android:textSize="10.5sp"
+            android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -73,7 +73,7 @@
         android:text="@string/teacher_exercise_loading_button"
         android:textAllCaps="false"
         android:textColor="@color/admin_primary"
-        android:textSize="10.5sp"
+        android:textSize="11sp"
         android:textStyle="bold"
         app:backgroundTint="@color/admin_primary_light"
         app:cornerRadius="16dp" />

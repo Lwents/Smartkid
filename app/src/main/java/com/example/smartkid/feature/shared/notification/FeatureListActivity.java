@@ -1,5 +1,6 @@
 package com.example.smartkid.feature.shared.notification;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -189,6 +190,7 @@ public class FeatureListActivity extends BaseActivity {
         }
     }
 
+    @SuppressLint("InflateParams")
     private void showNotification(FeatureItem item) {
         JSONObject source = item.getSource();
         boolean wasUnread = !NotificationUiFormatter.isRead(source);

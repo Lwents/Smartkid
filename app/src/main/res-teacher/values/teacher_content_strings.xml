@@ -4,7 +4,10 @@
     <string name="teacher_exercise_loading_button">Đang tải…</string>
     <string name="teacher_exercise_none">Chưa có bài tập</string>
     <string name="teacher_exercise_summary_format">Bài tập: %1$s • %2$s</string>
-    <string name="teacher_exercise_multiple_format">Có %1$d bài tập • Chọn bài cần sửa</string>
+    <plurals name="teacher_exercise_multiple_format">
+        <item quantity="one">Có %1$d bài tập • Chọn bài cần sửa</item>
+        <item quantity="other">Có %1$d bài tập • Chọn bài cần sửa</item>
+    </plurals>
     <string name="teacher_add_exercise_button">Thêm bài tập</string>
     <string name="teacher_edit_exercise_button">Sửa bài tập</string>
     <string name="teacher_retry_exercise_button">Thử lại</string>

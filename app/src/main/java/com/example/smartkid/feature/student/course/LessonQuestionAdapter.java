@@ -80,8 +80,17 @@ final class LessonQuestionAdapter extends BaseAdapter {
                 ? R.color.discussion_answered_text
                 : R.color.discussion_pending_text));
         holder.replyHint.setText(replies.length() == 0
-                ? "Mở cuộc trò chuyện" : "Xem " + replies.length() + " phản hồi");
-        holder.likes.setText(likes + " lượt thích");
+                ? context.getString(R.string.lesson_open_conversation)
+                : context.getResources().getQuantityString(
+                        R.plurals.lesson_reply_count,
+                        replies.length(),
+                        replies.length()
+                ));
+        holder.likes.setText(context.getResources().getQuantityString(
+                R.plurals.lesson_like_count,
+                likes,
+                likes
+        ));
         holder.likes.setVisibility(likes > 0 ? View.VISIBLE : View.GONE);
         return convertView;
     }

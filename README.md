@@ -1,8 +1,8 @@
-# SmartKid Android (Java)
+# SmartKid EDU Android
 
-SmartKid là ứng dụng Android viết bằng Java, ánh xạ nghiệp vụ của frontend SmartKid
-sang REST API Django. Ứng dụng không kết nối trực tiếp PostgreSQL, không dùng
-SQLite/Room và không sinh dữ liệu demo khi server trả lỗi.
+SmartKid EDU là ứng dụng Android viết bằng Java, phục vụ ba vai trò học sinh,
+giáo viên và quản trị viên qua REST API Django. Ứng dụng không kết nối trực tiếp
+PostgreSQL và không dựng dữ liệu giả khi server trả lỗi.
 
 ## Chức năng
 
@@ -19,60 +19,71 @@ SQLite/Room và không sinh dữ liệu demo khi server trả lỗi.
 - Quản trị: dashboard, người dùng, tạo/khóa/mở tài khoản, duyệt khóa học, sức khỏe
   hệ thống, nhật ký, chính sách bảo mật, cấu hình, báo cáo, giao dịch và thông báo.
 
-Bảng đối chiếu chi tiết với frontend nằm tại `FEATURE_PARITY.md`.
-
 ## Kiến trúc
 
 ```text
 com.example.smartkid
-├── core/              hằng số, log, JSON an toàn, theo dõi mạng
+├── common/
+│   ├── navigation/    điều hướng và phân quyền theo vai trò
+│   ├── ui/            thành phần giao diện dùng chung
+│   └── util/          hằng số, log và xử lý JSON an toàn
 ├── data/
 │   ├── local/         SharedPreferences cho JWT/session và ID giỏ hàng
 │   ├── model/         model Java
 │   ├── remote/        Volley, refresh token, chuẩn hóa lỗi
 │   └── repository/    truy cập API và ánh xạ JSON
 ├── domain/            kiểm tra/luật nghiệp vụ Java có unit test
-└── ui/                Activity, Fragment, Adapter theo từng chức năng
+└── feature/
+    ├── shared/        xác thực, hồ sơ và thông báo
+    ├── student/       học tập, khóa học, bài thi và AI
+    ├── teacher/       soạn nội dung, đề thi và quản lý học viên
+    └── admin/         dashboard và vận hành hệ thống
 ```
 
 `SharedPreferences` chỉ giữ phiên và lựa chọn giỏ hàng; dữ liệu nghiệp vụ luôn
 được đồng bộ lại từ PostgreSQL thông qua backend.
 
+Tài nguyên Android được tách theo miền (`res-auth`, `res-course`, `res-exam`,
+`res-teacher`, `res-admin`, ...) và được khai báo trong `sourceSets` để tránh một
+thư mục `res` quá lớn.
+
 ## Chạy backend Docker
 
+Backend nằm trong repository `BeSmartkid` và chạy bằng Docker Compose:
+
 ```bash
-cd /home/lwent/Downloads/SmartKid/backend
 docker compose up -d --build
 docker compose ps
-docker compose logs -f web
 ```
 
 Backend: `http://localhost:8000`, PostgreSQL: `localhost:5433`, Redis:
 `localhost:6379`. Tắt stack bằng `docker compose down`; không thêm `-v` nếu muốn
 giữ volume PostgreSQL.
 
-Tác vụ nền có thể bật riêng bằng `docker compose --profile worker up -d` và bộ
-giám sát bằng `docker compose --profile monitoring up -d`; hai nhóm này không
-khởi động mặc định để máy học tập nhẹ hơn.
-
 Không có tài khoản/mật khẩu đăng nhập mặc định. Hãy dùng màn **Đăng ký** để tạo
 tài khoản học viên thật. Tài khoản giáo viên/quản trị do admin tạo qua API/app.
 
 ## Địa chỉ API Android
 
-- Debug và release: `http://160.250.181.242:8000/api/`.
-- Backend đang dùng HTTP nên ứng dụng bật cleartext traffic trong Android manifest.
+- `API_BASE_URL` lấy từ tham số Gradle hoặc `local.properties`.
+- Mặc định emulator sử dụng `http://10.0.2.2:8000/api/`.
+- VPS dự phòng hiện đi qua nginx tại `http://160.250.181.242/api/`.
 
-Cả debug và release hiện cho phép HTTP để kết nối trực tiếp tới VPS. Khi backend có
-HTTPS, nên đổi lại `android:usesCleartextTraffic="false"`.
+Cleartext HTTP chỉ được phép với các host backend đã khai báo trong
+`network_security_config.xml`, không được mở cho toàn bộ Internet. Bản triển khai
+chính thức nên chuyển VPS sang HTTPS và bỏ ngoại lệ HTTP tương ứng.
 
 ## Kiểm tra và APK
 
 ```bash
 ./gradlew testDebugUnitTest assembleDebug lintDebug
+ANDROID_SERIAL=emulator-5554 ./gradlew connectedDebugAndroidTest
 ```
 
 APK debug: `app/build/outputs/apk/debug/app-debug.apk`.
+
+GitHub Actions chạy unit test, Android Lint và build debug trên mọi push hoặc pull
+request vào `main`. Bản release sử dụng R8 và resource shrinking.
 
 AI Tutor/câu hỏi AI cần `OPENROUTER_API_KEY` hoặc provider tương ứng trong
 `backend/.env`. Thanh toán thật cần cấu hình đầy đủ các biến `MOMO_*`. Khi thiếu

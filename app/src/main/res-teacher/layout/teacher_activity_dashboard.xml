@@ -140,7 +140,7 @@
                         android:paddingStart="4dp"
                         android:paddingEnd="4dp"
                         android:textColor="@color/white"
-                        android:textSize="9sp"
+                        android:textSize="11sp"
                         android:textStyle="bold"
                         android:visibility="gone" />
                 </FrameLayout>

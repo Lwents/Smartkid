@@ -91,14 +91,32 @@ final class TeacherExamAdapter extends BaseAdapter {
         boolean published = sourceItem.optBoolean("published", false);
 
         holder.title.setText(item.getTitle());
-        holder.meta.setText(questionCount + " câu hỏi  ·  "
-                + (durationSeconds > 0 ? Math.max(1, durationSeconds / 60) + " phút" : "Không giới hạn")
-                + "  ·  " + questionTypeLabel(SafeJson.string(sourceItem, "mcq", "type")));
+        int durationMinutes = Math.max(1, durationSeconds / 60);
+        String duration = durationSeconds > 0
+                ? context.getResources().getQuantityString(
+                        R.plurals.teacher_exam_duration_minutes,
+                        durationMinutes,
+                        durationMinutes
+                )
+                : context.getString(R.string.teacher_exam_unlimited);
+        holder.meta.setText(context.getResources().getQuantityString(
+                R.plurals.teacher_exam_meta_format,
+                questionCount,
+                questionCount,
+                duration,
+                questionTypeLabel(SafeJson.string(sourceItem, "mcq", "type"))
+        ));
         holder.results.setText(submissions == 0
-                ? "Chưa có học sinh nộp bài"
-                : submissions + " bài đã nộp  ·  Điểm TB "
-                        + formatScore(SafeJson.decimal(sourceItem, 0, "avgScore", "avg_score")));
-        holder.status.setText(published ? "Đang mở" : "Bản nháp");
+                ? context.getString(R.string.teacher_exam_no_submissions)
+                : context.getResources().getQuantityString(
+                        R.plurals.teacher_exam_submission_result,
+                        submissions,
+                        submissions,
+                        formatScore(SafeJson.decimal(
+                                sourceItem, 0, "avgScore", "avg_score"))
+                ));
+        holder.status.setText(published
+                ? R.string.teacher_status_open : R.string.teacher_status_draft);
         holder.status.setBackgroundResource(published
                 ? R.drawable.teacher_bg_exam_published : R.drawable.teacher_bg_exam_draft);
         holder.status.setTextColor(ContextCompat.getColor(context, published

@@ -121,12 +121,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@null"
-                android:drawableTop="@drawable/notification_ic_notifications"
                 android:drawablePadding="14dp"
                 android:gravity="center"
                 android:padding="40dp"
                 android:textColor="@color/smartkid_text_secondary"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                app:drawableTopCompat="@drawable/notification_ic_notifications" />
         </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

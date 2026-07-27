@@ -1,5 +1,6 @@
 package com.example.smartkid.feature.teacher.course.builder;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,6 +51,7 @@ final class BuilderLessonAdapter extends RecyclerView.Adapter<BuilderLessonAdapt
     }
 
     @Override
+    @SuppressLint("ClickableViewAccessibility")
     public void onBindViewHolder(@NonNull LessonViewHolder holder, int position) {
         FeatureItem lesson = lessons.get(position);
         holder.title.setText(lesson.getTitle());
@@ -65,9 +67,13 @@ final class BuilderLessonAdapter extends RecyclerView.Adapter<BuilderLessonAdapt
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onLessonClicked(moduleId, lesson);
         });
+        holder.handle.setOnClickListener(v -> {
+            if (listener != null) listener.onLessonDragStart(holder);
+        });
         holder.handle.setOnTouchListener((v, event) -> {
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN && listener != null) {
-                listener.onLessonDragStart(holder);
+                v.performClick();
+                return true;
             }
             return false;
         });

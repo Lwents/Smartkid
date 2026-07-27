@@ -109,11 +109,11 @@ public class AdminManagementActivity extends BaseActivity {
 
     private void configurePrimaryAction(MaterialToolbar toolbar) {
         if (supportsCreate()) {
-            ((TextView) refreshButton).setText("Tạo mới");
+            ((TextView) refreshButton).setText(R.string.admin_create_new);
             refreshButton.setOnClickListener(view -> openCreate());
             addRefreshAction(toolbar);
         } else if (supportsBackup()) {
-            ((TextView) refreshButton).setText("Tạo sao lưu");
+            ((TextView) refreshButton).setText(R.string.admin_create_backup);
             refreshButton.setOnClickListener(view -> confirmCreateBackup());
             addRefreshAction(toolbar);
         } else {

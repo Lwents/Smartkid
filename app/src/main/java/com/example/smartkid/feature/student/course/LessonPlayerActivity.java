@@ -1,5 +1,6 @@
 package com.example.smartkid.feature.student.course;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +15,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import androidx.activity.OnBackPressedCallback;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
@@ -123,6 +126,7 @@ public class LessonPlayerActivity extends BaseActivity {
             }
             repository = new CourseRepository(this);
             bindViews();
+            configureBackNavigation();
             toolbar.setNavigationOnClickListener(view -> finish());
             String title = getIntent().getStringExtra(AppConstants.EXTRA_LESSON_TITLE);
             toolbar.setTitle(title == null ? getString(R.string.lesson_content) : title);
@@ -145,6 +149,20 @@ public class LessonPlayerActivity extends BaseActivity {
             AppLogger.error(this, "LessonPlayerActivity", "Không thể tạo trình phát bài học", exception);
             showErrorDialog("Không thể mở nội dung bài học: " + exception.getMessage());
         }
+    }
+
+    private void configureBackNavigation() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (fullscreen) {
+                    exitFullscreen();
+                    return;
+                }
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
     }
 
     @Override
@@ -309,7 +327,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
         contentText.setText(intro.isEmpty() ? getString(R.string.no_text_content) : intro);
         if (previewMode) {
-            statusText.setText("Chế độ xem trước của giáo viên");
+            statusText.setText(R.string.lesson_teacher_preview);
         } else {
             statusText.setText(content.isCompleted()
                     ? R.string.lesson_completed : R.string.lesson_not_completed);
@@ -371,6 +389,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void prepareEmbeddedVideo(String videoUrl) {
         try {
             WebSettings settings = webVideo.getSettings();
@@ -710,6 +729,7 @@ public class LessonPlayerActivity extends BaseActivity {
      * GỠ khung video khỏi trang và gắn vào lớp phủ che kín màn hình. Trước đây hàm này
      * chỉ xoay ngang nên tiêu đề bài học vẫn còn và video vẫn nằm trong khung nhỏ.
      */
+    @SuppressLint("SourceLockedOrientationActivity")
     private void enterFullscreen() {
         if (fullscreen || videoContainer == null || fullscreenContainer == null) return;
         android.view.ViewGroup parent = (android.view.ViewGroup) videoContainer.getParent();
@@ -738,6 +758,7 @@ public class LessonPlayerActivity extends BaseActivity {
     }
 
     /** Thoát toàn màn hình: trả khung video về đúng vị trí cũ trong trang. */
+    @SuppressLint("SourceLockedOrientationActivity")
     private void exitFullscreen() {
         if (!fullscreen) return;
         fullscreen = false;
@@ -795,16 +816,6 @@ public class LessonPlayerActivity extends BaseActivity {
     private void refitVideo() {
         if (videoView == null || lastVideoWidth <= 0 || lastVideoHeight <= 0) return;
         videoView.post(() -> fitVideoToFrame(lastVideoWidth, lastVideoHeight));
-    }
-
-    /** Nút Back khi đang toàn màn hình thì chỉ thoát toàn màn hình, không rời bài học. */
-    @Override
-    public void onBackPressed() {
-        if (fullscreen) {
-            exitFullscreen();
-            return;
-        }
-        super.onBackPressed();
     }
 
     /** Xoay máy khi đang toàn màn hình: đo lại khung cho khớp kích thước mới. */

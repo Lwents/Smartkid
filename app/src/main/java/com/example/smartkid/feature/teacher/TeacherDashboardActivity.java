@@ -442,7 +442,9 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
             View row = inflater.inflate(R.layout.teacher_item_course_summary, coursesContainer, false);
             ((TextView) row.findViewById(R.id.textTeacherCourseTitle)).setText(item.getTitle());
             ((TextView) row.findViewById(R.id.textTeacherCourseMeta)).setText(
-                    getString(R.string.teacher_course_meta_format,
+                    getResources().getQuantityString(
+                            R.plurals.teacher_course_meta_format,
+                            item.getLessons(),
                             item.getEnrolled(), item.getLessons()));
             ((TextView) row.findViewById(R.id.textTeacherCourseStatus)).setText(
                     statusLabel(item.getStatus()));

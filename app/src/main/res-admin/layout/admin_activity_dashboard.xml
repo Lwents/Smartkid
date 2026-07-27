@@ -85,7 +85,7 @@
                 android:maxLines="1"
                 android:text="@string/admin_nav_overview"
                 android:textColor="@color/admin_nav_item_color"
-                android:textSize="10.5sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
                 app:drawableTint="@color/admin_nav_item_color"
                 app:drawableTopCompat="@drawable/admin_ic_home" />
@@ -103,7 +103,7 @@
                 android:maxLines="1"
                 android:text="@string/admin_nav_users"
                 android:textColor="@color/admin_nav_item_color"
-                android:textSize="10.5sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
                 app:drawableTint="@color/admin_nav_item_color"
                 app:drawableTopCompat="@drawable/admin_ic_users" />
@@ -121,7 +121,7 @@
                 android:maxLines="1"
                 android:text="@string/admin_nav_content"
                 android:textColor="@color/admin_nav_item_color"
-                android:textSize="10.5sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
                 app:drawableTint="@color/admin_nav_item_color"
                 app:drawableTopCompat="@drawable/admin_ic_course" />
@@ -139,7 +139,7 @@
                 android:maxLines="1"
                 android:text="@string/admin_nav_settings"
                 android:textColor="@color/admin_nav_item_color"
-                android:textSize="10.5sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
                 app:drawableTint="@color/admin_nav_item_color"
                 app:drawableTopCompat="@drawable/admin_ic_settings" />

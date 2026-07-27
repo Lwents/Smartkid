@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="management_create">Tạo mới</string>
-    <string name="management_create_course_subtitle">Thiết lập thông tin và nội dung khóa học</string>
+    <string name="management_question_limit">Một bài kiểm tra có tối đa 50 câu hỏi</string>
+    <string name="management_default_score">1</string>
+    <string name="management_matching_arrow">→</string>
+    <string name="management_remove_symbol">×</string>
+    <string name="management_file_with_size">%1$s · %2$s</string>
     <string name="management_create_exam_subtitle">Tạo cấu hình bài thi và bộ câu hỏi trắc nghiệm</string>
     <string name="management_create_module_subtitle">Tạo chương mới trong khóa học</string>
     <string name="management_create_module_in_course_subtitle">Sắp xếp nội dung khóa học theo từng chương</string>
@@ -24,13 +27,6 @@
     <string name="management_grade_three">Lớp 3</string>
     <string name="management_grade_four">Lớp 4</string>
     <string name="management_grade_five">Lớp 5</string>
-    <string name="management_course_content_section">Nội dung khóa học</string>
-    <string name="management_course_content_description">Mô tả ngắn gọn mục tiêu, nội dung và phương pháp giảng dạy.</string>
-    <string name="management_course_short_description">Mô tả ngắn</string>
-    <string name="management_course_introduction">Nội dung chi tiết</string>
-    <string name="management_course_video_url">Liên kết YouTube</string>
-    <string name="management_course_media_section">Ảnh và video khóa học</string>
-    <string name="management_course_media_description">Ảnh bìa và video giới thiệu đều không bắt buộc. Video có thể dùng YouTube hoặc file tải lên.</string>
     <string name="management_course_thumbnail">Ảnh bìa khóa học</string>
     <string name="management_course_thumbnail_hint">JPG, PNG hoặc WEBP · tối đa 5 MB</string>
     <string name="management_course_video_file">File video khóa học</string>
@@ -38,12 +34,7 @@
     <string name="management_choose_file">Chọn tệp</string>
     <string name="management_replace_file">Đổi tệp</string>
     <string name="management_clear_file">Bỏ</string>
-    <string name="management_video_source_conflict">Chỉ chọn một nguồn video: file tải lên hoặc liên kết YouTube</string>
-    <string name="management_video_source_label">Nguồn video</string>
-    <string name="management_video_source_youtube">YouTube</string>
     <string name="management_video_source_file">Tải file video</string>
-    <string name="management_youtube_url_required">Hãy nhập liên kết video YouTube</string>
-    <string name="management_invalid_youtube_url">Liên kết phải thuộc youtube.com hoặc youtu.be</string>
     <string name="management_video_file_required">Hãy chọn file video cần tải lên</string>
     <string name="management_invalid_image_file">Hãy chọn một tệp ảnh hợp lệ</string>
     <string name="management_invalid_video_file">Hãy chọn một tệp video hợp lệ</string>
@@ -58,7 +49,6 @@
     <string name="management_lesson_title">Tên bài học</string>
     <string name="management_lesson_content_type">Loại nội dung</string>
     <string name="management_lesson_introduction">Giới thiệu bài học</string>
-    <string name="management_lesson_video_url">URL video YouTube hoặc video trực tiếp</string>
     <string name="management_lesson_video_file">File video bài học</string>
     <string name="management_lesson_document_file">Tệp tài liệu bài học</string>
     <string name="management_lesson_document_file_hint">PDF, DOC, DOCX hoặc ODT · tối đa 50 MB</string>
@@ -68,10 +58,7 @@
     <string name="management_exam_basic_section">Thông tin bài kiểm tra</string>
     <string name="management_exam_basic_description">Chọn khóa học áp dụng và mô tả mục tiêu đánh giá.</string>
     <string name="management_exam_title">Tên bài kiểm tra</string>
-    <string name="management_exam_level">Trình độ</string>
-    <string name="management_exam_description">Mô tả bài kiểm tra</string>
     <string name="management_invalid_http_url">URL phải bắt đầu bằng http:// hoặc https:// và có tên miền hợp lệ</string>
-    <string name="management_video_url_required">Bài học video cần URL video hợp lệ</string>
     <string name="management_text_content_required">Bài học văn bản cần có nội dung</string>
     <string name="management_document_file_required">Hãy chọn tệp tài liệu cho bài học</string>
     <string name="management_invalid_pdf_file">Hãy chọn đúng tệp PDF</string>
@@ -111,18 +98,25 @@
     <string name="management_matching_pairs_required">Câu nối cặp cần ít nhất hai cặp đầy đủ</string>
     <string name="management_matching_pair_limit">Một câu có tối đa 10 cặp nối</string>
     <string name="management_generate_questions_ai">📄 Tạo câu hỏi từ tài liệu (AI)</string>
-    <string name="management_ai_count">Số câu hỏi</string>
     <string name="management_ai_count_title">Bạn muốn tạo bao nhiêu câu?</string>
-    <string name="management_ai_count_option">%1$d câu hỏi</string>
+    <plurals name="management_ai_count_option">
+        <item quantity="one">%1$d câu hỏi</item>
+        <item quantity="other">%1$d câu hỏi</item>
+    </plurals>
     <string name="management_ai_generate">Bắt đầu tạo</string>
-    <string name="management_ai_generating">AI đang đọc tài liệu và tạo câu hỏi, vui lòng chờ…</string>
-    <string name="management_ai_generating_count">AI đang đọc tài liệu và tạo %1$d câu hỏi. Quá trình này có thể mất một chút thời gian…</string>
+    <plurals name="management_ai_generating_count">
+        <item quantity="one">AI đang đọc tài liệu và tạo %1$d câu hỏi. Quá trình này có thể mất một chút thời gian…</item>
+        <item quantity="other">AI đang đọc tài liệu và tạo %1$d câu hỏi. Quá trình này có thể mất một chút thời gian…</item>
+    </plurals>
     <string name="management_ai_file_invalid">Chỉ hỗ trợ tài liệu PDF, Word (.docx) hoặc text (.txt)</string>
     <string name="management_ai_file_too_large">Tài liệu quá lớn (tối đa 20MB)</string>
     <string name="management_ai_empty">AI chưa tạo được câu hỏi hợp lệ, vui lòng thử lại</string>
     <string name="management_ai_invalid_response">Phản hồi AI không đúng định dạng câu hỏi</string>
     <string name="management_ai_error">Không thể tạo câu hỏi bằng AI lúc này</string>
-    <string name="management_ai_partial">AI tạo được %1$d/%2$d câu hợp lệ. Bạn có thể giữ các câu này hoặc thử lại với tài liệu rõ ràng hơn.</string>
+    <plurals name="management_ai_partial">
+        <item quantity="one">AI tạo được %1$d/%2$d câu hợp lệ. Bạn có thể giữ các câu này hoặc thử lại với tài liệu rõ ràng hơn.</item>
+        <item quantity="other">AI tạo được %1$d/%2$d câu hợp lệ. Bạn có thể giữ các câu này hoặc thử lại với tài liệu rõ ràng hơn.</item>
+    </plurals>
     <string name="management_boolean_true">Đúng</string>
     <string name="management_boolean_false">Sai</string>
     <plurals name="management_ai_questions_added">
@@ -166,17 +160,13 @@
     <string name="builder_empty">Chưa có chương nào. Thêm chương để bắt đầu.</string>
     <string name="builder_edit_title">Sửa tên</string>
     <string name="builder_module_default_title">Chương mới</string>
-    <string name="builder_lesson_count">%1$d bài học</string>
     <string name="builder_load_error">Không tải được nội dung khóa học</string>
     <string name="builder_delete">Xóa</string>
     <string name="builder_delete_module_confirm">Xóa chương này và toàn bộ bài học bên trong?</string>
-    <string name="builder_delete_lesson_confirm">Xóa bài học này?</string>
 
     <!-- Lesson editor bottom sheet -->
     <string name="sheet_lesson_note">Ghi chú bài học</string>
     <string name="sheet_lesson_note_hint">Ghi chú ngắn gọn về bài học này</string>
     <string name="sheet_done">Xong</string>
-    <string name="sheet_lesson_video_url_hint">URL video YouTube hoặc video trực tiếp</string>
-    <string name="sheet_lesson_saved">Đã lưu bài học</string>
     <string name="sheet_lesson_saving">Đang lưu bài học…</string>
 </resources>

@@ -2,10 +2,6 @@
 <resources>
     <string name="teacher_question_prompt">Nội dung câu hỏi</string>
     <string name="teacher_question_choices_hint">Phương án trả lời · chọn đáp án đúng</string>
-    <string name="teacher_choice_one">Phương án A</string>
-    <string name="teacher_choice_two">Phương án B</string>
-    <string name="teacher_choice_three">Phương án C</string>
-    <string name="teacher_choice_four">Phương án D</string>
     <string name="teacher_question_score">Điểm của câu hỏi</string>
     <string name="teacher_updating">Giáo viên: đang cập nhật</string>
     <string name="teacher_format">Giáo viên: %1$s</string>
@@ -31,7 +27,6 @@
     <string name="teacher_rate_completed_format">%1$d%% xong</string>
     <string name="teacher_percentage_format">%1$d%%</string>
     <string name="teacher_completion_zero">0%</string>
-    <string name="teacher_management_tools">Công cụ giảng dạy</string>
     <string name="teacher_grade_action">Kết quả bài kiểm tra</string>
     <string name="teacher_manage_students_action">Quản lý học viên</string>
     <string name="teacher_activity_title">Hoạt động giảng dạy</string>
@@ -48,7 +43,6 @@
     <string name="teacher_course_content_subtitle">Quản lý chương, bài học, video và bài luyện tập theo đúng cấu trúc SmartKid.</string>
     <string name="teacher_add_module">Thêm chương</string>
     <string name="teacher_add_lesson">Thêm bài học</string>
-    <string name="teacher_add_exercise_short">+ Bài tập</string>
     <string name="teacher_loading_lessons">Đang tải bài học…</string>
     <string name="teacher_lessons_load_error">Không tải được bài học</string>
     <string name="teacher_course_content_empty">Khóa học chưa có chương nào</string>
@@ -81,6 +75,74 @@
     <string name="teacher_feedback_title">Phản hồi học viên</string>
     <string name="teacher_feedback_description">Xem ý kiến từ học viên</string>
     <string name="teacher_no_lesson_questions">Chưa có câu hỏi nào từ học viên</string>
+    <string name="teacher_exam_library">Kho bài kiểm tra</string>
+    <string name="teacher_exam_loading">Đang tải bài kiểm tra…</string>
+    <string name="teacher_exam_search">Tìm bài kiểm tra</string>
+    <string name="teacher_exam_create_short">Tạo bài</string>
+    <string name="teacher_exam_empty">Chưa có bài kiểm tra.\nHãy tạo bài đầu tiên cho học sinh.</string>
+    <string name="teacher_questions_pending">Câu hỏi cần xử lý</string>
+    <string name="teacher_questions_loading">Đang tải câu hỏi của học sinh…</string>
+    <string name="teacher_questions_search">Tìm câu hỏi</string>
+    <string name="teacher_exam_open_manage">Mở và quản lý  ›</string>
+    <string name="teacher_edit_content">Chỉnh sửa nội dung</string>
+    <string name="teacher_results">Kết quả</string>
+    <string name="teacher_publish">Xuất bản</string>
+    <string name="teacher_delete_exam">Xóa bài kiểm tra</string>
+    <string name="teacher_exam_results_title">Kết quả bài kiểm tra</string>
+    <string name="teacher_submissions">Bài đã nộp</string>
+    <string name="teacher_average_score">Điểm trung bình</string>
+    <string name="teacher_pass_rate">Tỷ lệ đạt</string>
+    <string name="teacher_top_students">Học sinh nổi bật</string>
+    <string name="teacher_viewed">Đã xem</string>
+    <string name="teacher_student_asked">Học sinh hỏi:</string>
+    <string name="teacher_related_lesson">Bài học liên quan</string>
+    <string name="teacher_reply_hint">Viết câu trả lời cho học sinh</string>
+    <string name="teacher_send_reply">Gửi câu trả lời</string>
+    <string name="teacher_view_lesson">Xem bài học</string>
+    <string name="teacher_conversation_history">Lịch sử trao đổi</string>
+    <string name="teacher_no_replies">Chưa có phản hồi. Hãy giúp học sinh giải đáp câu hỏi này.</string>
+    <plurals name="teacher_exam_meta_format">
+        <item quantity="one">%1$d câu hỏi · %2$s · %3$s</item>
+        <item quantity="other">%1$d câu hỏi · %2$s · %3$s</item>
+    </plurals>
+    <plurals name="teacher_exam_duration_minutes">
+        <item quantity="one">%1$d phút</item>
+        <item quantity="other">%1$d phút</item>
+    </plurals>
+    <string name="teacher_exam_unlimited">Không giới hạn</string>
+    <string name="teacher_exam_no_submissions">Chưa có học sinh nộp bài</string>
+    <plurals name="teacher_exam_submission_result">
+        <item quantity="one">%1$d bài đã nộp · Điểm TB %2$s</item>
+        <item quantity="other">%1$d bài đã nộp · Điểm TB %2$s</item>
+    </plurals>
+    <string name="teacher_status_open">Đang mở</string>
+    <string name="teacher_status_draft">Bản nháp</string>
+    <string name="teacher_question_summary_empty">Chưa có câu hỏi mới từ học sinh</string>
+    <plurals name="teacher_question_summary_done">
+        <item quantity="one">%1$d câu hỏi • Đã trả lời tất cả</item>
+        <item quantity="other">%1$d câu hỏi • Đã trả lời tất cả</item>
+    </plurals>
+    <plurals name="teacher_question_summary_pending">
+        <item quantity="one">%1$d câu hỏi • %2$d câu đang chờ trả lời</item>
+        <item quantity="other">%1$d câu hỏi • %2$d câu đang chờ trả lời</item>
+    </plurals>
+    <string name="teacher_exam_summary_empty">Chưa có bài kiểm tra nào</string>
+    <plurals name="teacher_exam_summary_open">
+        <item quantity="one">%1$d bài kiểm tra • Tất cả đang mở</item>
+        <item quantity="other">%1$d bài kiểm tra • Tất cả đang mở</item>
+    </plurals>
+    <plurals name="teacher_exam_summary_mixed">
+        <item quantity="one">%1$d bài kiểm tra • %2$d đang mở • %3$d bản nháp</item>
+        <item quantity="other">%1$d bài kiểm tra • %2$d đang mở • %3$d bản nháp</item>
+    </plurals>
+    <string name="teacher_exam_search_empty">Không tìm thấy bài kiểm tra phù hợp.\nHãy thử từ khóa khác.</string>
+    <string name="teacher_unpublish">Gỡ xuất bản</string>
+    <string name="teacher_pause_exam">Tạm đóng</string>
+    <string name="teacher_publish_blocked">Bài này chưa có câu hỏi. Hãy chỉnh sửa nội dung trước khi xuất bản.</string>
+    <string name="teacher_unpublish_hint">Tạm đóng sẽ ẩn bài này khỏi danh sách làm bài của học sinh.</string>
     <string name="teacher_notifications_description">Cập nhật thông báo giảng dạy</string>
-    <string name="teacher_course_meta_format">%1$d học viên • %2$d bài học</string>
+    <plurals name="teacher_course_meta_format">
+        <item quantity="one">%1$d học viên • %2$d bài học</item>
+        <item quantity="other">%1$d học viên • %2$d bài học</item>
+    </plurals>
 </resources>

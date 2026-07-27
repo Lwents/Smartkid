@@ -14,11 +14,6 @@
         <item name="android:clickable">false</item>
     </style>
 
-    <style name="Widget.Smartkid.GlassCard.Interactive" parent="Widget.Smartkid.GlassCard">
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="rippleColor">@color/glass_stroke</item>
-    </style>
 
     <!-- Neutral role-shared card/tab/title styles. Used by both Teacher and Admin surfaces. -->
     <style name="Widget.Smartkid.RoleCard" parent="Widget.Material3.CardView.Elevated">
@@ -83,10 +78,6 @@
         <item name="android:insetBottom">0dp</item>
     </style>
 
-    <style name="Widget.Smartkid.GlassButton.Secondary" parent="Widget.Smartkid.GlassButton">
-        <item name="backgroundTint">@color/smartkid_secondary</item>
-        <item name="android:textColor">@color/on_secondary</item>
-    </style>
 
     <style name="Widget.Smartkid.GlassButton.Outlined" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:minHeight">@dimen/button_height</item>
@@ -109,20 +100,6 @@
         <item name="cornerRadius">@dimen/glass_radius_large</item>
     </style>
 
-    <style name="Widget.Smartkid.CourseToolCard" parent="Widget.Material3.Button">
-        <item name="android:minHeight">@dimen/button_height</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="backgroundTint">@color/glass_surface_strong</item>
-        <item name="android:textColor">@color/smartkid_text</item>
-        <item name="iconTint">@color/smartkid_primary</item>
-        <item name="cornerRadius">@dimen/glass_radius_large</item>
-        <item name="elevation">1dp</item>
-        <item name="rippleColor">@color/glass_stroke</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-    </style>
 
     <style name="Widget.Smartkid.GlassInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="boxBackgroundColor">@color/glass_input</item>
@@ -174,16 +151,6 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
-    <style name="Widget.Smartkid.ServiceTile" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardBackgroundColor">@color/glass_service_tile</item>
-        <item name="cardCornerRadius">@dimen/glass_radius</item>
-        <item name="cardElevation">@dimen/glass_elevation</item>
-        <item name="strokeColor">@color/glass_service_stroke</item>
-        <item name="strokeWidth">@dimen/glass_stroke_width</item>
-        <item name="rippleColor">@color/glass_navigation_active</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-    </style>
 
     <style name="ThemeOverlay.Smartkid.GlassDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="colorSurface">@color/glass_surface_strong</item>

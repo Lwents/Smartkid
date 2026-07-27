@@ -1,5 +1,6 @@
 package com.example.smartkid.feature.student.course;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -155,6 +156,7 @@ public class LessonDiscussionActivity extends BaseActivity {
                 "Đã gửi câu hỏi tới giáo viên", () -> questionInput.setText("")));
     }
 
+    @SuppressLint("InflateParams")
     private void showQuestion(FeatureItem item) {
         if (item == null) return;
         try {

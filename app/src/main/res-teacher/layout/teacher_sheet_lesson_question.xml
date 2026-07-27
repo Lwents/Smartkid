@@ -69,7 +69,7 @@
                 android:layout_height="48dp"
                 android:layout_marginStart="6dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Đóng"
+                android:contentDescription="@string/close"
                 android:padding="12dp"
                 android:src="@drawable/course_ic_close"
                 app:tint="@color/smartkid_text_secondary" />
@@ -93,7 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="19dp"
-            android:text="Học sinh hỏi:"
+            android:text="@string/teacher_student_asked"
             android:textColor="@color/smartkid_text"
             android:textSize="15sp"
             android:textStyle="bold" />
@@ -113,7 +113,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="19dp"
-            android:text="Bài học liên quan"
+            android:text="@string/teacher_related_lesson"
             android:textColor="@color/smartkid_text_secondary"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -158,7 +158,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
-            android:hint="Viết câu trả lời cho học sinh">
+            android:hint="@string/teacher_reply_hint">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputTeacherQuestionReply"
@@ -176,7 +176,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="10dp"
-            android:text="Gửi câu trả lời"
+            android:text="@string/teacher_send_reply"
             app:icon="@drawable/notification_ic_reply"
             app:iconGravity="textStart" />
 
@@ -186,7 +186,7 @@
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_marginTop="9dp"
-            android:text="Xem bài học"
+            android:text="@string/teacher_view_lesson"
             app:icon="@drawable/common_ic_nav_course"
             app:iconGravity="textStart" />
 
@@ -195,7 +195,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
-            android:text="Lịch sử trao đổi"
+            android:text="@string/teacher_conversation_history"
             android:textColor="@color/smartkid_text"
             android:textSize="16sp"
             android:textStyle="bold" />
@@ -214,7 +214,7 @@
             android:background="@drawable/teacher_bg_question_empty"
             android:gravity="center"
             android:padding="18dp"
-            android:text="Chưa có phản hồi. Hãy giúp học sinh giải đáp câu hỏi này."
+            android:text="@string/teacher_no_replies"
             android:textColor="@color/smartkid_text_secondary"
             android:textSize="14sp" />
 
