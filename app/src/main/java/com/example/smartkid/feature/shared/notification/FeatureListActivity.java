@@ -25,10 +25,11 @@ import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.ExamRepository;
 import com.example.smartkid.data.repository.StudentFeatureRepository;
 import com.example.smartkid.common.ui.BaseActivity;
-import com.example.smartkid.feature.student.course.CatalogActivity;
 import com.example.smartkid.feature.student.course.CourseDetailActivity;
+import com.example.smartkid.feature.student.course.LessonPlayerActivity;
 import com.example.smartkid.feature.student.ai.LearningAnalysisActivity;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONObject;
@@ -50,6 +51,8 @@ public class FeatureListActivity extends BaseActivity {
     private Button actionButton;
     private SwipeRefreshLayout refreshLayout;
     private FeatureItemAdapter adapter;
+    private NotificationItemAdapter notificationAdapter;
+    private TextView notificationSummary;
     private StudentFeatureRepository featureRepository;
     private ExamRepository examRepository;
 
@@ -57,13 +60,16 @@ public class FeatureListActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            setContentView(R.layout.common_activity_feature_list);
             mode = getIntent() == null ? "" : getIntent().getStringExtra(EXTRA_MODE);
             if (!isModeValid(mode)) {
+                setContentView(R.layout.common_activity_feature_list);
                 showErrorDialog("Chức năng không hợp lệ");
                 finish();
                 return;
             }
+            setContentView(MODE_NOTIFICATIONS.equals(mode)
+                    ? R.layout.notification_activity_list
+                    : R.layout.common_activity_feature_list);
             featureRepository = new StudentFeatureRepository(this);
             examRepository = new ExamRepository(this);
             bindViews();
@@ -81,6 +87,7 @@ public class FeatureListActivity extends BaseActivity {
         emptyText = findViewById(R.id.textFeatureListEmpty);
         actionButton = findViewById(R.id.buttonFeatureAction);
         refreshLayout = findViewById(R.id.refreshFeatureList);
+        notificationSummary = findViewById(R.id.textNotificationSummary);
         SwipeRefreshFix.attach(refreshLayout);
         TextInputEditText searchInput = findViewById(R.id.inputFeatureSearch);
         ListView listView = findViewById(R.id.listFeatures);
@@ -90,15 +97,20 @@ public class FeatureListActivity extends BaseActivity {
         }
         toolbar.setNavigationOnClickListener(view -> finish());
         refreshLayout.setOnRefreshListener(this::loadSafely);
-        adapter = new FeatureItemAdapter(this);
-        listView.setAdapter(adapter);
+        if (MODE_NOTIFICATIONS.equals(mode)) {
+            notificationAdapter = new NotificationItemAdapter(this);
+            listView.setAdapter(notificationAdapter);
+        } else {
+            adapter = new FeatureItemAdapter(this);
+            listView.setAdapter(adapter);
+        }
         listView.setEmptyView(emptyText);
         listView.setOnItemClickListener((parent, view, position, id) ->
-                openItemSafely(adapter.getItem(position)));
+                openItemSafely(itemAt(position)));
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.filter(s == null ? "" : s.toString());
+                filterItems(s == null ? "" : s.toString());
             }
             @Override public void afterTextChanged(Editable s) { }
         });
@@ -113,7 +125,7 @@ public class FeatureListActivity extends BaseActivity {
         } else if (MODE_NOTIFICATIONS.equals(mode)) {
             toolbar.setTitle(R.string.notifications);
             emptyText.setText(R.string.no_notifications);
-            actionButton.setText(R.string.mark_all_read);
+            actionButton.setText(R.string.notification_mark_all_read);
             actionButton.setOnClickListener(view -> markAllRead());
         } else {
             toolbar.setTitle(R.string.certificates);
@@ -142,7 +154,7 @@ public class FeatureListActivity extends BaseActivity {
             public void onSuccess(List<FeatureItem> data) {
                 if (!isUsable()) return;
                 setLoading(false);
-                adapter.setItems(data);
+                setItems(data);
             }
 
             @Override
@@ -177,14 +189,44 @@ public class FeatureListActivity extends BaseActivity {
     }
 
     private void showNotification(FeatureItem item) {
-        new AlertDialog.Builder(this)
-                .setTitle(item.getTitle())
-                .setMessage(item.getDetail())
-                .setPositiveButton("Đã đọc", (dialog, which) -> {
-                    if (!item.getId().isEmpty()) markRead(item.getId());
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .show();
+        JSONObject source = item.getSource();
+        boolean wasUnread = !NotificationUiFormatter.isRead(source);
+        if (wasUnread && !item.getId().isEmpty()) markReadOptimistically(item);
+
+        BottomSheetDialog sheet = new BottomSheetDialog(
+                this, R.style.ThemeOverlay_Smartkid_NotificationSheet);
+        View content = getLayoutInflater().inflate(R.layout.notification_sheet_detail, null);
+        sheet.setContentView(content);
+
+        ((TextView) content.findViewById(R.id.textNotificationSheetCategory))
+                .setText(NotificationUiFormatter.categoryLabel(source));
+        ((TextView) content.findViewById(R.id.textNotificationSheetTime))
+                .setText(NotificationUiFormatter.timeLabel(source));
+        ((TextView) content.findViewById(R.id.textNotificationSheetTitle))
+                .setText(NotificationUiFormatter.displayTitle(source, item.getTitle()));
+        ((TextView) content.findViewById(R.id.textNotificationSheetMessage))
+                .setText(item.getDetail().isEmpty()
+                        ? getString(R.string.notification_no_content)
+                        : item.getDetail());
+
+        String context = NotificationUiFormatter.contextLabel(source, item.getTitle());
+        TextView contextView = content.findViewById(R.id.textNotificationSheetContext);
+        View contextCard = content.findViewById(R.id.layoutNotificationSheetContext);
+        contextView.setText(context);
+        contextCard.setVisibility(context.isEmpty() ? View.GONE : View.VISIBLE);
+
+        View openLesson = content.findViewById(R.id.buttonNotificationOpenLesson);
+        String lessonId = NotificationUiFormatter.lessonId(source);
+        String courseId = NotificationUiFormatter.courseId(source);
+        openLesson.setVisibility(lessonId.isEmpty() || courseId.isEmpty()
+                ? View.GONE : View.VISIBLE);
+        openLesson.setOnClickListener(view -> {
+            sheet.dismiss();
+            openNotificationLesson(source, courseId, lessonId);
+        });
+        content.findViewById(R.id.buttonNotificationClose)
+                .setOnClickListener(view -> sheet.dismiss());
+        sheet.show();
     }
 
     private void showCertificate(FeatureItem item) {
@@ -202,19 +244,24 @@ public class FeatureListActivity extends BaseActivity {
         builder.show();
     }
 
-    private void markRead(String id) {
-        setLoading(true);
-        featureRepository.markNotificationRead(id, new ApiCallback<Boolean>() {
-            @Override public void onSuccess(Boolean data) { if (isUsable()) loadSafely(); }
+    private void markReadOptimistically(FeatureItem item) {
+        try {
+            item.getSource().put("is_read", true);
+            refreshNotificationPresentation();
+        } catch (Exception ignored) { }
+        featureRepository.markNotificationRead(item.getId(), new ApiCallback<Boolean>() {
+            @Override public void onSuccess(Boolean data) { }
             @Override public void onError(ApiError error) {
                 if (!isUsable()) return;
-                setLoading(false);
-                handleApiError(error);
+                try { item.getSource().put("is_read", false); }
+                catch (Exception ignored) { }
+                refreshNotificationPresentation();
             }
         });
     }
 
     private void markAllRead() {
+        if (notificationAdapter != null && notificationAdapter.getUnreadCount() == 0) return;
         setLoading(true);
         featureRepository.markAllNotificationsRead(new ApiCallback<Boolean>() {
             @Override public void onSuccess(Boolean data) { if (isUsable()) loadSafely(); }
@@ -246,6 +293,56 @@ public class FeatureListActivity extends BaseActivity {
             AppLogger.error(this, "FeatureListActivity", "Không thể chuyển trang", exception);
             showErrorDialog("Không thể mở chức năng");
         }
+    }
+
+    private void openNotificationLesson(JSONObject source, String courseId, String lessonId) {
+        try {
+            Intent intent = new Intent(this, LessonPlayerActivity.class);
+            intent.putExtra(AppConstants.EXTRA_COURSE_ID, courseId);
+            intent.putExtra(AppConstants.EXTRA_LESSON_ID, lessonId);
+            String title = NotificationUiFormatter.lessonTitle(source);
+            if (!title.isEmpty()) intent.putExtra(AppConstants.EXTRA_LESSON_TITLE, title);
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "FeatureListActivity", "Không thể mở bài học", exception);
+            showErrorDialog("Không thể mở bài học từ thông báo này");
+        }
+    }
+
+    private FeatureItem itemAt(int position) {
+        return notificationAdapter != null
+                ? notificationAdapter.getItem(position)
+                : adapter == null ? null : adapter.getItem(position);
+    }
+
+    private void setItems(List<FeatureItem> data) {
+        if (notificationAdapter != null) {
+            notificationAdapter.setItems(data);
+            refreshNotificationPresentation();
+        } else if (adapter != null) {
+            adapter.setItems(data);
+        }
+    }
+
+    private void filterItems(String query) {
+        if (notificationAdapter != null) notificationAdapter.filter(query);
+        else if (adapter != null) adapter.filter(query);
+    }
+
+    private void refreshNotificationPresentation() {
+        if (notificationAdapter == null) return;
+        notificationAdapter.notifyDataSetChanged();
+        int unread = notificationAdapter.getUnreadCount();
+        if (notificationSummary != null) {
+            notificationSummary.setText(unread == 0
+                    ? getString(R.string.notification_all_caught_up)
+                    : getResources().getQuantityString(
+                            R.plurals.notification_unread_count, unread, unread));
+        }
+        actionButton.setEnabled(unread > 0);
+        actionButton.setText(unread > 0
+                ? R.string.notification_mark_all_read
+                : R.string.notification_all_read);
     }
 
     private void setLoading(boolean loading) {

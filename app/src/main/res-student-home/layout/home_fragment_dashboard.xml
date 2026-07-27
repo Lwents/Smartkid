@@ -76,23 +76,45 @@
                             android:textSize="13sp" />
                     </LinearLayout>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/buttonDashboardNotifications"
-                        style="@style/Widget.Smartkid.GlassButton.Outlined"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:contentDescription="@string/open_notifications"
-                        android:minWidth="0dp"
-                        android:padding="7dp"
-                        android:text=""
-                        app:icon="@drawable/home_icon_glass_bell"
-                        app:iconGravity="textStart"
-                        app:iconPadding="0dp"
-                        app:iconSize="34dp"
-                        app:iconTint="@null"
-                        app:backgroundTint="@color/glass_surface"
-                        app:strokeColor="@color/glass_stroke"
-                        app:strokeWidth="1dp" />
+                    <FrameLayout
+                        android:layout_width="56dp"
+                        android:layout_height="56dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/buttonDashboardNotifications"
+                            style="@style/Widget.Smartkid.GlassButton.Outlined"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="bottom|start"
+                            android:contentDescription="@string/open_notifications"
+                            android:minWidth="0dp"
+                            android:padding="7dp"
+                            android:text=""
+                            app:icon="@drawable/home_icon_glass_bell"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp"
+                            app:iconSize="34dp"
+                            app:iconTint="@null"
+                            app:backgroundTint="@color/glass_surface"
+                            app:strokeColor="@color/glass_stroke"
+                            app:strokeWidth="1dp" />
+
+                        <TextView
+                            android:id="@+id/textDashboardNotificationBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="22dp"
+                            android:layout_gravity="top|end"
+                            android:background="@drawable/home_bg_notification_badge"
+                            android:elevation="8dp"
+                            android:gravity="center"
+                            android:minWidth="22dp"
+                            android:paddingStart="5dp"
+                            android:paddingEnd="5dp"
+                            android:textColor="@color/white"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:visibility="gone" />
+                    </FrameLayout>
                 </LinearLayout>
             </FrameLayout>
 

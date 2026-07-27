@@ -85,7 +85,8 @@ public class StudentFeatureRepository {
                         result.add(new FeatureItem(
                                 SafeJson.string(item, "", "id"),
                                 SafeJson.string(item, "Thông báo", "title"),
-                                SafeJson.string(item, "", "category", "type"),
+                                notificationLabel(SafeJson.string(
+                                        item, "", "category", "type")),
                                 SafeJson.string(item, "", "message"),
                                 read ? "Đã đọc" : "Chưa đọc", item));
                     }
@@ -97,6 +98,14 @@ public class StudentFeatureRepository {
 
             @Override public void onError(ApiError error) { callback.onError(error); }
         });
+    }
+
+    private String notificationLabel(String category) {
+        if ("lesson_question_reply".equals(category)) return "Tin từ thầy cô";
+        if ("teacher_feedback".equals(category)) return "Lời nhắn từ thầy cô";
+        if ("exam".equals(category)) return "Bài kiểm tra";
+        if ("course".equals(category)) return "Khóa học";
+        return "Thông báo học tập";
     }
 
     /** Đánh dấu một thông báo đã đọc. */

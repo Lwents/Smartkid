@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_inbox_title">Cập nhật dành cho bạn</string>
+    <string name="notification_search_hint">Tìm theo nội dung hoặc bài học</string>
+    <string name="notification_mark_all_read">Đánh dấu tất cả</string>
+    <string name="notification_all_read">Đã đọc hết</string>
+    <string name="notification_all_caught_up">Bạn đã xem tất cả thông báo</string>
+    <string name="notification_no_content">Thông báo này không có nội dung chi tiết.</string>
+    <string name="notification_open_lesson">Mở bài học</string>
+    <string name="notification_teacher_says">Thầy cô nhắn em:</string>
+    <string name="notification_related_lesson">Bài học liên quan</string>
+    <string name="notification_view_lesson">Xem bài học</string>
+    <string name="notification_close">Đóng</string>
+    <plurals name="notification_unread_count">
+        <item quantity="one">%d thông báo chưa đọc</item>
+        <item quantity="other">%d thông báo chưa đọc</item>
+    </plurals>
+</resources>

@@ -197,6 +197,14 @@
         <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Smartkid.Glass</item>
     </style>
 
+    <style name="ThemeOverlay.Smartkid.NotificationSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.Smartkid.NotificationSheet</item>
+    </style>
+
+    <style name="Widget.Smartkid.NotificationSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
     <style name="TextAppearance.Smartkid.Display" parent="TextAppearance.Material3.HeadlineLarge">
         <item name="android:textColor">@color/smartkid_text</item>
         <item name="android:textStyle">bold</item>

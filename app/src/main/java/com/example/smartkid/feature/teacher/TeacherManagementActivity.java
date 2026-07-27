@@ -99,7 +99,9 @@ public class TeacherManagementActivity extends BaseActivity {
             toolbar.setNavigationOnClickListener(view -> finish());
             refreshLayout.setOnRefreshListener(this::loadSafely);
             configurePrimaryAction(toolbar);
-            emptyText.setText(R.string.no_server_data);
+            emptyText.setText(isQaFeature()
+                    ? R.string.teacher_no_lesson_questions
+                    : R.string.no_server_data);
             adapter = new FeatureItemAdapter(this);
             list.setAdapter(adapter);
             list.setEmptyView(emptyText);
@@ -215,7 +217,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 showNotificationDetail(item);
                 return;
             }
-            if ("teacher_qa".equals(specKey)) {
+            if (isQaFeature()) {
                 showQuestionDetail(item);
                 return;
             }
@@ -416,6 +418,10 @@ public class TeacherManagementActivity extends BaseActivity {
         Intent intent = new Intent(this, TeacherManagementActivity.class);
         intent.putExtra(EXTRA_SPEC_KEY, "teacher_qa");
         startActivity(intent);
+    }
+
+    private boolean isQaFeature() {
+        return spec != null && "teacher_qa".equals(spec.getActionKind());
     }
 
     private void showActions(FeatureItem item) {

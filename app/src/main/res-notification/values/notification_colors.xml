@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="notification_unread_surface">#F2F3FF</color>
+    <color name="notification_read_surface">#EFFFFFFF</color>
+    <color name="notification_unread_stroke">#8C5E5CE6</color>
+    <color name="notification_read_stroke">#DDE2F0</color>
+    <color name="notification_unread_title">#35339F</color>
+    <color name="notification_icon_surface">#E7E8FF</color>
+    <color name="notification_chip_surface">#E8E9FF</color>
+    <color name="notification_context_surface">#F7F8FD</color>
+    <color name="notification_sheet_surface">#FFFCFDFF</color>
+    <color name="notification_handle">#CDD1DC</color>
+    <color name="notification_message_surface">#FFF8E9</color>
+    <color name="notification_message_stroke">#FFE0A3</color>
+</resources>

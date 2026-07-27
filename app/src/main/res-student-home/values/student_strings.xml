@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="notification_badge_description">Có %1$d thông báo mới</string>
     <string name="title_home">Trang chủ</string>
     <string name="title_my_courses">Khóa học</string>
     <string name="title_profile">Hồ sơ</string>

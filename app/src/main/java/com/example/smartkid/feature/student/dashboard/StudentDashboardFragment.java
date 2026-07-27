@@ -23,6 +23,7 @@ import com.example.smartkid.data.model.DashboardSummary;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.DashboardRepository;
+import com.example.smartkid.data.repository.StudentFeatureRepository;
 import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.feature.student.course.CatalogActivity;
 import com.example.smartkid.feature.student.course.CourseDetailActivity;
@@ -42,7 +43,10 @@ public class StudentDashboardFragment extends Fragment {
     private Button retryButton;
     private SwipeRefreshLayout refreshLayout;
     private DashboardRepository repository;
+    private StudentFeatureRepository featureRepository;
     private TextView streakText;
+    private TextView notificationBadge;
+    private View notificationButton;
     private Course resumeCourse;
 
     @Nullable
@@ -58,6 +62,7 @@ public class StudentDashboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         try {
             repository = new DashboardRepository(requireContext());
+            featureRepository = new StudentFeatureRepository(requireContext());
             bindViews(view);
             SessionManager sessionManager = new SessionManager(requireContext());
             String displayName = sessionManager.getUser().getFullName();
@@ -72,6 +77,12 @@ public class StudentDashboardFragment extends Fragment {
             AppLogger.error(getContext(), "StudentDashboardFragment", "Không thể tạo dashboard", exception);
             showInlineError("Không thể khởi tạo trang chủ");
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getView() != null && featureRepository != null) loadNotificationBadge();
     }
 
     private void bindViews(View view) {
@@ -95,11 +106,13 @@ public class StudentDashboardFragment extends Fragment {
     }
 
     private void bindQuickActions(View view) {
-        View notificationButton = view.findViewById(R.id.buttonDashboardNotifications);
+        notificationButton = view.findViewById(R.id.buttonDashboardNotifications);
+        notificationBadge = view.findViewById(R.id.textDashboardNotificationBadge);
         View aiButton = view.findViewById(R.id.buttonQuickAi);
         View analysisButton = view.findViewById(R.id.buttonQuickAnalysis);
         View catalogButton = view.findViewById(R.id.buttonQuickCatalog);
-        if (notificationButton == null || aiButton == null || analysisButton == null
+        if (notificationButton == null || notificationBadge == null
+                || aiButton == null || analysisButton == null
                 || catalogButton == null) {
             throw new IllegalStateException("Giao diện thao tác nhanh chưa đầy đủ");
         }
@@ -110,6 +123,48 @@ public class StudentDashboardFragment extends Fragment {
         aiButton.setOnClickListener(clicked -> openActivity(LearningAnalysisActivity.class));
         analysisButton.setOnClickListener(clicked -> openActivity(LearningAnalysisActivity.class));
         catalogButton.setOnClickListener(clicked -> openActivity(CatalogActivity.class));
+    }
+
+    private void loadNotificationBadge() {
+        featureRepository.loadNotifications(new ApiCallback<java.util.List<com.example.smartkid.data.model.FeatureItem>>() {
+            @Override
+            public void onSuccess(java.util.List<com.example.smartkid.data.model.FeatureItem> items) {
+                if (!isAdded() || notificationBadge == null || notificationButton == null) return;
+                int unread = 0;
+                if (items != null) {
+                    for (com.example.smartkid.data.model.FeatureItem item : items) {
+                        if (item != null && !com.example.smartkid.common.util.SafeJson.bool(
+                                item.getSource(), false, "is_read", "isRead")) {
+                            unread++;
+                        }
+                    }
+                }
+                showNotificationBadge(unread);
+            }
+
+            @Override
+            public void onError(ApiError error) {
+                if (!isAdded() || notificationBadge == null) return;
+                notificationBadge.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void showNotificationBadge(int unread) {
+        if (notificationBadge == null || notificationButton == null) return;
+        if (unread <= 0) {
+            notificationBadge.setVisibility(View.GONE);
+            notificationButton.setContentDescription(getString(R.string.open_notifications));
+            return;
+        }
+        notificationBadge.setText(unread > 99 ? "99+" : String.valueOf(unread));
+        notificationBadge.setVisibility(View.VISIBLE);
+        notificationBadge.setScaleX(0.7f);
+        notificationBadge.setScaleY(0.7f);
+        notificationBadge.setAlpha(0f);
+        notificationBadge.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(220).start();
+        notificationButton.setContentDescription(
+                getString(R.string.notification_badge_description, unread));
     }
 
     private void openNotifications() {

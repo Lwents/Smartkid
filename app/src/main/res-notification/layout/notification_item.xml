@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardNotification"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="22dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="126dp"
+        android:gravity="top"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/notification_bg_icon">
+
+            <ImageView
+                android:id="@+id/imageNotificationIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="13dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textNotificationTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:textColor="@color/smartkid_text"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:id="@+id/viewNotificationUnread"
+                    android:layout_width="9dp"
+                    android:layout_height="9dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/notification_bg_unread_dot" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textNotificationMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/smartkid_text_secondary"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/textNotificationContext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/smartkid_primary_dark"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="9dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textNotificationCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/notification_bg_chip"
+                    android:paddingStart="9dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="9dp"
+                    android:paddingBottom="4dp"
+                    android:textColor="@color/smartkid_primary_dark"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textNotificationTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textColor="@color/smartkid_text_tertiary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
