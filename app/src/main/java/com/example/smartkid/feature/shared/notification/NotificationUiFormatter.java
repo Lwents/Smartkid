@@ -69,6 +69,10 @@ final class NotificationUiFormatter {
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
         String course = SafeJson.string(metadata, "", "course_title");
         String lesson = SafeJson.string(metadata, "", "lesson_title");
+        String exam = SafeJson.string(metadata, "", "exam_title", "exercise_title");
+        if (!exam.isEmpty()) {
+            return course.isEmpty() ? exam : course + "\n" + exam;
+        }
         if (lesson.isEmpty()) lesson = lessonFromLegacyTitle(fallbackTitle);
         if (!course.isEmpty() && !lesson.isEmpty()) return course + "\n" + lesson;
         return course.isEmpty() ? lesson : course;
@@ -97,5 +101,15 @@ final class NotificationUiFormatter {
     static String lessonTitle(JSONObject source) {
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
         return SafeJson.string(metadata, "", "lesson_title");
+    }
+
+    static String examId(JSONObject source) {
+        JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
+        return SafeJson.string(metadata, "", "exam_id", "exercise_id");
+    }
+
+    static String examTitle(JSONObject source) {
+        JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
+        return SafeJson.string(metadata, "", "exam_title", "exercise_title");
     }
 }

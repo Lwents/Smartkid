@@ -98,9 +98,10 @@ final class NotificationItemAdapter extends BaseAdapter {
         holder.card.setStrokeColor(ContextCompat.getColor(context,
                 read ? R.color.notification_read_stroke : R.color.notification_unread_stroke));
         holder.card.setStrokeWidth(read ? 1 : 2);
-        holder.icon.setImageResource(item.getSource().optString("category")
-                .equals("lesson_question_reply")
+        String rawCategory = item.getSource().optString("category");
+        holder.icon.setImageResource("lesson_question_reply".equals(rawCategory)
                 ? R.drawable.notification_ic_reply
+                : "exam".equals(rawCategory) ? R.drawable.common_ic_nav_exam
                 : R.drawable.notification_ic_notifications);
         holder.itemView.setContentDescription((read ? "Đã đọc. " : "Chưa đọc. ")
                 + displayTitle + ". " + item.getDetail());

@@ -28,6 +28,7 @@ import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.feature.student.course.CourseDetailActivity;
 import com.example.smartkid.feature.student.course.LessonPlayerActivity;
 import com.example.smartkid.feature.student.ai.LearningAnalysisActivity;
+import com.example.smartkid.feature.student.exam.ExamActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputEditText;
@@ -211,18 +212,33 @@ public class FeatureListActivity extends BaseActivity {
 
         String context = NotificationUiFormatter.contextLabel(source, item.getTitle());
         TextView contextView = content.findViewById(R.id.textNotificationSheetContext);
+        TextView contextLabel = content.findViewById(R.id.textNotificationSheetContextLabel);
+        android.widget.ImageView contextIcon = content.findViewById(
+                R.id.imageNotificationSheetContextIcon);
         View contextCard = content.findViewById(R.id.layoutNotificationSheetContext);
         contextView.setText(context);
         contextCard.setVisibility(context.isEmpty() ? View.GONE : View.VISIBLE);
 
-        View openLesson = content.findViewById(R.id.buttonNotificationOpenLesson);
+        com.google.android.material.button.MaterialButton openLesson = content.findViewById(
+                R.id.buttonNotificationOpenLesson);
+        String examId = NotificationUiFormatter.examId(source);
         String lessonId = NotificationUiFormatter.lessonId(source);
         String courseId = NotificationUiFormatter.courseId(source);
-        openLesson.setVisibility(lessonId.isEmpty() || courseId.isEmpty()
-                ? View.GONE : View.VISIBLE);
+        boolean opensExam = !examId.isEmpty();
+        boolean opensLesson = !lessonId.isEmpty() && !courseId.isEmpty();
+        contextLabel.setText(opensExam ? R.string.notification_related_exam
+                : R.string.notification_related_lesson);
+        contextIcon.setImageResource(opensExam ? R.drawable.common_ic_nav_exam
+                : R.drawable.common_ic_nav_course);
+        openLesson.setText(opensExam ? R.string.notification_view_exam
+                : R.string.notification_view_lesson);
+        openLesson.setIconResource(opensExam ? R.drawable.common_ic_nav_exam
+                : R.drawable.common_ic_nav_course);
+        openLesson.setVisibility(opensExam || opensLesson ? View.VISIBLE : View.GONE);
         openLesson.setOnClickListener(view -> {
             sheet.dismiss();
-            openNotificationLesson(source, courseId, lessonId);
+            if (opensExam) openNotificationExam(source, examId);
+            else openNotificationLesson(source, courseId, lessonId);
         });
         content.findViewById(R.id.buttonNotificationClose)
                 .setOnClickListener(view -> sheet.dismiss());
@@ -306,6 +322,19 @@ public class FeatureListActivity extends BaseActivity {
         } catch (Exception exception) {
             AppLogger.error(this, "FeatureListActivity", "Không thể mở bài học", exception);
             showErrorDialog("Không thể mở bài học từ thông báo này");
+        }
+    }
+
+    private void openNotificationExam(JSONObject source, String examId) {
+        try {
+            Intent intent = new Intent(this, ExamActivity.class);
+            intent.putExtra(ExamActivity.EXTRA_EXAM_ID, examId);
+            String title = NotificationUiFormatter.examTitle(source);
+            if (!title.isEmpty()) intent.putExtra(ExamActivity.EXTRA_EXAM_TITLE, title);
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "FeatureListActivity", "Không thể mở bài kiểm tra", exception);
+            showErrorDialog("Không thể mở bài kiểm tra từ thông báo này");
         }
     }
 
