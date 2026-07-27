@@ -78,6 +78,9 @@
     <string name="invalid_lesson">Bài học không hợp lệ</string>
     <string name="lesson_completed">Đã hoàn thành</string>
     <string name="lesson_not_completed">Chưa hoàn thành</string>
+    <string name="lesson_locked_status">Đã khóa</string>
+    <string name="section_locked">Chưa mở</string>
+    <string name="complete_previous_lesson">Hãy hoàn thành “%1$s” trước để mở bài này.</string>
     <string name="lesson_content">Nội dung bài học</string>
     <string name="content_type_format">Loại nội dung: %1$s</string>
     <string name="no_text_content">Bài học này không có nội dung văn bản.</string>
@@ -112,7 +115,6 @@
     <string name="home_streak_days">%1$d ngày liên tiếp</string>
     <string name="ai_question_hint">Hỏi AI về bài học</string>
     <string name="send_question">Gửi câu hỏi</string>
-    <string name="clear_conversation">Xóa hội thoại</string>
     <string name="lesson_discussion">Hỏi đáp bài học</string>
     <string name="student_default_name">Học viên SmartKid</string>
     <string name="username_format">Tên đăng nhập: %1$s</string>

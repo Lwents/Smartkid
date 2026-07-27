@@ -896,12 +896,13 @@ public class LessonPlayerActivity extends BaseActivity {
         return -1;
     }
 
-    /** Ẩn hẳn thẻ không dùng được: bài đầu ẩn "Bài trước", bài cuối ẩn "Bài tiếp". */
+    /** Chỉ ẩn ở hai đầu khóa; bài tiếp bị khóa vẫn hiện để giải thích khi học sinh bấm. */
     private void updateLessonNavigation() {
         if (lessonPrevCard == null || lessonNextCard == null) return;
         int index = currentLessonIndex();
         boolean hasPrev = !previewMode && index > 0;
-        boolean hasNext = !previewMode && index >= 0 && index < courseLessons.size() - 1;
+        boolean hasNext = !previewMode && index >= 0
+                && index < courseLessons.size() - 1;
 
         lessonPrevCard.setVisibility(hasPrev ? View.VISIBLE : View.GONE);
         lessonNextCard.setVisibility(hasNext ? View.VISIBLE : View.GONE);
@@ -928,6 +929,10 @@ public class LessonPlayerActivity extends BaseActivity {
             showShortMessage(getString(R.string.lesson_is_last));
             return;
         }
+        if (!isLessonUnlocked(target)) {
+            showShortMessage(getString(R.string.lesson_locked));
+            return;
+        }
         com.example.smartkid.data.model.Lesson lesson = courseLessons.get(target);
         try {
             Intent intent = new Intent(this, LessonPlayerActivity.class);
@@ -940,6 +945,18 @@ public class LessonPlayerActivity extends BaseActivity {
             AppLogger.error(this, "LessonPlayerActivity", "Không thể mở bài học khác", exception);
             showErrorDialog("Không thể mở bài học kế tiếp");
         }
+    }
+
+    private boolean isLessonUnlocked(int targetIndex) {
+        if (targetIndex < 0 || targetIndex >= courseLessons.size()) {
+            return false;
+        }
+        for (int index = 0; index < targetIndex; index++) {
+            if (!courseLessons.get(index).isCompleted()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void openExternalContent() {
@@ -1017,6 +1034,9 @@ public class LessonPlayerActivity extends BaseActivity {
                         ? R.string.lesson_completed : R.string.progress_saved);
                 if (!silent) {
                     showShortMessage("Đã lưu tiến độ bài học");
+                }
+                if (Boolean.TRUE.equals(completed)) {
+                    loadCourseLessons();
                 }
             }
 

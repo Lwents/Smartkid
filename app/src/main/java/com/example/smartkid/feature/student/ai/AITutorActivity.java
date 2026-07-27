@@ -6,6 +6,10 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppConstants;
 import com.example.smartkid.common.util.AppLogger;
@@ -22,7 +26,6 @@ public class AITutorActivity extends BaseActivity {
     private TextView statusText;
     private TextInputEditText messageInput;
     private Button sendButton;
-    private Button clearButton;
     private ProgressBar progressBar;
     private StudentFeatureRepository repository;
     private String lessonId;
@@ -45,8 +48,7 @@ public class AITutorActivity extends BaseActivity {
             toolbar.setNavigationOnClickListener(view -> finish());
             if (!lessonTitle.isEmpty()) toolbar.setSubtitle(lessonTitle);
             sendButton.setOnClickListener(view -> sendSafely());
-            clearButton.setOnClickListener(view -> clearSafely());
-            conversation.append("Gia Sư AI chỉ hiển thị câu trả lời do server AI cung cấp.\n");
+            keepComposerAboveKeyboard();
             bindConversation();
         } catch (Exception exception) {
             AppLogger.error(this, "AITutorActivity", "Không thể tạo Gia Sư AI", exception);
@@ -59,12 +61,30 @@ public class AITutorActivity extends BaseActivity {
         statusText = findViewById(R.id.textAiStatus);
         messageInput = findViewById(R.id.inputAiMessage);
         sendButton = findViewById(R.id.buttonAiSend);
-        clearButton = findViewById(R.id.buttonAiClear);
         progressBar = findViewById(R.id.progressAiTutor);
         if (conversationText == null || statusText == null || messageInput == null
-                || sendButton == null || clearButton == null || progressBar == null) {
+                || sendButton == null || progressBar == null) {
             throw new IllegalStateException("Giao diện Gia Sư AI thiếu thành phần bắt buộc");
         }
+    }
+
+    /** Edge-to-edge không tự co layout ổn định trên mọi máy, nên bù đúng chiều cao IME. */
+    private void keepComposerAboveKeyboard() {
+        View root = findViewById(R.id.rootAiTutor);
+        if (root == null) return;
+        int left = root.getPaddingLeft();
+        int top = root.getPaddingTop();
+        int right = root.getPaddingRight();
+        int bottom = root.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+            Insets ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime());
+            Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            int keyboardPadding = windowInsets.isVisible(WindowInsetsCompat.Type.ime())
+                    ? Math.max(0, ime.bottom - bars.bottom) : 0;
+            view.setPadding(left, top, right, bottom + keyboardPadding);
+            return windowInsets;
+        });
+        ViewCompat.requestApplyInsets(root);
     }
 
     private void sendSafely() {
@@ -106,34 +126,6 @@ public class AITutorActivity extends BaseActivity {
         }
     }
 
-    private void clearSafely() {
-        try {
-            setLoading(true);
-            repository.clearTutorHistory(lessonId, new ApiCallback<Boolean>() {
-                @Override
-                public void onSuccess(Boolean ignored) {
-                    if (!isUsable()) return;
-                    setLoading(false);
-                    conversation.setLength(0);
-                    conversation.append("Lịch sử hội thoại đã được xóa trên server.\n");
-                    bindConversation();
-                    showStatus("Đã xóa hội thoại");
-                }
-
-                @Override
-                public void onError(ApiError error) {
-                    if (!isUsable()) return;
-                    setLoading(false);
-                    handleApiError(error);
-                }
-            });
-        } catch (Exception exception) {
-            AppLogger.error(this, "AITutorActivity", "Không thể xóa hội thoại", exception);
-            setLoading(false);
-            showStatus("Không thể xóa hội thoại");
-        }
-    }
-
     private void appendLine(String speaker, String value) {
         if (conversation.length() > 0) conversation.append("\n");
         conversation.append(speaker).append(": ").append(safe(value)).append("\n");
@@ -147,7 +139,6 @@ public class AITutorActivity extends BaseActivity {
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         sendButton.setEnabled(!loading);
-        clearButton.setEnabled(!loading);
         messageInput.setEnabled(!loading);
     }
 

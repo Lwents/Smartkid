@@ -33,19 +33,22 @@ public class LessonAdapter extends BaseAdapter {
         final String tieuDeChuong;
         final int soBai;
         final Lesson baiHoc;
+        final boolean daMoKhoa;
 
-        Dong(String tieuDeChuong, int soBai) {
+        Dong(String tieuDeChuong, int soBai, boolean daMoKhoa) {
             this.loai = LOAI_CHUONG;
             this.tieuDeChuong = tieuDeChuong;
             this.soBai = soBai;
             this.baiHoc = null;
+            this.daMoKhoa = daMoKhoa;
         }
 
-        Dong(Lesson baiHoc) {
+        Dong(Lesson baiHoc, boolean daMoKhoa) {
             this.loai = LOAI_BAI_HOC;
             this.tieuDeChuong = null;
             this.soBai = 0;
             this.baiHoc = baiHoc;
+            this.daMoKhoa = daMoKhoa;
         }
     }
 
@@ -63,14 +66,18 @@ public class LessonAdapter extends BaseAdapter {
      */
     public void setSections(List<CourseSection> sections) {
         dongs.clear();
+        boolean cacBaiTruocDaHoanThanh = true;
         if (sections != null) {
             for (CourseSection section : sections) {
                 if (section.getLessons().isEmpty()) {
                     continue;
                 }
-                dongs.add(new Dong(section.getTitle(), section.getLessons().size()));
+                dongs.add(new Dong(section.getTitle(), section.getLessons().size(),
+                        cacBaiTruocDaHoanThanh));
                 for (Lesson lesson : section.getLessons()) {
-                    dongs.add(new Dong(lesson));
+                    dongs.add(new Dong(lesson, cacBaiTruocDaHoanThanh));
+                    cacBaiTruocDaHoanThanh = cacBaiTruocDaHoanThanh
+                            && lesson.isCompleted();
                 }
             }
         }
@@ -109,7 +116,8 @@ public class LessonAdapter extends BaseAdapter {
     /** Dòng tiêu đề chương không cho bấm, chỉ dòng bài học mới mở được. */
     @Override
     public boolean isEnabled(int position) {
-        return getItemViewType(position) == LOAI_BAI_HOC;
+        return getItemViewType(position) == LOAI_BAI_HOC
+                && dongs.get(position).daMoKhoa;
     }
 
     @Override
@@ -124,7 +132,7 @@ public class LessonAdapter extends BaseAdapter {
             if (dong.loai == LOAI_CHUONG) {
                 return taoDongChuong(dong, convertView, parent);
             }
-            return taoDongBaiHoc(dong.baiHoc, convertView, parent);
+            return taoDongBaiHoc(dong, convertView, parent);
         } catch (Exception exception) {
             AppLogger.error(parent.getContext(), "LessonAdapter",
                     "Không thể hiển thị nội dung khóa học", exception);
@@ -140,12 +148,14 @@ public class LessonAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.course_item_section, parent, false);
         }
         ((TextView) convertView.findViewById(R.id.textSectionTitle)).setText(dong.tieuDeChuong);
-        ((TextView) convertView.findViewById(R.id.textSectionCount))
-                .setText(parent.getContext().getString(R.string.section_lesson_count, dong.soBai));
+        ((TextView) convertView.findViewById(R.id.textSectionCount)).setText(dong.daMoKhoa
+                ? parent.getContext().getString(R.string.section_lesson_count, dong.soBai)
+                : parent.getContext().getString(R.string.section_locked));
+        convertView.setAlpha(dong.daMoKhoa ? 1f : 0.55f);
         return convertView;
     }
 
-    private View taoDongBaiHoc(Lesson lesson, View convertView, ViewGroup parent) {
+    private View taoDongBaiHoc(Dong dong, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null || convertView.getTag() == null) {
             convertView = inflater.inflate(R.layout.course_item_lesson, parent, false);
@@ -154,6 +164,7 @@ public class LessonAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
+        Lesson lesson = dong.baiHoc;
         if (lesson == null) {
             holder.title.setText(R.string.invalid_lesson);
             holder.type.setText("");
@@ -162,9 +173,17 @@ public class LessonAdapter extends BaseAdapter {
         }
         holder.title.setText(lesson.getTitle());
         holder.type.setText(displayType(lesson.getType()));
-        holder.status.setText(lesson.isCompleted()
-                ? R.string.lesson_completed : R.string.lesson_not_completed);
-        holder.status.setSelected(lesson.isCompleted());
+        if (!dong.daMoKhoa) {
+            holder.status.setText(R.string.lesson_locked_status);
+            holder.status.setTextColor(parent.getContext().getColor(R.color.smartkid_text_secondary));
+        } else if (lesson.isCompleted()) {
+            holder.status.setText(R.string.lesson_completed);
+            holder.status.setTextColor(parent.getContext().getColor(R.color.smartkid_success));
+        } else {
+            holder.status.setText(R.string.lesson_not_completed);
+            holder.status.setTextColor(parent.getContext().getColor(R.color.smartkid_success));
+        }
+        convertView.setAlpha(dong.daMoKhoa ? 1f : 0.55f);
         return convertView;
     }
 

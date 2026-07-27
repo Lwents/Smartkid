@@ -36,4 +36,36 @@ public class CourseDetail {
     public List<Lesson> getLessons() {
         return Collections.unmodifiableList(lessons);
     }
+
+    /** Một bài chỉ mở khi tất cả bài đứng trước nó trong khóa đã hoàn thành. */
+    public boolean isLessonUnlocked(String lessonId) {
+        if (lessonId == null || lessonId.trim().isEmpty()) {
+            return false;
+        }
+        boolean previousLessonsCompleted = true;
+        for (Lesson lesson : lessons) {
+            if (lessonId.equals(lesson.getId())) {
+                return previousLessonsCompleted;
+            }
+            previousLessonsCompleted = previousLessonsCompleted && lesson.isCompleted();
+        }
+        return false;
+    }
+
+    /** Bài chưa hoàn thành đầu tiên đang chặn bài cần mở, hoặc null nếu không bị chặn. */
+    public Lesson getBlockingLesson(String lessonId) {
+        if (lessonId == null || lessonId.trim().isEmpty()) {
+            return null;
+        }
+        Lesson firstIncomplete = null;
+        for (Lesson lesson : lessons) {
+            if (lessonId.equals(lesson.getId())) {
+                return firstIncomplete;
+            }
+            if (firstIncomplete == null && !lesson.isCompleted()) {
+                firstIncomplete = lesson;
+            }
+        }
+        return null;
+    }
 }

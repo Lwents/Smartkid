@@ -76,6 +76,12 @@ public class CourseDetailActivity extends BaseActivity {
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        safeLoadDetail();
+    }
+
+    @Override
     protected void onDestroy() {
         if (repository != null) {
             repository.close();
@@ -222,6 +228,14 @@ public class CourseDetailActivity extends BaseActivity {
         }
         if (lesson == null || lesson.getId().isEmpty()) {
             showErrorDialog("Bài học không có mã hợp lệ");
+            return;
+        }
+        if (courseDetail != null && !courseDetail.isLessonUnlocked(lesson.getId())) {
+            Lesson blockingLesson = courseDetail.getBlockingLesson(lesson.getId());
+            showShortMessage(blockingLesson == null
+                    ? getString(R.string.lesson_locked)
+                    : getString(R.string.complete_previous_lesson,
+                            blockingLesson.getTitle()));
             return;
         }
         try {
