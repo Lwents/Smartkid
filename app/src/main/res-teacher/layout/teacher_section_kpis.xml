@@ -49,13 +49,14 @@
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/textTeacherCourseRate"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
                         android:gravity="end"
-                        android:text="@string/teacher_delta_courses"
-                        android:textColor="@color/admin_green"
+                        android:text="@string/teacher_completion_zero"
+                        android:textColor="@color/admin_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -123,13 +124,14 @@
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/textTeacherStudentRate"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
                         android:gravity="end"
-                        android:text="@string/teacher_delta_students"
-                        android:textColor="@color/admin_green"
+                        android:text="@string/teacher_completion_zero"
+                        android:textColor="@color/admin_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -197,13 +199,14 @@
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/textTeacherLessonRate"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
                         android:gravity="end"
-                        android:text="@string/teacher_delta_lessons"
-                        android:textColor="@color/admin_green"
+                        android:text="@string/teacher_completion_zero"
+                        android:textColor="@color/admin_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -271,13 +274,14 @@
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/textTeacherExamRate"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
                         android:gravity="end"
-                        android:text="@string/teacher_delta_exams"
-                        android:textColor="@color/admin_green"
+                        android:text="@string/teacher_completion_zero"
+                        android:textColor="@color/admin_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -345,13 +349,14 @@
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/textTeacherSubmissionRate"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
                         android:gravity="end"
-                        android:text="@string/teacher_delta_pending"
-                        android:textColor="@color/admin_red"
+                        android:text="@string/teacher_completion_zero"
+                        android:textColor="@color/admin_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
                 </LinearLayout>
@@ -419,13 +424,14 @@
                         app:tint="@color/white" />
 
                     <TextView
+                        android:id="@+id/textTeacherCompletionRate"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
                         android:gravity="end"
-                        android:text="@string/teacher_delta_completion"
-                        android:textColor="@color/admin_green"
+                        android:text="@string/teacher_completion_zero"
+                        android:textColor="@color/admin_text_muted"
                         android:textSize="11sp"
                         android:textStyle="bold" />
                 </LinearLayout>

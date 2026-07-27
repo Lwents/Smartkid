@@ -335,6 +335,20 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         setText(R.id.textTeacherLessonCount, number(data.getLessonCount()));
         setText(R.id.textTeacherExamCount, number(data.getExamCount()));
         setText(R.id.textTeacherPendingCount, number(data.getAttemptCount()));
+        setRate(R.id.textTeacherCourseRate, data.getCoursePublishedRate(),
+                R.string.teacher_rate_published_format);
+        setRate(R.id.textTeacherStudentRate, data.getStudentActiveRate(),
+                R.string.teacher_rate_active_format);
+        setRate(R.id.textTeacherLessonRate, data.getLessonPublishedRate(),
+                R.string.teacher_rate_published_format);
+        setRate(R.id.textTeacherExamRate, data.getExamPublishedRate(),
+                R.string.teacher_rate_published_format);
+        setRate(R.id.textTeacherSubmissionRate, data.getAttemptSubmittedRate(),
+                R.string.teacher_rate_submitted_format);
+        setRate(R.id.textTeacherCompletionRate, data.getCompletionRate(),
+                R.string.teacher_rate_completed_format);
+        setText(R.id.textTeacherCompletion, getString(
+                R.string.teacher_percentage_format, data.getCompletionRate()));
         setText(R.id.textTeacherChartTotal, getString(R.string.teacher_chart_total_format,
                 number(data.getStudentCount())));
         renderActivityChart(data.getCourses());
@@ -406,6 +420,15 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
 
     private void setText(int id, String value) {
         ((TextView) findViewById(id)).setText(value);
+    }
+
+    private void setRate(int id, int value, int formatRes) {
+        TextView view = findViewById(id);
+        view.setText(getString(formatRes, value));
+        int color = value >= 80 ? R.color.admin_green
+                : value >= 40 ? R.color.admin_orange
+                : value > 0 ? R.color.admin_red : R.color.admin_text_muted;
+        view.setTextColor(ContextCompat.getColor(this, color));
     }
 
     private String number(int value) {

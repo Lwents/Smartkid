@@ -50,12 +50,20 @@ public final class TeacherDashboardRepository {
         JSONObject root = response == null ? new JSONObject() : response;
         JSONObject stats = root.optJSONObject("stats");
         if (stats == null) stats = new JSONObject();
+        JSONObject rates = root.optJSONObject("rates");
+        if (rates == null) rates = new JSONObject();
         return new TeacherDashboardData(
                 SafeJson.integer(stats, 0, "courses"),
                 SafeJson.integer(stats, 0, "students"),
                 SafeJson.integer(stats, 0, "assignments", "lessons"),
                 SafeJson.integer(stats, 0, "exams", "exercises"),
                 SafeJson.integer(stats, 0, "attempts", "submissions"),
+                SafeJson.integer(rates, 0, "coursePublished", "courses"),
+                SafeJson.integer(rates, 0, "studentActive", "students"),
+                SafeJson.integer(rates, 0, "lessonPublished", "lessons"),
+                SafeJson.integer(rates, 0, "examPublished", "exams"),
+                SafeJson.integer(rates, 0, "attemptSubmitted", "attempts"),
+                SafeJson.integer(rates, 0, "completion"),
                 parseCourses(root));
     }
 

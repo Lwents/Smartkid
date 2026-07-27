@@ -25,12 +25,11 @@
     <string name="teacher_exams_description">Đã tạo bài kiểm tra</string>
     <string name="teacher_pending_description">Học viên đã nộp</string>
     <string name="teacher_completion_description">Tiến độ học viên</string>
-    <string name="teacher_delta_courses">↑ 0%</string>
-    <string name="teacher_delta_students">↑ 0%</string>
-    <string name="teacher_delta_lessons">↑ 0%</string>
-    <string name="teacher_delta_exams">↑ 0%</string>
-    <string name="teacher_delta_pending">↓ 0%</string>
-    <string name="teacher_delta_completion">↑ 0%</string>
+    <string name="teacher_rate_published_format">%1$d%% mở</string>
+    <string name="teacher_rate_active_format">%1$d%% học</string>
+    <string name="teacher_rate_submitted_format">%1$d%% nộp</string>
+    <string name="teacher_rate_completed_format">%1$d%% xong</string>
+    <string name="teacher_percentage_format">%1$d%%</string>
     <string name="teacher_completion_zero">0%</string>
     <string name="teacher_management_tools">Công cụ giảng dạy</string>
     <string name="teacher_grade_action">Kết quả bài kiểm tra</string>

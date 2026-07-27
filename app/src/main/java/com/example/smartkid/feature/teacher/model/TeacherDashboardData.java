@@ -11,16 +11,31 @@ public final class TeacherDashboardData {
     private final int lessonCount;
     private final int examCount;
     private final int attemptCount;
+    private final int coursePublishedRate;
+    private final int studentActiveRate;
+    private final int lessonPublishedRate;
+    private final int examPublishedRate;
+    private final int attemptSubmittedRate;
+    private final int completionRate;
     private final List<CourseItem> courses;
 
     public TeacherDashboardData(int courseCount, int studentCount, int lessonCount,
                                 int examCount, int attemptCount,
+                                int coursePublishedRate, int studentActiveRate,
+                                int lessonPublishedRate, int examPublishedRate,
+                                int attemptSubmittedRate, int completionRate,
                                 List<CourseItem> courses) {
         this.courseCount = courseCount;
         this.studentCount = studentCount;
         this.lessonCount = lessonCount;
         this.examCount = examCount;
         this.attemptCount = attemptCount;
+        this.coursePublishedRate = percentage(coursePublishedRate);
+        this.studentActiveRate = percentage(studentActiveRate);
+        this.lessonPublishedRate = percentage(lessonPublishedRate);
+        this.examPublishedRate = percentage(examPublishedRate);
+        this.attemptSubmittedRate = percentage(attemptSubmittedRate);
+        this.completionRate = percentage(completionRate);
         this.courses = Collections.unmodifiableList(courses == null
                 ? new ArrayList<>() : new ArrayList<>(courses));
     }
@@ -30,6 +45,12 @@ public final class TeacherDashboardData {
     public int getLessonCount() { return lessonCount; }
     public int getExamCount() { return examCount; }
     public int getAttemptCount() { return attemptCount; }
+    public int getCoursePublishedRate() { return coursePublishedRate; }
+    public int getStudentActiveRate() { return studentActiveRate; }
+    public int getLessonPublishedRate() { return lessonPublishedRate; }
+    public int getExamPublishedRate() { return examPublishedRate; }
+    public int getAttemptSubmittedRate() { return attemptSubmittedRate; }
+    public int getCompletionRate() { return completionRate; }
     public List<CourseItem> getCourses() { return courses; }
 
     public static final class CourseItem {
@@ -56,5 +77,9 @@ public final class TeacherDashboardData {
 
     private static String safe(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private static int percentage(int value) {
+        return Math.max(0, Math.min(100, value));
     }
 }
