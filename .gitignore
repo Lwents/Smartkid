@@ -1,18 +1,23 @@
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
-/tmp
+
+# Android Studio and machine-local configuration
+/.idea/
+/.vscode/
+/.claude/
+.gradle/
+/local.properties
+
+# Generated build output
+/build/
+/captures/
+/.externalNativeBuild/
+/.cxx/
+/tmp/
+
+# Local project notes and generated QA documents
+/.local-notes/
 /docs/
 /memory/
+/FEATURE_PARITY.md
+/TEST_PLAN_*.md
