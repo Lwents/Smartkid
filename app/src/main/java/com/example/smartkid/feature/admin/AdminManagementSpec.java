@@ -20,9 +20,9 @@ public final class AdminManagementSpec {
         add(specs, "admin_health", "Sức khỏe hệ thống", "admin/system/health/", "");
         add(specs, "admin_activity", "Nhật ký hoạt động", "admin/activity-logs/", "");
         add(specs, "admin_security", "Bảo mật", "admin/security/policy/", "");
-        add(specs, "admin_sessions", "Phiên đăng nhập", "admin/security/sessions/", "");
+        add(specs, "admin_sessions", "Phiên đăng nhập", "admin/security/sessions/", "admin_sessions");
         add(specs, "admin_config", "Cấu hình hệ thống", "admin/system/config/", "");
-        add(specs, "admin_backups", "Sao lưu hệ thống", "admin/system/backups/", "");
+        add(specs, "admin_backups", "Sao lưu hệ thống", "admin/system/backups/", "admin_backups");
         add(specs, "admin_report_learning", "Báo cáo học tập", "admin/reports/learning/?type=kpis", "");
         add(specs, "admin_report_content", "Báo cáo nội dung", "admin/reports/content/?type=kpis", "");
         add(specs, "admin_notifications", "Thông báo", "admin/notifications/?limit=100", "");

@@ -88,6 +88,22 @@ public class ManagementRepository {
             {"domain", "Tên miền"},
             {"forceHttps", "Bắt buộc HTTPS"},
             {"hsts", "HSTS"},
+            {"idleTimeoutMin", "Tự khóa khi không hoạt động (phút)"},
+            {"maxSessionHours", "Thời lượng phiên tối đa (giờ)"},
+            {"rememberMeDays", "Ghi nhớ đăng nhập (ngày)"},
+            {"ssoGoogleEnabled", "Đăng nhập Google"},
+            {"singleDeviceOnly", "Chỉ cho phép một thiết bị"},
+            {"minLength", "Độ dài mật khẩu tối thiểu"},
+            {"requireNumbers", "Bắt buộc có số"},
+            {"requireSymbols", "Bắt buộc có ký tự đặc biệt"},
+            {"schedule", "Lịch chạy"},
+            {"retentionDays", "Thời gian lưu (ngày)"},
+            {"rpoMinutes", "Mất dữ liệu tối đa (phút)"},
+            {"rtoMinutes", "Thời gian khôi phục (phút)"},
+            {"encrypted", "Mã hóa"},
+            {"enabled", "Đang bật"},
+            {"level", "Mức ghi log"},
+            {"traceIdEnabled", "Theo dõi mã yêu cầu"},
             {"siteName", "Tên hệ thống"},
             {"language", "Ngôn ngữ"},
             {"timezone", "Múi giờ"},
@@ -402,7 +418,7 @@ public class ManagementRepository {
             Object value = child.opt(key);
             if (value instanceof JSONObject || value instanceof JSONArray) continue;
             if (value == null || value == JSONObject.NULL) continue;
-            String text = String.valueOf(value).trim();
+            String text = display(value).trim();
             if (text.isEmpty()) continue;
             if (summary.length() > 0) summary.append(" • ");
             summary.append(readable(key)).append(": ").append(text);
@@ -500,7 +516,7 @@ public class ManagementRepository {
                     actionLabel(SafeJson.string(item, "", "action")),
                     SafeJson.string(item, "", "userEmail"),
                     shortTime(SafeJson.string(item, "", "timestamp")),
-                    SafeJson.string(item, "", "status"), item);
+                    statusLabel(SafeJson.string(item, "", "status")), item);
         }
         // Bài kiểm tra: "5 câu • Trắc nghiệm" thay vì giá trị kỹ thuật "mcq"
         String exerciseType = SafeJson.string(item, "", "type");
@@ -554,13 +570,22 @@ public class ManagementRepository {
         }
         // Phiên đăng nhập: thiết bị + IP/vị trí + hoạt động gần nhất
         if (item.has("jti") && item.has("device")) {
+            String email = SafeJson.string(item, "", "userEmail");
+            String ip = SafeJson.string(item, "", "ip");
             return new FeatureItem(id,
                     SafeJson.string(item, "Thiết bị", "device"),
-                    SafeJson.string(item, "", "ip")
-                            + (SafeJson.string(item, "", "location").isEmpty() ? ""
-                            : " • " + SafeJson.string(item, "", "location")),
-                    "Hoạt động: " + shortTime(SafeJson.string(item, "", "lastActiveAt")),
+                    email,
+                    (ip.isEmpty() ? "" : "IP: " + ip + " • ")
+                            + "Hoạt động: " + shortTime(SafeJson.string(item, "", "lastActiveAt")),
                     "", item);
+        }
+        if (item.has("fileName") && item.has("sizeBytes")) {
+            double sizeMb = SafeJson.decimal(item, 0, "sizeMB");
+            return new FeatureItem(id,
+                    SafeJson.string(item, "Bản sao lưu", "title"),
+                    String.format(Locale.getDefault(), "%.2f MB", sizeMb),
+                    SafeJson.string(item, "", "notes"),
+                    statusLabel(SafeJson.string(item, "", "status")), item);
         }
         String title = SafeJson.string(item, "", "title", "name", "full_name", "display_name",
                 "username", "studentName", "student", "player_name", "email", "date");
@@ -592,6 +617,7 @@ public class ManagementRepository {
 
     private String display(Object value) {
         if (value == null || value == JSONObject.NULL) return "—";
+        if (value instanceof Boolean) return (Boolean) value ? "Bật" : "Tắt";
         String raw = String.valueOf(value);
         return raw.length() > 400 ? raw.substring(0, 400) + "…" : raw;
     }
@@ -640,6 +666,14 @@ public class ManagementRepository {
             case "user.login": return "Đăng nhập";
             case "user.signup": return "Đăng ký tài khoản";
             case "user.logout": return "Đăng xuất";
+            case "user.login_failed": return "Đăng nhập thất bại";
+            case "user.create": return "Tạo tài khoản";
+            case "user.update": return "Cập nhật tài khoản";
+            case "user.delete": return "Xóa tài khoản";
+            case "system.config.update": return "Cập nhật cấu hình hệ thống";
+            case "system.backup.create": return "Tạo bản sao lưu";
+            case "security.policy.update": return "Cập nhật chính sách bảo mật";
+            case "security.session.revoke": return "Thu hồi phiên đăng nhập";
             default: return action.isEmpty() ? "Hoạt động" : action;
         }
     }

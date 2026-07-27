@@ -111,20 +111,32 @@ public class AdminManagementActivity extends BaseActivity {
         if (supportsCreate()) {
             ((TextView) refreshButton).setText("Tạo mới");
             refreshButton.setOnClickListener(view -> openCreate());
-            android.view.MenuItem refresh = toolbar.getMenu().add(R.string.refresh);
-            refresh.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            refresh.setOnMenuItemClickListener(item -> {
-                loadSafely();
-                return true;
-            });
+            addRefreshAction(toolbar);
+        } else if (supportsBackup()) {
+            ((TextView) refreshButton).setText("Tạo sao lưu");
+            refreshButton.setOnClickListener(view -> confirmCreateBackup());
+            addRefreshAction(toolbar);
         } else {
             ((TextView) refreshButton).setText(R.string.refresh);
             refreshButton.setOnClickListener(view -> loadSafely());
         }
     }
 
+    private void addRefreshAction(MaterialToolbar toolbar) {
+        android.view.MenuItem refresh = toolbar.getMenu().add(R.string.refresh);
+        refresh.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        refresh.setOnMenuItemClickListener(item -> {
+            loadSafely();
+            return true;
+        });
+    }
+
     private boolean supportsCreate() {
         return "admin_users".equals(spec == null ? "" : spec.getActionKind());
+    }
+
+    private boolean supportsBackup() {
+        return "admin_backups".equals(spec == null ? "" : spec.getActionKind());
     }
 
     private void openCreate() {
@@ -167,6 +179,10 @@ public class AdminManagementActivity extends BaseActivity {
                     .setNegativeButton("Đóng", null);
             if ("admin_users".equals(spec.getActionKind()) && !item.getId().isEmpty()) {
                 builder.setPositiveButton("Thao tác", (dialog, which) -> showActions(item));
+            } else if ("admin_sessions".equals(spec.getActionKind())
+                    && !item.getId().isEmpty()) {
+                builder.setPositiveButton("Thu hồi phiên",
+                        (dialog, which) -> confirmSessionRevoke(item));
             }
             builder.show();
         } catch (Exception exception) {
@@ -214,6 +230,18 @@ public class AdminManagementActivity extends BaseActivity {
         } else if ("admin_notifications".equals(specKey)) {
             appendLine(detail, "", SafeJson.string(source, item.getDetail(), "message"));
             appendLine(detail, "Thời gian", shortTime(SafeJson.string(source, "", "created_at")));
+        } else if ("admin_sessions".equals(specKey)) {
+            appendLine(detail, "Tài khoản", SafeJson.string(source, "", "userEmail"));
+            appendLine(detail, "Thiết bị", SafeJson.string(source, item.getTitle(), "device"));
+            appendLine(detail, "Địa chỉ IP", SafeJson.string(source, "", "ip"));
+            appendLine(detail, "Hoạt động gần nhất",
+                    shortTime(SafeJson.string(source, "", "lastActiveAt")));
+            appendLine(detail, "Hết hạn", shortTime(SafeJson.string(source, "", "expiresAt")));
+        } else if ("admin_backups".equals(specKey)) {
+            appendLine(detail, "Tệp", SafeJson.string(source, "", "fileName"));
+            appendLine(detail, "Dung lượng", item.getSubtitle());
+            appendLine(detail, "Trạng thái", item.getStatus());
+            appendLine(detail, "Thời gian", shortTime(SafeJson.string(source, "", "createdAt")));
         } else {
             appendLine(detail, "", item.getSubtitle());
             appendLine(detail, "", item.getDetail());
@@ -272,6 +300,68 @@ public class AdminManagementActivity extends BaseActivity {
         new AlertDialog.Builder(this).setTitle("Chọn thao tác")
                 .setItems(labels, (dialog, which) -> confirmAction(item, labels[which]))
                 .show();
+    }
+
+    private void confirmCreateBackup() {
+        new AlertDialog.Builder(this)
+                .setTitle("Tạo bản sao lưu")
+                .setMessage("Hệ thống sẽ tạo một tệp sao lưu dữ liệu thật. Quá trình có thể mất một lúc.")
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton("Tạo sao lưu", (dialog, which) -> createBackup())
+                .show();
+    }
+
+    private void createBackup() {
+        setLoading(true);
+        JSONObject body = new JSONObject();
+        try { body.put("notes", "Sao lưu từ ứng dụng Android"); }
+        catch (Exception ignored) { }
+        repository.action(Request.Method.POST, "admin/system/backups/", body,
+                new ApiCallback<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject data) {
+                        if (!isUsable()) return;
+                        showShortMessage("Đã tạo bản sao lưu");
+                        loadSafely();
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        if (!isUsable()) return;
+                        setLoading(false);
+                        handleApiError(error);
+                    }
+                });
+    }
+
+    private void confirmSessionRevoke(FeatureItem item) {
+        new AlertDialog.Builder(this)
+                .setTitle("Thu hồi phiên đăng nhập")
+                .setMessage("Thiết bị này sẽ không thể làm mới phiên đăng nhập sau khi bị thu hồi.")
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton("Thu hồi", (dialog, which) -> revokeSession(item))
+                .show();
+    }
+
+    private void revokeSession(FeatureItem item) {
+        setLoading(true);
+        repository.action(Request.Method.DELETE,
+                "admin/security/sessions/" + item.getId() + "/", new JSONObject(),
+                new ApiCallback<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject data) {
+                        if (!isUsable()) return;
+                        showShortMessage("Đã thu hồi phiên đăng nhập");
+                        loadSafely();
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        if (!isUsable()) return;
+                        setLoading(false);
+                        handleApiError(error);
+                    }
+                });
     }
 
     private void confirmAction(FeatureItem item, String label) {
