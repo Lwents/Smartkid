@@ -27,6 +27,7 @@ import com.example.smartkid.common.navigation.UserRole;
 import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.common.ui.FeatureItemAdapter;
 import com.example.smartkid.common.ui.FeatureSpec;
+import com.example.smartkid.common.ui.form.ContentFormActivity;
 import com.example.smartkid.common.ui.form.ExerciseScope;
 import com.example.smartkid.common.util.AppConstants;
 import com.example.smartkid.common.util.AppLogger;
@@ -41,6 +42,7 @@ import com.example.smartkid.feature.teacher.course.builder.TeacherCourseBuilderA
 import com.example.smartkid.feature.teacher.exercise.TeacherExerciseEditorActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.json.JSONArray;
@@ -57,11 +59,14 @@ public class TeacherManagementActivity extends BaseActivity {
     private ManagementRepository repository;
     private FeatureItemAdapter adapter;
     private TeacherQuestionAdapter questionAdapter;
+    private TeacherExamAdapter examAdapter;
     private ProgressBar progressBar;
     private TextView emptyText;
     private TextView questionSummary;
+    private TextView examSummary;
     private View refreshButton;
     private SwipeRefreshLayout refreshLayout;
+    private String currentSearchQuery = "";
 
     @Override
     public void finish() {
@@ -90,12 +95,14 @@ public class TeacherManagementActivity extends BaseActivity {
             }
             setContentView(isQaFeature()
                     ? R.layout.teacher_activity_lesson_questions
-                    : R.layout.common_activity_feature_list);
+                    : (isExamFeature() ? R.layout.teacher_activity_exams
+                            : R.layout.common_activity_feature_list));
             repository = new ManagementRepository(this);
             MaterialToolbar toolbar = findViewById(R.id.toolbarFeatureList);
             progressBar = findViewById(R.id.progressFeatureList);
             emptyText = findViewById(R.id.textFeatureListEmpty);
             questionSummary = findViewById(R.id.textTeacherQuestionSummary);
+            examSummary = findViewById(R.id.textTeacherExamSummary);
             refreshButton = findViewById(R.id.buttonFeatureAction);
             refreshLayout = findViewById(R.id.refreshFeatureList);
             SwipeRefreshFix.attach(refreshLayout);
@@ -109,12 +116,17 @@ public class TeacherManagementActivity extends BaseActivity {
             toolbar.setNavigationOnClickListener(view -> finish());
             refreshLayout.setOnRefreshListener(this::loadSafely);
             configurePrimaryAction(toolbar);
-            emptyText.setText(isQaFeature()
-                    ? R.string.teacher_no_lesson_questions
-                    : R.string.no_server_data);
+            if (isQaFeature()) {
+                emptyText.setText(R.string.teacher_no_lesson_questions);
+            } else if (!isExamFeature()) {
+                emptyText.setText(R.string.no_server_data);
+            }
             if (isQaFeature()) {
                 questionAdapter = new TeacherQuestionAdapter(this);
                 list.setAdapter(questionAdapter);
+            } else if (isExamFeature()) {
+                examAdapter = new TeacherExamAdapter(this);
+                list.setAdapter(examAdapter);
             } else {
                 adapter = new FeatureItemAdapter(this);
                 list.setAdapter(adapter);
@@ -122,13 +134,17 @@ public class TeacherManagementActivity extends BaseActivity {
             list.setEmptyView(emptyText);
             list.setOnItemClickListener((parent, row, position, id) -> {
                 FeatureItem item = itemAt(position);
-                if ("teacher_courses".equals(spec.getActionKind())) showActions(item);
+                if ("teacher_courses".equals(spec.getActionKind()) || isExamFeature()) {
+                    showActions(item);
+                }
                 else showItem(item);
             });
             search.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
                 @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    filterItems(s == null ? "" : s.toString());
+                    currentSearchQuery = s == null ? "" : s.toString();
+                    filterItems(currentSearchQuery);
+                    updateEmptyMessage();
                 }
                 @Override public void afterTextChanged(Editable s) { }
             });
@@ -141,7 +157,7 @@ public class TeacherManagementActivity extends BaseActivity {
 
     private void configurePrimaryAction(MaterialToolbar toolbar) {
         if (supportsCreate()) {
-            ((TextView) refreshButton).setText("Tạo mới");
+            ((TextView) refreshButton).setText(isExamFeature() ? "Tạo bài" : "Tạo mới");
             refreshButton.setOnClickListener(view -> openCreate());
             android.view.MenuItem refresh = toolbar.getMenu().add(R.string.refresh);
             refresh.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM);
@@ -198,22 +214,29 @@ public class TeacherManagementActivity extends BaseActivity {
     }
 
     private FeatureItem itemAt(int position) {
-        return questionAdapter != null
-                ? questionAdapter.getItem(position)
-                : (adapter == null ? null : adapter.getItem(position));
+        if (questionAdapter != null) return questionAdapter.getItem(position);
+        if (examAdapter != null) return examAdapter.getItem(position);
+        return adapter == null ? null : adapter.getItem(position);
     }
 
     private void setItems(List<FeatureItem> items) {
         if (questionAdapter != null) {
             questionAdapter.setItems(items);
+            if (!currentSearchQuery.isEmpty()) questionAdapter.filter(currentSearchQuery);
             updateQuestionSummary();
+        } else if (examAdapter != null) {
+            examAdapter.setItems(items);
+            if (!currentSearchQuery.isEmpty()) examAdapter.filter(currentSearchQuery);
+            updateExamSummary();
         } else if (adapter != null) {
             adapter.setItems(items);
+            if (!currentSearchQuery.isEmpty()) adapter.filter(currentSearchQuery);
         }
     }
 
     private void filterItems(String keyword) {
         if (questionAdapter != null) questionAdapter.filter(keyword);
+        else if (examAdapter != null) examAdapter.filter(keyword);
         else if (adapter != null) adapter.filter(keyword);
     }
 
@@ -228,6 +251,28 @@ public class TeacherManagementActivity extends BaseActivity {
         } else {
             questionSummary.setText(total + " câu hỏi • " + pending + " câu đang chờ trả lời");
         }
+    }
+
+    private void updateExamSummary() {
+        if (examSummary == null || examAdapter == null) return;
+        int total = examAdapter.getTotalCount();
+        int published = examAdapter.getPublishedCount();
+        int drafts = Math.max(0, total - published);
+        if (total == 0) {
+            examSummary.setText("Chưa có bài kiểm tra nào");
+        } else if (drafts == 0) {
+            examSummary.setText(total + " bài kiểm tra  •  Tất cả đang mở");
+        } else {
+            examSummary.setText(total + " bài kiểm tra  •  " + published
+                    + " đang mở  •  " + drafts + " bản nháp");
+        }
+    }
+
+    private void updateEmptyMessage() {
+        if (emptyText == null || !isExamFeature()) return;
+        emptyText.setText(currentSearchQuery.trim().isEmpty()
+                ? "Chưa có bài kiểm tra.\nHãy tạo bài đầu tiên cho học sinh."
+                : "Không tìm thấy bài kiểm tra phù hợp.\nHãy thử từ khóa khác.");
     }
 
     private List<FeatureItem> filterForCurrentFeature(List<FeatureItem> data) {
@@ -571,9 +616,17 @@ public class TeacherManagementActivity extends BaseActivity {
         return spec != null && "teacher_qa".equals(spec.getActionKind());
     }
 
+    private boolean isExamFeature() {
+        return spec != null && "teacher_exams".equals(spec.getActionKind());
+    }
+
     private void showActions(FeatureItem item) {
         if (item == null) return;
         String kind = spec.getActionKind();
+        if ("teacher_exams".equals(kind)) {
+            showExamActions(item);
+            return;
+        }
         String[] labels;
         if ("teacher_courses".equals(kind)) {
             boolean published = item.getSource().optBoolean("published", false)
@@ -581,8 +634,6 @@ public class TeacherManagementActivity extends BaseActivity {
             labels = published
                     ? new String[]{"Quản lý nội dung", "Gỡ xuất bản", "Xóa"}
                     : new String[]{"Quản lý nội dung", "Xuất bản", "Xóa"};
-        } else if ("teacher_exams".equals(kind)) {
-            labels = new String[]{"Thêm câu hỏi", "Xem thống kê", "Xuất bản", "Gỡ xuất bản", "Xóa"};
         } else if ("teacher_exam_reports".equals(kind)) {
             labels = new String[]{"Xem thống kê", "Xem lượt nộp"};
         } else if ("teacher_qa".equals(kind)) {
@@ -595,6 +646,102 @@ public class TeacherManagementActivity extends BaseActivity {
         new AlertDialog.Builder(this).setTitle("Chọn thao tác")
                 .setItems(labels, (dialog, which) -> confirmAction(item, labels[which]))
                 .show();
+    }
+
+    private void showExamActions(FeatureItem item) {
+        try {
+            JSONObject source = item.getSource();
+            boolean published = source.optBoolean("published", false);
+            int questionCount = examQuestionCount(source);
+            BottomSheetDialog sheet = new BottomSheetDialog(
+                    this, R.style.ThemeOverlay_Smartkid_NotificationSheet);
+            View content = getLayoutInflater().inflate(R.layout.teacher_sheet_exam_actions, null);
+            sheet.setContentView(content);
+
+            bindText(content, R.id.textTeacherExamSheetTitle, item.getTitle());
+            bindText(content, R.id.textTeacherExamSheetMeta, examMeta(source));
+            TextView status = content.findViewById(R.id.textTeacherExamSheetStatus);
+            status.setText(published ? "Đang mở cho học sinh" : "Bản nháp • Học sinh chưa thấy");
+            status.setBackgroundResource(published
+                    ? R.drawable.teacher_bg_exam_published : R.drawable.teacher_bg_exam_draft);
+            status.setTextColor(androidx.core.content.ContextCompat.getColor(this, published
+                    ? R.color.teacher_exam_published_text : R.color.teacher_exam_draft_text));
+
+            content.findViewById(R.id.buttonTeacherExamClose)
+                    .setOnClickListener(view -> sheet.dismiss());
+            content.findViewById(R.id.buttonTeacherExamEdit).setOnClickListener(view -> {
+                sheet.dismiss();
+                openExamEditor(item);
+            });
+            content.findViewById(R.id.buttonTeacherExamStats).setOnClickListener(view -> {
+                sheet.dismiss();
+                showStatistics(item);
+            });
+
+            MaterialButton publishButton = content.findViewById(R.id.buttonTeacherExamPublish);
+            String publishAction = published ? "Gỡ xuất bản" : "Xuất bản";
+            publishButton.setText(published ? "Tạm đóng" : "Xuất bản");
+            publishButton.setIconResource(published
+                    ? R.drawable.teacher_ic_unpublish : R.drawable.teacher_ic_publish);
+            TextView hint = content.findViewById(R.id.textTeacherExamPublishHint);
+            boolean publishBlocked = !published && questionCount == 0;
+            publishButton.setEnabled(!publishBlocked);
+            if (publishBlocked) {
+                hint.setVisibility(View.VISIBLE);
+                hint.setText("Bài này chưa có câu hỏi. Hãy chỉnh sửa nội dung trước khi xuất bản.");
+            } else if (published) {
+                hint.setVisibility(View.VISIBLE);
+                hint.setText("Tạm đóng sẽ ẩn bài này khỏi danh sách làm bài của học sinh.");
+                hint.setTextColor(androidx.core.content.ContextCompat.getColor(this,
+                        R.color.smartkid_text_secondary));
+            }
+            publishButton.setOnClickListener(view -> {
+                sheet.dismiss();
+                confirmAction(item, publishAction);
+            });
+            content.findViewById(R.id.buttonTeacherExamDelete).setOnClickListener(view -> {
+                sheet.dismiss();
+                confirmAction(item, "Xóa");
+            });
+            sheet.show();
+        } catch (Exception exception) {
+            AppLogger.error(this, "TeacherManagementActivity",
+                    "Không thể mở quản lý bài kiểm tra", exception);
+            showErrorDialog("Không thể mở bài kiểm tra");
+        }
+    }
+
+    private void openExamEditor(FeatureItem item) {
+        if (item == null || item.getId().isEmpty()) {
+            showErrorDialog("Bài kiểm tra không có mã hợp lệ");
+            return;
+        }
+        try {
+            Intent intent = new Intent(this, TeacherExerciseEditorActivity.class);
+            intent.putExtra(TeacherExerciseEditorActivity.EXTRA_SCOPE,
+                    ExerciseScope.STANDALONE_EXAM.name());
+            intent.putExtra(ContentFormActivity.EXTRA_EDIT_ID, item.getId());
+            startActivity(intent);
+        } catch (Exception exception) {
+            AppLogger.error(this, "TeacherManagementActivity",
+                    "Không thể chỉnh sửa bài kiểm tra", exception);
+            showErrorDialog("Không thể mở trình chỉnh sửa bài kiểm tra");
+        }
+    }
+
+    private int examQuestionCount(JSONObject source) {
+        JSONArray questions = source == null ? null : source.optJSONArray("questions");
+        return questions == null ? 0 : questions.length();
+    }
+
+    private String examMeta(JSONObject source) {
+        int questions = examQuestionCount(source);
+        JSONObject settings = source == null ? null : source.optJSONObject("settings");
+        int seconds = settings == null ? 0
+                : SafeJson.integer(settings, 0, "duration_seconds", "time_limit_seconds");
+        return questions + " câu hỏi  •  "
+                + (seconds > 0 ? Math.max(1, seconds / 60) + " phút" : "Không giới hạn")
+                + "  •  " + questionTypeLabel(SafeJson.string(source, "mcq", "type"));
     }
 
     private void confirmAction(FeatureItem item, String label) {
@@ -628,11 +775,29 @@ public class TeacherManagementActivity extends BaseActivity {
             return;
         }
         if ("Xóa".equals(label)) {
-            new AlertDialog.Builder(this).setTitle("Xóa dữ liệu")
-                    .setMessage("Xóa vĩnh viễn “" + item.getTitle()
-                            + "” khỏi server? Thao tác này không thể hoàn tác.")
+            boolean exam = isExamFeature();
+            new AlertDialog.Builder(this).setTitle(exam
+                            ? "Xóa bài kiểm tra?" : "Xóa dữ liệu")
+                    .setMessage(exam
+                            ? "“" + item.getTitle()
+                                    + "” sẽ bị xóa vĩnh viễn. Bạn không thể hoàn tác."
+                            : "Xóa vĩnh viễn “" + item.getTitle()
+                                    + "” khỏi server? Thao tác này không thể hoàn tác.")
                     .setNegativeButton(R.string.cancel, null)
                     .setPositiveButton("Xóa", (dialog, which) -> deleteItem(item))
+                    .show();
+            return;
+        }
+        if (isExamFeature() && ("Xuất bản".equals(label) || "Gỡ xuất bản".equals(label))) {
+            boolean publish = "Xuất bản".equals(label);
+            new AlertDialog.Builder(this)
+                    .setTitle(publish ? "Xuất bản bài kiểm tra?" : "Tạm đóng bài kiểm tra?")
+                    .setMessage(publish
+                            ? "Học sinh sẽ thấy và có thể bắt đầu làm bài này."
+                            : "Học sinh sẽ không còn thấy bài này trong danh sách làm bài.")
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(publish ? "Xuất bản" : "Tạm đóng",
+                            (dialog, which) -> performAction(item, label))
                     .show();
             return;
         }
@@ -764,7 +929,7 @@ public class TeacherManagementActivity extends BaseActivity {
             @Override public void onSuccess(JSONObject data) {
                 if (!isUsable()) return;
                 setLoading(false);
-                showJsonDialog("Thống kê • " + item.getTitle(), data);
+                showExamStatistics(item, data == null ? new JSONObject() : data);
             }
 
             @Override public void onError(ApiError error) {
@@ -773,6 +938,51 @@ public class TeacherManagementActivity extends BaseActivity {
                 handleApiError(error);
             }
         });
+    }
+
+    private void showExamStatistics(FeatureItem item, JSONObject data) {
+        try {
+            BottomSheetDialog sheet = new BottomSheetDialog(
+                    this, R.style.ThemeOverlay_Smartkid_NotificationSheet);
+            View content = getLayoutInflater().inflate(R.layout.teacher_sheet_exam_stats, null);
+            sheet.setContentView(content);
+            bindText(content, R.id.textTeacherExamStatsTitle, item.getTitle());
+            bindText(content, R.id.textTeacherExamSubmissions,
+                    String.valueOf(SafeJson.integer(data, 0, "submissions", "total_attempts")));
+            bindText(content, R.id.textTeacherExamAverage,
+                    readableMetric(SafeJson.decimal(data, 0, "avgScore", "avg_score")));
+            bindText(content, R.id.textTeacherExamPassRate,
+                    readableMetric(SafeJson.decimal(data, 0, "passRate", "pass_rate")) + "%");
+
+            JSONArray students = SafeJson.array(data, "top_students");
+            StringBuilder ranking = new StringBuilder();
+            for (int index = 0; index < Math.min(3, students.length()); index++) {
+                JSONObject student = students.optJSONObject(index);
+                if (student == null) continue;
+                if (ranking.length() > 0) ranking.append('\n');
+                ranking.append(index + 1).append(". ")
+                        .append(SafeJson.string(student, "Học sinh", "student_name", "name"))
+                        .append("  •  ")
+                        .append(readableMetric(SafeJson.decimal(student, 0, "score", "total_score")))
+                        .append(" điểm");
+            }
+            TextView topStudents = content.findViewById(R.id.textTeacherExamTopStudents);
+            topStudents.setText(ranking.length() == 0
+                    ? "Chưa có học sinh hoàn thành bài kiểm tra này." : ranking.toString());
+            View.OnClickListener close = view -> sheet.dismiss();
+            content.findViewById(R.id.buttonTeacherExamStatsClose).setOnClickListener(close);
+            content.findViewById(R.id.buttonTeacherExamStatsDone).setOnClickListener(close);
+            sheet.show();
+        } catch (Exception exception) {
+            AppLogger.error(this, "TeacherManagementActivity",
+                    "Không thể hiện thống kê bài kiểm tra", exception);
+            showErrorDialog("Không thể đọc kết quả bài kiểm tra");
+        }
+    }
+
+    private String readableMetric(double value) {
+        return value == Math.rint(value) ? String.valueOf((int) value)
+                : String.format(java.util.Locale.US, "%.1f", value);
     }
 
     private void showAttempts(FeatureItem item) {

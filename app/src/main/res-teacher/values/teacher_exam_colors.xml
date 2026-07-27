@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="teacher_exam_card_surface">#FFFEFFFF</color>
+    <color name="teacher_exam_card_stroke">#FFE0E5F0</color>
+    <color name="teacher_exam_icon_surface">#FFE9EAFF</color>
+    <color name="teacher_exam_published_surface">#FFE4F7EB</color>
+    <color name="teacher_exam_published_text">#FF16753A</color>
+    <color name="teacher_exam_draft_surface">#FFFFF1D8</color>
+    <color name="teacher_exam_draft_text">#FF936000</color>
+    <color name="teacher_exam_danger_surface">#FFFFECEA</color>
+    <color name="teacher_exam_stats_surface">#FFF1F4FF</color>
+</resources>

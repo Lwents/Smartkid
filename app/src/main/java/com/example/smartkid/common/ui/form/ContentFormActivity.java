@@ -32,6 +32,7 @@ import com.example.smartkid.common.navigation.UserRole;
 import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.common.ui.LiquidGlassUi;
 import com.example.smartkid.common.util.AppLogger;
+import com.example.smartkid.common.util.SafeJson;
 import com.example.smartkid.data.local.SessionManager;
 import com.example.smartkid.data.model.FeatureItem;
 import com.example.smartkid.data.remote.ApiCallback;
@@ -235,7 +236,8 @@ public abstract class ContentFormActivity extends BaseActivity {
         } else if (kind == ContentFormKind.TEACHER_EXAM) {
             icon.setImageResource(R.drawable.role_ic_exam);
             subtitle.setText(R.string.management_create_exam_subtitle);
-            submitButton.setText(R.string.create_exam);
+            submitButton.setText(editId.isEmpty() ? getString(R.string.create_exam)
+                    : "Lưu thay đổi");
         } else {
             icon.setImageResource(R.drawable.role_ic_user_add_filled);
             subtitle.setText(R.string.management_create_user_subtitle);
@@ -994,6 +996,8 @@ private void registerFilePickers() {
                         if (courseOptions.isEmpty()) {
                             submitButton.setEnabled(false);
                             showStatus(getString(R.string.management_exam_no_courses));
+                        } else if (!editId.isEmpty()) {
+                            loadExerciseForEdit();
                         } else {
                             courseSpinner.setEnabled(true);
                             statusText.setVisibility(View.GONE);
@@ -1054,14 +1058,21 @@ private void registerFilePickers() {
         } else if (lessonValue != null && lessonValue != JSONObject.NULL) {
             exerciseLessonId = safe(String.valueOf(lessonValue));
         }
-        if (parentId.isEmpty() || !parentId.equals(exerciseLessonId)) {
+        if (kind == ContentFormKind.TEACHER_EXERCISE
+                && (parentId.isEmpty() || !parentId.equals(exerciseLessonId))) {
             throw new IllegalArgumentException("Bài tập không thuộc bài học đang mở");
+        }
+        if (kind == ContentFormKind.TEACHER_EXAM && !exerciseLessonId.isEmpty()) {
+            throw new IllegalArgumentException("Dữ liệu không phải bài kiểm tra độc lập");
         }
         inputs.get("title").setText(safe(exercise.optString("title", "")));
         boolean published = exercise.optBoolean("published", false);
         setSpinnerValue("status", published ? "published" : "draft");
         JSONObject settings = exercise.optJSONObject("settings");
         if (settings == null) settings = new JSONObject();
+        if (kind == ContentFormKind.TEACHER_EXAM) {
+            selectCourse(SafeJson.string(settings, "", "course_id"));
+        }
         try {
             existingExerciseSettings = new JSONObject(settings.toString());
         } catch (Exception ignored) {
@@ -1201,13 +1212,14 @@ private void registerFilePickers() {
                 endpoint = "content/modules/" + parentId + "/lessons/";
             }
             else {
-                boolean editingExercise = kind == ContentFormKind.TEACHER_EXERCISE
-                        && !editId.isEmpty();
+                boolean editingExercise = (kind == ContentFormKind.TEACHER_EXERCISE
+                        || kind == ContentFormKind.TEACHER_EXAM) && !editId.isEmpty();
                 endpoint = editingExercise ? "activities/exercises/" + editId + "/"
                         : "activities/exercises/";
             }
-            int requestMethod = kind == ContentFormKind.TEACHER_EXERCISE && !editId.isEmpty()
-                    ? Request.Method.PATCH : Request.Method.POST;
+            boolean editingExercise = (kind == ContentFormKind.TEACHER_EXERCISE
+                    || kind == ContentFormKind.TEACHER_EXAM) && !editId.isEmpty();
+            int requestMethod = editingExercise ? Request.Method.PATCH : Request.Method.POST;
             setLoading(true);
             statusText.setVisibility(View.GONE);
             ApiCallback<JSONObject> callback = new ApiCallback<JSONObject>() {
@@ -1602,6 +1614,16 @@ private void registerFilePickers() {
         return courseOptions.get(position).getId();
     }
 
+    private void selectCourse(String courseId) {
+        if (courseSpinner == null || courseId == null || courseId.trim().isEmpty()) return;
+        for (int index = 0; index < courseOptions.size(); index++) {
+            if (courseId.trim().equals(courseOptions.get(index).getId())) {
+                courseSpinner.setSelection(index);
+                return;
+            }
+        }
+    }
+
     private List<MultipartFilePart> multipartFiles() {
         List<MultipartFilePart> files = new ArrayList<>();
         if (kind == ContentFormKind.TEACHER_COURSE) {
@@ -1633,7 +1655,7 @@ private void registerFilePickers() {
             return getString(editId.isEmpty() ? R.string.management_create_exercise_title
                     : R.string.management_update_exercise_title);
         }
-        return getString(R.string.create_exam);
+        return editId.isEmpty() ? getString(R.string.create_exam) : "Chỉnh sửa bài kiểm tra";
     }
 
     private String successMessage() {
@@ -1645,7 +1667,8 @@ private void registerFilePickers() {
             return getString(editId.isEmpty() ? R.string.management_exercise_created
                     : R.string.management_exercise_updated);
         }
-        return getString(R.string.management_exam_created);
+        return editId.isEmpty() ? getString(R.string.management_exam_created)
+                : "Đã cập nhật bài kiểm tra";
     }
 
     private void setLoading(boolean loading) {
