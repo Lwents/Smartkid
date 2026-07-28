@@ -31,7 +31,7 @@
                     android:layout_gravity="center"
                     android:contentDescription="@null"
                     android:src="@drawable/course_ic_video_badge"
-                    app:tint="@color/admin_primary" />
+                    app:tint="@color/white" />
             </FrameLayout>
 
             <LinearLayout
