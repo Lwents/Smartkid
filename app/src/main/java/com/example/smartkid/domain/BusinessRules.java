@@ -34,8 +34,12 @@ public final class BusinessRules {
     /** Kiểm tra dữ liệu đăng ký: tên, email, số điện thoại, mật khẩu và xác nhận. */
     public static String validateRegistration(String username, String email, String phone,
                                               String password, String confirmation) {
-        if (username == null || username.trim().length() < 3) {
+        String normalizedUsername = username == null ? "" : username.trim();
+        if (normalizedUsername.length() < 3) {
             return "Tên đăng nhập phải có ít nhất 3 ký tự";
+        }
+        if (!normalizedUsername.matches("^[A-Za-z0-9._-]+$")) {
+            return "Tên tài khoản chỉ gồm chữ không dấu, số, dấu chấm, gạch dưới hoặc gạch ngang";
         }
         if (!isEmail(email)) {
             return "Email không đúng định dạng";
@@ -47,8 +51,8 @@ public final class BusinessRules {
         if (!normalizedPhone.matches("^\\+?[0-9]{9,15}$")) {
             return "Số điện thoại phải có từ 9 đến 15 chữ số";
         }
-        if (password == null || password.length() < 6) {
-            return "Mật khẩu phải có ít nhất 6 ký tự";
+        if (password == null || password.length() < 8) {
+            return "Mật khẩu phải có ít nhất 8 ký tự";
         }
         if (!password.equals(confirmation)) {
             return "Mật khẩu nhập lại không khớp";

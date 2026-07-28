@@ -27,13 +27,39 @@ public class BusinessRulesTest {
     public void validateRegistration_requiresAValidPhoneNumber() {
         assertEquals("Vui lòng nhập số điện thoại",
                 BusinessRules.validateRegistration(
-                        "student", "student@example.com", "", "123456", "123456"));
+                        "student", "student@example.com", "", "12345678", "12345678"));
         assertEquals("Số điện thoại phải có từ 9 đến 15 chữ số",
                 BusinessRules.validateRegistration(
-                        "student", "student@example.com", "123", "123456", "123456"));
+                        "student", "student@example.com", "123", "12345678", "12345678"));
         assertTrue(BusinessRules.validateRegistration(
-                "student", "student@example.com", "+84912345678", "123456", "123456")
+                "student", "student@example.com", "+84912345678", "12345678", "12345678")
                 .isEmpty());
+    }
+
+    @Test
+    public void validateRegistration_requiresAtLeastEightPasswordCharacters() {
+        assertEquals("Mật khẩu phải có ít nhất 8 ký tự",
+                BusinessRules.validateRegistration(
+                        "student", "student@example.com", "+84912345678",
+                        "1234567", "1234567"));
+        assertTrue(BusinessRules.validateRegistration(
+                "student", "student@example.com", "+84912345678",
+                "12345678", "12345678").isEmpty());
+    }
+
+    @Test
+    public void validateRegistration_rejectsWhitespaceAndUnsupportedUsernameCharacters() {
+        String expected = "Tên tài khoản chỉ gồm chữ không dấu, số, dấu chấm, "
+                + "gạch dưới hoặc gạch ngang";
+        assertEquals(expected, BusinessRules.validateRegistration(
+                "lwent kkk", "student@example.com", "+84912345678",
+                "12345678", "12345678"));
+        assertEquals(expected, BusinessRules.validateRegistration(
+                "lwent@kkk", "student@example.com", "+84912345678",
+                "12345678", "12345678"));
+        assertTrue(BusinessRules.validateRegistration(
+                "lwent.kkk_01-test", "student@example.com", "+84912345678",
+                "12345678", "12345678").isEmpty());
     }
 
     @Test

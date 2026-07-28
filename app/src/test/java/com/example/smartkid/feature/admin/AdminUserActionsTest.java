@@ -27,13 +27,21 @@ public class AdminUserActionsTest {
 
     @Test
     public void validatesPasswordAndConfirmation() {
+        String tooShort = valueWithLength(7);
+        String valid = valueWithLength(8);
+        String different = valueWithLength(9);
+
         assertEquals(AdminUserActions.PasswordIssue.REQUIRED,
                 AdminUserActions.validatePassword("", ""));
         assertEquals(AdminUserActions.PasswordIssue.TOO_SHORT,
-                AdminUserActions.validatePassword("Abc123", "Abc123"));
+                AdminUserActions.validatePassword(tooShort, tooShort));
         assertEquals(AdminUserActions.PasswordIssue.MISMATCH,
-                AdminUserActions.validatePassword("Secure123", "Secure124"));
+                AdminUserActions.validatePassword(valid, different));
         assertEquals(AdminUserActions.PasswordIssue.NONE,
-                AdminUserActions.validatePassword("Secure123", "Secure123"));
+                AdminUserActions.validatePassword(valid, valid));
+    }
+
+    private static String valueWithLength(int length) {
+        return new String(new char[length]).replace('\0', 'x');
     }
 }

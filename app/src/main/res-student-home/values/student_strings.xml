@@ -162,6 +162,10 @@
     <string name="start_exam">Bắt đầu làm bài</string>
     <string name="submit_exam">Nộp bài</string>
     <string name="ranking">Bảng xếp hạng</string>
+    <string name="exam_attempt_limit_title">Em đã hoàn thành bài này</string>
+    <string name="exam_attempt_limit_message">Em đã dùng hết số lượt làm bài. Hãy xem lại thành tích của mình trong bảng xếp hạng nhé!</string>
+    <string name="exam_attempt_limit_status">Đã hoàn thành • Đã dùng hết lượt làm bài</string>
+    <string name="exam_view_ranking">Xem bảng xếp hạng</string>
     <string name="certificates">Chứng chỉ</string>
     <string name="no_certificates">Bạn chưa có chứng chỉ nào</string>
     <string name="open_certificate">Mở chứng chỉ</string>

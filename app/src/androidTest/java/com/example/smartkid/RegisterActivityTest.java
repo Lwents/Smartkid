@@ -33,11 +33,51 @@ public class RegisterActivityTest {
 
         onView(withId(R.id.inputRegisterUsername)).perform(replaceText("student_test"));
         onView(withId(R.id.inputRegisterEmail)).perform(replaceText("student@example.com"));
-        onView(withId(R.id.inputRegisterPassword)).perform(replaceText("123456"));
+        onView(withId(R.id.inputRegisterPassword)).perform(replaceText("12345678"));
         onView(withId(R.id.inputRegisterConfirmation))
-                .perform(replaceText("123456"), closeSoftKeyboard());
+                .perform(replaceText("12345678"), closeSoftKeyboard());
         onView(withId(R.id.buttonRegister)).perform(scrollTo(), click());
 
         onView(withText("Vui lòng nhập số điện thoại")).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void sevenCharacterPassword_showsMinimumLengthErrorWithoutCallingApi() {
+        Intent intent = new Intent(
+                InstrumentationRegistry.getInstrumentation().getTargetContext(),
+                RegisterActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        InstrumentationRegistry.getInstrumentation().startActivitySync(intent);
+
+        onView(withId(R.id.inputRegisterUsername)).perform(replaceText("student_test"));
+        onView(withId(R.id.inputRegisterEmail)).perform(replaceText("student@example.com"));
+        onView(withId(R.id.inputRegisterPhone)).perform(replaceText("0912345678"));
+        onView(withId(R.id.inputRegisterPassword)).perform(replaceText("1234567"));
+        onView(withId(R.id.inputRegisterConfirmation))
+                .perform(replaceText("1234567"), closeSoftKeyboard());
+        onView(withId(R.id.buttonRegister)).perform(scrollTo(), click());
+
+        onView(withText("Mật khẩu phải có ít nhất 8 ký tự"))
+                .check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void usernameWithWhitespace_showsFormatErrorWithoutCallingApi() {
+        Intent intent = new Intent(
+                InstrumentationRegistry.getInstrumentation().getTargetContext(),
+                RegisterActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        InstrumentationRegistry.getInstrumentation().startActivitySync(intent);
+
+        onView(withId(R.id.inputRegisterUsername)).perform(replaceText("lwent kkk"));
+        onView(withId(R.id.inputRegisterEmail)).perform(replaceText("student@example.com"));
+        onView(withId(R.id.inputRegisterPhone)).perform(replaceText("0912345678"));
+        onView(withId(R.id.inputRegisterPassword)).perform(replaceText("12345678"));
+        onView(withId(R.id.inputRegisterConfirmation))
+                .perform(replaceText("12345678"), closeSoftKeyboard());
+        onView(withId(R.id.buttonRegister)).perform(scrollTo(), click());
+
+        onView(withText("Tên tài khoản chỉ gồm chữ không dấu, số, dấu chấm, "
+                + "gạch dưới hoặc gạch ngang")).check(matches(isDisplayed()));
     }
 }
