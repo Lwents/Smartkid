@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="management_question_limit">Một bài kiểm tra có tối đa 50 câu hỏi</string>
+    <string name="management_manual_question_memory_limit">Để ứng dụng chạy ổn định, em có thể nhập trực tiếp tối đa 10 câu mỗi lần. Hãy dùng nút AI để tạo đề dài hơn.</string>
     <string name="management_default_score">1</string>
     <string name="management_matching_arrow">→</string>
     <string name="management_remove_symbol">×</string>
@@ -122,6 +123,10 @@
     <plurals name="management_ai_questions_added">
         <item quantity="one">Đã thêm %1$d câu hỏi từ AI</item>
         <item quantity="other">Đã thêm %1$d câu hỏi từ AI</item>
+    </plurals>
+    <plurals name="management_compact_questions_summary">
+        <item quantity="one">Còn %1$d câu được giữ ở chế độ gọn để ứng dụng không bị nặng. Các câu này vẫn được lưu đầy đủ khi tạo bài kiểm tra.</item>
+        <item quantity="other">Còn %1$d câu được giữ ở chế độ gọn để ứng dụng không bị nặng. Các câu này vẫn được lưu đầy đủ khi tạo bài kiểm tra.</item>
     </plurals>
     <string name="management_loading_courses">Đang tải danh sách khóa học…</string>
     <string name="management_exam_requires_question">Bài kiểm tra cần ít nhất một câu hỏi</string>

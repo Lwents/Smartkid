@@ -31,6 +31,7 @@
     <string name="teacher_manage_students_action">Quản lý học viên</string>
     <string name="teacher_activity_title">Hoạt động giảng dạy</string>
     <string name="teacher_chart_metric">Số học viên tham gia</string>
+    <string name="teacher_chart_scope">So sánh số học sinh đang học trong từng khóa</string>
     <string name="teacher_chart_total_zero">Tổng: 0</string>
     <string name="teacher_chart_total_format">Tổng: %1$s</string>
     <string name="teacher_chart_course_label">KH%1$d</string>

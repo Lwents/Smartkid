@@ -18,8 +18,10 @@ import org.json.JSONObject;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /** Teacher exam cards with state, settings and result counts visible before opening actions. */
 final class TeacherExamAdapter extends BaseAdapter {
@@ -104,7 +106,7 @@ final class TeacherExamAdapter extends BaseAdapter {
                 questionCount,
                 questionCount,
                 duration,
-                questionTypeLabel(SafeJson.string(sourceItem, "mcq", "type"))
+                questionTypeLabel(questions, SafeJson.string(sourceItem, "mcq", "type"))
         ));
         holder.results.setText(submissions == 0
                 ? context.getString(R.string.teacher_exam_no_submissions)
@@ -124,7 +126,22 @@ final class TeacherExamAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private static String questionTypeLabel(String type) {
+    private static String questionTypeLabel(JSONArray questions, String type) {
+        Set<String> labels = new LinkedHashSet<>();
+        if (questions != null) {
+            for (int index = 0; index < questions.length(); index++) {
+                JSONObject question = questions.optJSONObject(index);
+                JSONObject meta = question == null ? null : question.optJSONObject("meta");
+                labels.add(singleTypeLabel(SafeJson.string(meta, type, "type")));
+            }
+        }
+        labels.remove("");
+        if (labels.size() > 1) return labels.size() + " dạng câu hỏi";
+        if (labels.size() == 1) return labels.iterator().next();
+        return singleTypeLabel(type);
+    }
+
+    private static String singleTypeLabel(String type) {
         if ("short_answer".equals(type)) return "Trả lời ngắn";
         if ("matching".equals(type)) return "Nối cặp";
         return "Trắc nghiệm";

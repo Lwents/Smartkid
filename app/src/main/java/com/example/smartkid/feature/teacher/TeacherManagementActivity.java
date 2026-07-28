@@ -389,6 +389,17 @@ public class TeacherManagementActivity extends BaseActivity {
             } else {
                 appendInfoLine(detail, "", "Học viên chưa tham gia khóa học nào của bạn.");
             }
+        } else if ("teacher_feedback".equals(specKey)) {
+            appendInfoLine(detail, "Học sinh",
+                    SafeJson.string(source, item.getTitle(), "studentName"));
+            appendInfoLine(detail, "Khóa học",
+                    SafeJson.string(source, "Phản hồi chung", "courseTitle", "course_title"));
+            appendInfoLine(detail, "Lời nhận xét",
+                    SafeJson.string(source, item.getDetail(), "message"));
+            appendInfoLine(detail, "Điểm đánh giá",
+                    readableMetric(SafeJson.decimal(source, 0, "rating")) + "/10");
+            appendInfoLine(detail, "Đã gửi lúc",
+                    readableTime(SafeJson.string(source, "", "createdAt", "created_at")));
         } else {
             appendInfoLine(detail, "", item.getSubtitle());
             appendInfoLine(detail, "", item.getDetail());
@@ -535,7 +546,6 @@ public class TeacherManagementActivity extends BaseActivity {
         }
         empty.setVisibility(View.GONE);
         LayoutInflater inflater = LayoutInflater.from(this);
-        String studentName = TeacherQuestionUiFormatter.studentName(question);
         for (int index = 0; index < replies.length(); index++) {
             JSONObject reply = replies.optJSONObject(index);
             if (reply == null) continue;
@@ -545,8 +555,11 @@ public class TeacherManagementActivity extends BaseActivity {
             TextView author = row.findViewById(R.id.textTeacherReplyAuthor);
             TextView time = row.findViewById(R.id.textTeacherReplyTime);
             TextView message = row.findViewById(R.id.textTeacherReplyContent);
-            avatar.setText(teacher ? "GV" : TeacherQuestionUiFormatter.studentInitial(question));
-            author.setText(teacher ? "Bạn đã trả lời" : studentName + " phản hồi");
+            String replyName = SafeJson.string(reply, "Học sinh", "user", "username");
+            String replyInitial = replyName.trim().isEmpty() ? "HS"
+                    : replyName.trim().substring(0, 1).toUpperCase(java.util.Locale.getDefault());
+            avatar.setText(teacher ? "GV" : replyInitial);
+            author.setText(teacher ? "Bạn đã trả lời" : replyName + " phản hồi");
             time.setText(TeacherQuestionUiFormatter.timeLabel(reply));
             time.setVisibility(time.getText().length() == 0 ? View.GONE : View.VISIBLE);
             message.setText(SafeJson.string(reply, "Không có nội dung", "content"));

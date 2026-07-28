@@ -499,6 +499,11 @@ public class ManagementRepository {
         return String.format(Locale.getDefault(), "%.1f%%", value);
     }
 
+    private String feedbackRating(double value) {
+        return value == Math.rint(value) ? String.valueOf((int) value)
+                : String.format(Locale.getDefault(), "%.1f", value);
+    }
+
     private void appendArray(List<FeatureItem> target, JSONArray array) {
         for (int index = 0; index < array.length(); index++) {
             Object value = array.opt(index);
@@ -524,8 +529,23 @@ public class ManagementRepository {
             int questionCount = questions == null ? 0 : questions.length();
             return new FeatureItem(id,
                     SafeJson.string(item, "Bài kiểm tra", "title"),
-                    questionCount + " câu • " + exerciseTypeLabel(exerciseType),
+                    questionCount + " câu • " + exerciseTypeSummary(questions, exerciseType),
                     SafeJson.string(item, "", "description"),
+                    SafeJson.bool(item, false, "published") ? "Đã xuất bản" : "Bản nháp",
+                    item);
+        }
+        // Khóa học: ưu tiên tên môn do server trả về, không hiển thị UUID môn học.
+        if (item.has("lessonsCount") && item.has("grade") && item.has("published")) {
+            String subject = SafeJson.string(item, "", "subject_title", "subjectTitle");
+            String grade = SafeJson.string(item, "", "grade");
+            int lessons = SafeJson.integer(item, 0, "lessonsCount", "lessons_count");
+            String subtitle = (subject.isEmpty() ? "Khóa học" : subject)
+                    + (grade.isEmpty() ? "" : " • Lớp " + grade)
+                    + " • " + lessons + " bài học";
+            return new FeatureItem(id,
+                    SafeJson.string(item, "Khóa học", "title"),
+                    subtitle,
+                    SafeJson.string(item, "", "description", "introduction"),
                     SafeJson.bool(item, false, "published") ? "Đã xuất bản" : "Bản nháp",
                     item);
         }
@@ -556,6 +576,16 @@ public class ManagementRepository {
             return new FeatureItem(id, SafeJson.string(item, "Học viên", "name", "username"),
                     subtitle, detail,
                     "Hoạt động: " + SafeJson.string(item, "", "lastActive"), item);
+        }
+        // Lịch sử phản hồi giáo viên đã gửi: hiện đúng học sinh, khóa học và điểm.
+        if (item.has("studentName") && item.has("rating") && item.has("message")) {
+            String courseTitle = SafeJson.string(item, "", "courseTitle", "course_title");
+            double rating = SafeJson.decimal(item, 0, "rating");
+            String status = "Đánh giá " + feedbackRating(rating) + "/10";
+            return new FeatureItem(id,
+                    SafeJson.string(item, "Học viên", "studentName"),
+                    courseTitle.isEmpty() ? "Phản hồi chung" : courseTitle,
+                    SafeJson.string(item, "", "message"), status, item);
         }
         // Người dùng đang hoạt động: tên + vai trò/email + lần hoạt động gần nhất
         if (item.has("lastActive") && item.has("name")) {
@@ -648,6 +678,20 @@ public class ManagementRepository {
             case "matching": return "Nối cặp";
             default: return type;
         }
+    }
+
+    private String exerciseTypeSummary(JSONArray questions, String fallbackType) {
+        Set<String> types = new LinkedHashSet<>();
+        if (questions != null) {
+            for (int index = 0; index < questions.length(); index++) {
+                JSONObject question = questions.optJSONObject(index);
+                JSONObject meta = question == null ? null : question.optJSONObject("meta");
+                types.add(exerciseTypeLabel(SafeJson.string(meta, fallbackType, "type")));
+            }
+        }
+        types.remove("");
+        if (types.size() > 1) return types.size() + " dạng câu hỏi";
+        return types.isEmpty() ? exerciseTypeLabel(fallbackType) : types.iterator().next();
     }
 
     /** Dịch key kỹ thuật của API sang nhãn tiếng Việt để hiển thị. */

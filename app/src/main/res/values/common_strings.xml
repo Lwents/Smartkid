@@ -18,7 +18,7 @@
     <string name="search">Tìm kiếm</string>
     <string name="save">Lưu thay đổi</string>
     <string name="cancel">Hủy</string>
-    <string name="login_title">Đăng nhập học viên</string>
+    <string name="login_title">Đăng nhập SmartEdu</string>
     <string name="login_subtitle">Dùng tài khoản trên hệ thống SmartEdu</string>
     <string name="identifier_hint">Tên đăng nhập hoặc email</string>
     <string name="password_hint">Mật khẩu</string>

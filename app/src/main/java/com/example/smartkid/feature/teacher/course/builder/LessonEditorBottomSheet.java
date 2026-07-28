@@ -17,6 +17,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import com.android.volley.Request;
 import com.example.smartkid.R;
@@ -45,6 +46,10 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         void onSaved(FeatureItem updated);
     }
 
+    public interface OnDeletedListener {
+        void onDeleted(String lessonId);
+    }
+
     private static final String ARG_LESSON_ID = "lesson_id";
     private static final String ARG_LESSON_TITLE = "lesson_title";
 
@@ -54,6 +59,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
 
     private ManagementRepository repository;
     private OnSavedListener savedListener;
+    private OnDeletedListener deletedListener;
 
     private String lessonId;
     private String lessonTitle;
@@ -63,6 +69,9 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     private View videoSourceGroup;
     private View videoFileRow;
     private TextView videoFileName;
+    private View documentSourceGroup;
+    private TextView documentFileName;
+    private EditText textContentInput;
     private EditText noteInput;
     private SwitchMaterial requiresExerciseSwitch;
     private SwitchMaterial publishedSwitch;
@@ -70,7 +79,10 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     private MaterialButton doneButton;
 
     private Uri selectedVideoUri;
+    private Uri selectedDocumentUri;
     private ActivityResultLauncher<String[]> videoPicker;
+    private ActivityResultLauncher<String[]> documentPicker;
+    private boolean hasExistingDocument;
     private boolean saving;
 
     public static LessonEditorBottomSheet newInstance(String lessonId, String lessonTitle) {
@@ -86,6 +98,10 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         this.savedListener = listener;
     }
 
+    public void setOnDeletedListener(OnDeletedListener listener) {
+        this.deletedListener = listener;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +111,8 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         repository = new ManagementRepository(requireContext());
         videoPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
                 this::handleSelectedVideo);
+        documentPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
+                this::handleSelectedDocument);
     }
 
     @NonNull
@@ -117,6 +135,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         bindContentTypeSpinner();
         ((TextView) view.findViewById(R.id.textSheetLessonTitle)).setText(lessonTitle);
         view.findViewById(R.id.buttonSheetLessonClose).setOnClickListener(v -> dismiss());
+        view.findViewById(R.id.buttonSheetLessonDelete).setOnClickListener(v -> confirmDelete());
         doneButton.setOnClickListener(v -> save());
         loadLesson();
     }
@@ -126,12 +145,16 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         videoSourceGroup = view.findViewById(R.id.groupSheetVideoSource);
         videoFileRow = view.findViewById(R.id.rowSheetVideoFile);
         videoFileName = view.findViewById(R.id.textSheetVideoFile);
+        documentSourceGroup = view.findViewById(R.id.groupSheetDocumentSource);
+        documentFileName = view.findViewById(R.id.textSheetDocumentFile);
+        textContentInput = view.findViewById(R.id.editSheetTextContent);
         noteInput = view.findViewById(R.id.editSheetLessonNote);
         requiresExerciseSwitch = view.findViewById(R.id.switchSheetRequiresExercise);
         publishedSwitch = view.findViewById(R.id.switchSheetPublished);
         statusView = view.findViewById(R.id.textSheetLessonStatus);
         doneButton = view.findViewById(R.id.buttonSheetLessonDone);
         view.findViewById(R.id.buttonSheetVideoFilePick).setOnClickListener(v -> pickVideo());
+        view.findViewById(R.id.buttonSheetDocumentFilePick).setOnClickListener(v -> pickDocument());
     }
 
     private void bindContentTypeSpinner() {
@@ -162,9 +185,14 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
 
     private void updateContentFields() {
         boolean video = "video".equals(selectedContentType());
+        boolean text = "text".equals(selectedContentType());
+        boolean document = "pdf".equals(selectedContentType())
+                || "document".equals(selectedContentType());
         // Bài học chỉ nhận video dạng file upload.
         videoSourceGroup.setVisibility(video ? View.VISIBLE : View.GONE);
         videoFileRow.setVisibility(video ? View.VISIBLE : View.GONE);
+        textContentInput.setVisibility(text ? View.VISIBLE : View.GONE);
+        documentSourceGroup.setVisibility(document ? View.VISIBLE : View.GONE);
     }
 
     private String selectedContentType() {
@@ -210,6 +238,10 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         String type = SafeJson.string(data, "lesson", "content_type", "type");
         selectContentType(type);
         noteInput.setText(SafeJson.string(data, "", "introduction"));
+        textContentInput.setText(SafeJson.string(data, "", "text_content"));
+        String document = SafeJson.string(data, "", "document_file");
+        hasExistingDocument = !document.isEmpty();
+        if (hasExistingDocument) documentFileName.setText("Tài liệu hiện tại đã được tải lên");
         requiresExerciseSwitch.setChecked(
                 SafeJson.bool(data, false, "requires_exercise_completion"));
         publishedSwitch.setChecked(SafeJson.bool(data, false, "published"));
@@ -241,6 +273,32 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         videoFileName.setText(fileDisplayName(uri));
     }
 
+    private void pickDocument() {
+        try {
+            if ("pdf".equals(selectedContentType())) {
+                documentPicker.launch(new String[]{"application/pdf"});
+            } else {
+                documentPicker.launch(new String[]{"application/msword",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        "application/vnd.oasis.opendocument.text"});
+            }
+        } catch (Exception exception) {
+            AppLogger.error(requireContext(), "LessonEditorBottomSheet",
+                    "Không thể mở bộ chọn tài liệu", exception);
+        }
+    }
+
+    private void handleSelectedDocument(Uri uri) {
+        if (uri == null) return;
+        try {
+            requireContext().getContentResolver().takePersistableUriPermission(uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (Exception ignored) {
+        }
+        selectedDocumentUri = uri;
+        documentFileName.setText(fileDisplayName(uri));
+    }
+
     // ------------------------------------------------------------------
     // Save (PATCH, multipart when a file is chosen)
     // ------------------------------------------------------------------
@@ -254,16 +312,35 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
             body.put("introduction", safe(text(noteInput)));
             body.put("requires_exercise_completion", requiresExerciseSwitch.isChecked());
             body.put("published", publishedSwitch.isChecked());
+            if ("text".equals(contentType)) {
+                String textContent = safe(text(textContentInput));
+                if (textContent.isEmpty()) {
+                    textContentInput.setError(getString(R.string.management_text_content_required));
+                    return;
+                }
+                body.put("text_content", textContent);
+            }
         } catch (Exception exception) {
             showStatus(getString(R.string.management_create_prepare_error));
             return;
         }
 
-        boolean hasFile = "video".equals(contentType) && selectedVideoUri != null;
+        boolean documentType = "pdf".equals(contentType) || "document".equals(contentType);
+        if (documentType && selectedDocumentUri == null && !hasExistingDocument) {
+            showStatus(getString(R.string.management_document_file_required));
+            return;
+        }
+        boolean hasFile = ("video".equals(contentType) && selectedVideoUri != null)
+                || (documentType && selectedDocumentUri != null);
         setSaving(true);
         if (hasFile) {
             java.util.List<MultipartFilePart> files = new java.util.ArrayList<>();
-            files.add(new MultipartFilePart("video_file", selectedVideoUri));
+            if ("video".equals(contentType) && selectedVideoUri != null) {
+                files.add(new MultipartFilePart("video_file", selectedVideoUri));
+            }
+            if (documentType && selectedDocumentUri != null) {
+                files.add(new MultipartFilePart("document_file", selectedDocumentUri));
+            }
             repository.multipartAction(Request.Method.PATCH,
                     "content/lessons/" + lessonId + "/", body, files, saveCallback());
         } else {
@@ -292,6 +369,38 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
                 showStatus(error == null ? getString(R.string.unknown_error) : error.getMessage());
             }
         };
+    }
+
+    private void confirmDelete() {
+        if (saving || lessonId.isEmpty()) return;
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Xóa bài học này?")
+                .setMessage("Bài học và tiến độ liên quan sẽ bị xóa. Thao tác này không thể hoàn tác.")
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton("Xóa bài học", (dialog, which) -> deleteLesson())
+                .show();
+    }
+
+    private void deleteLesson() {
+        setSaving(true);
+        repository.action(Request.Method.DELETE, "content/lessons/" + lessonId + "/",
+                new JSONObject(), new ApiCallback<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject data) {
+                        if (!isUsable()) return;
+                        setSaving(false);
+                        if (deletedListener != null) deletedListener.onDeleted(lessonId);
+                        dismiss();
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        if (!isUsable()) return;
+                        setSaving(false);
+                        showStatus(error == null ? getString(R.string.unknown_error)
+                                : error.getMessage());
+                    }
+                });
     }
 
     // ------------------------------------------------------------------

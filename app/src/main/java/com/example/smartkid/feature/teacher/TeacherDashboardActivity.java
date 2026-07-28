@@ -72,7 +72,6 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
     private androidx.swiperefreshlayout.widget.SwipeRefreshLayout[] refreshLayouts;
     private ActivityChartView activityChart;
     private TextView chartEmpty;
-    private TextView[] chartTabs;
     private ViewFlipper pageFlipper;
     private FrameLayout bottomNavigation;
     private View navigationIndicator;
@@ -147,10 +146,6 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                 findViewById(R.id.buttonTeacherNavCourses),
                 findViewById(R.id.buttonTeacherNavExams),
                 findViewById(R.id.buttonTeacherNavStudents)};
-        chartTabs = new TextView[]{findViewById(R.id.buttonTeacherChart7),
-                findViewById(R.id.buttonTeacherChart30),
-                findViewById(R.id.buttonTeacherChart90),
-                findViewById(R.id.buttonTeacherChartCustom)};
         if (progressBar == null || statusText == null || coursesContainer == null
                 || dashboardScroll == null || activityChart == null || chartEmpty == null
                 || pageFlipper == null || bottomNavigation == null
@@ -243,10 +238,6 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                 openManagementFeature("teacher_feedback"));
         findViewById(R.id.buttonTeacherPageNotifications).setOnClickListener(view ->
                 openManagementFeature("teacher_notifications"));
-        for (int index = 0; index < chartTabs.length; index++) {
-            final int selected = index;
-            chartTabs[index].setOnClickListener(view -> selectChartTab(selected));
-        }
     }
 
     private void bindNavigation() {
@@ -450,18 +441,6 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                     statusLabel(item.getStatus()));
             row.setOnClickListener(view -> openManagementFeature("teacher_courses"));
             coursesContainer.addView(row);
-        }
-    }
-
-    private void selectChartTab(int selectedIndex) {
-        for (int index = 0; index < chartTabs.length; index++) {
-            boolean selected = index == selectedIndex;
-            chartTabs[index].setBackgroundResource(selected
-                    ? R.drawable.admin_bg_chart_tab_selected : android.R.color.transparent);
-            chartTabs[index].setTextColor(ContextCompat.getColor(this, selected
-                    ? R.color.admin_primary : R.color.admin_text_secondary));
-            chartTabs[index].setTypeface(null, selected
-                    ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
         }
     }
 

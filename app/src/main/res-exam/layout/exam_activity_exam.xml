@@ -21,6 +21,7 @@
         android:indeterminate="true"
         android:visibility="gone" />
     <ScrollView
+        android:id="@+id/scrollExamContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -64,6 +65,42 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:orientation="vertical" />
+            <LinearLayout
+                android:id="@+id/layoutExamQuestionNavigation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonExamPreviousQuestion"
+                    style="@style/Widget.Smartkid.GlassButton.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/exam_previous_question" />
+
+                <TextView
+                    android:id="@+id/textExamQuestionPosition"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:gravity="center"
+                    android:minWidth="72dp"
+                    android:textColor="@color/smartkid_text"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonExamNextQuestion"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:text="@string/exam_next_question" />
+            </LinearLayout>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonStartExam"
                 android:layout_width="match_parent"

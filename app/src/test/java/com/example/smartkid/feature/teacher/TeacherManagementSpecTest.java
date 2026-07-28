@@ -10,11 +10,11 @@ import org.junit.Test;
 public class TeacherManagementSpecTest {
 
     @Test
-    public void studentFeedbackUsesLessonQuestionWorkflow() {
+    public void studentFeedbackUsesSentFeedbackHistory() {
         FeatureSpec spec = TeacherManagementSpec.get("teacher_feedback");
 
         assertNotNull(spec);
-        assertEquals("teacher/lesson-questions/", spec.getEndpoint());
-        assertEquals("teacher_qa", spec.getActionKind());
+        assertEquals("teacher/students/feedback/", spec.getEndpoint());
+        assertEquals("teacher_feedback", spec.getActionKind());
     }
 }

@@ -450,6 +450,20 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
             }
             showSaved();
         });
+        sheet.setOnDeletedListener(deletedId -> {
+            for (BuilderModule module : modules) {
+                if (!module.id.equals(moduleId)) continue;
+                for (int index = module.lessons.size() - 1; index >= 0; index--) {
+                    if (module.lessons.get(index).getId().equals(deletedId)) {
+                        module.lessons.remove(index);
+                    }
+                }
+                int moduleIndex = modules.indexOf(module);
+                if (moduleIndex >= 0) adapter.notifyItemChanged(moduleIndex);
+                break;
+            }
+            showSaved();
+        });
         sheet.show(getSupportFragmentManager(), "lesson_editor");
     }
 

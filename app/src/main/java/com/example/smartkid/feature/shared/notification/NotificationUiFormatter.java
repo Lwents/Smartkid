@@ -20,10 +20,15 @@ final class NotificationUiFormatter {
         String category = SafeJson.string(source, "", "category");
         switch (category) {
             case "lesson_question_reply": return "Tin từ thầy cô";
+            case "lesson_question": return "Học sinh cần hỗ trợ";
+            case "lesson_question_report": return "Báo cáo hỏi đáp";
+            case "feedback":
             case "teacher_feedback": return "Lời nhắn từ thầy cô";
             case "course": return "Khóa học";
             case "exam": return "Bài kiểm tra";
             case "achievement": return "Thành tích";
+            case "system_health": return "Tình trạng hệ thống";
+            case "learning_report": return "Báo cáo học tập";
             case "system": return "Hệ thống";
             default: return "Thông báo học tập";
         }
@@ -32,6 +37,9 @@ final class NotificationUiFormatter {
     static String displayTitle(JSONObject source, String fallback) {
         String category = SafeJson.string(source, "", "category");
         if ("lesson_question_reply".equals(category)) return "Thầy cô đã trả lời em";
+        if ("lesson_question".equals(category)) return "Có học sinh vừa hỏi bài";
+        if ("system_health".equals(category)) return "Hệ thống cần được kiểm tra";
+        if ("learning_report".equals(category)) return "Báo cáo học tập mới";
         return fallback == null || fallback.trim().isEmpty() ? "Thông báo mới" : fallback.trim();
     }
 

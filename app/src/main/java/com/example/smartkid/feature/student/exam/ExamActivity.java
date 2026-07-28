@@ -47,6 +47,9 @@ public class ExamActivity extends BaseActivity {
     public static final String EXTRA_EXAM_TITLE = "exam_title";
 
     private final Map<String, View> answerViews = new LinkedHashMap<>();
+    private JSONArray attemptQuestions = new JSONArray();
+    private JSONObject savedAnswers = new JSONObject();
+    private int currentQuestionIndex = -1;
     private String examId;
     private String attemptId;
     private int durationSeconds = 1800;
@@ -56,6 +59,11 @@ public class ExamActivity extends BaseActivity {
     private TextView timerText;
     private TextView statusText;
     private LinearLayout questionsContainer;
+    private ScrollView examScroll;
+    private View questionNavigation;
+    private TextView questionPosition;
+    private Button previousQuestionButton;
+    private Button nextQuestionButton;
     private Button startButton;
     private Button submitButton;
     private Button rankingButton;
@@ -102,14 +110,23 @@ public class ExamActivity extends BaseActivity {
         timerText = findViewById(R.id.textExamTimer);
         statusText = findViewById(R.id.textExamStatus);
         questionsContainer = findViewById(R.id.containerExamQuestions);
+        examScroll = findViewById(R.id.scrollExamContent);
+        questionNavigation = findViewById(R.id.layoutExamQuestionNavigation);
+        questionPosition = findViewById(R.id.textExamQuestionPosition);
+        previousQuestionButton = findViewById(R.id.buttonExamPreviousQuestion);
+        nextQuestionButton = findViewById(R.id.buttonExamNextQuestion);
         startButton = findViewById(R.id.buttonStartExam);
         submitButton = findViewById(R.id.buttonSubmitExam);
         rankingButton = findViewById(R.id.buttonExamRanking);
         if (toolbar == null || progressBar == null || infoText == null || timerText == null
-                || statusText == null || questionsContainer == null || startButton == null
-                || submitButton == null || rankingButton == null) {
+                || statusText == null || questionsContainer == null || examScroll == null
+                || questionNavigation == null || questionPosition == null
+                || previousQuestionButton == null || nextQuestionButton == null
+                || startButton == null || submitButton == null || rankingButton == null) {
             throw new IllegalStateException("Giao diện bài kiểm tra thiếu thành phần bắt buộc");
         }
+        previousQuestionButton.setOnClickListener(view -> showQuestion(currentQuestionIndex - 1));
+        nextQuestionButton.setOnClickListener(view -> showQuestion(currentQuestionIndex + 1));
     }
 
     private void loadDetailSafely() {
@@ -134,7 +151,23 @@ public class ExamActivity extends BaseActivity {
                         minuteCount, String.valueOf(pass));
                 infoText.setText(description.isEmpty() ? examInfo
                         : getString(R.string.exam_info_with_description, examInfo, description));
-                startButton.setEnabled(count > 0);
+                boolean activeAttempt = SafeJson.bool(data, false,
+                        "hasActiveAttempt", "has_active_attempt");
+                int attemptsUsed = SafeJson.integer(data, 0,
+                        "attemptsUsed", "attempts_used");
+                int attemptsRemaining = SafeJson.integer(data, -1,
+                        "attemptsRemaining", "attempts_remaining");
+                startButton.setText(activeAttempt ? "Tiếp tục làm bài" : "Bắt đầu làm bài");
+                startButton.setEnabled(count > 0 && (activeAttempt || attemptsRemaining != 0));
+                rankingButton.setVisibility(attemptsUsed > 0 ? View.VISIBLE : View.GONE);
+                if (!activeAttempt && attemptsRemaining == 0) {
+                    startButton.setVisibility(View.GONE);
+                    showStatus(getString(R.string.exam_attempt_limit_status));
+                } else if (data.has("lastScore") && !data.isNull("lastScore")) {
+                    double lastScore = SafeJson.decimal(data, 0, "lastScore", "last_score");
+                    showStatus("Lần gần nhất: " + formatScore(lastScore)
+                            + "% • Em có thể xem bảng xếp hạng bên dưới");
+                }
             }
 
             @Override
@@ -164,7 +197,10 @@ public class ExamActivity extends BaseActivity {
                     startButton.setVisibility(View.GONE);
                     submitButton.setVisibility(View.VISIBLE);
                     timerText.setVisibility(View.VISIBLE);
-                    startTimer(durationSeconds);
+                    startTimer(ExamTiming.remainingSeconds(
+                            SafeJson.string(data, "", "deadlineAt", "deadline_at"),
+                            System.currentTimeMillis(),
+                            durationSeconds));
                 }
 
                 @Override
@@ -182,84 +218,99 @@ public class ExamActivity extends BaseActivity {
     }
 
     private void renderQuestions(JSONArray questions) {
+        attemptQuestions = questions == null ? new JSONArray() : questions;
+        savedAnswers = new JSONObject();
+        currentQuestionIndex = -1;
+        questionNavigation.setVisibility(attemptQuestions.length() > 1 ? View.VISIBLE : View.GONE);
+        showQuestion(0);
+    }
+
+    private void showQuestion(int requestedIndex) {
+        if (attemptQuestions.length() == 0) return;
+        int index = Math.max(0, Math.min(requestedIndex, attemptQuestions.length() - 1));
+        if (currentQuestionIndex >= 0) saveVisibleAnswer();
         questionsContainer.removeAllViews();
         answerViews.clear();
-        for (int index = 0; index < questions.length(); index++) {
-            JSONObject question = questions.optJSONObject(index);
-            if (question == null) continue;
-            String questionId = SafeJson.string(question, "", "id");
-            if (questionId.isEmpty()) continue;
+        currentQuestionIndex = index;
+        JSONObject question = attemptQuestions.optJSONObject(index);
+        if (question == null) return;
+        String questionId = SafeJson.string(question, "", "id");
+        if (questionId.isEmpty()) return;
 
-            LinearLayout card = new LinearLayout(this);
-            card.setOrientation(LinearLayout.VERTICAL);
-            card.setPadding(dp(14), dp(14), dp(14), dp(14));
-            LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            cardParams.setMargins(0, dp(6), 0, dp(10));
-            card.setLayoutParams(cardParams);
-            card.setBackgroundResource(R.drawable.common_bg_feature_card);
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(dp(14), dp(14), dp(14), dp(14));
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        cardParams.setMargins(0, dp(6), 0, dp(10));
+        card.setLayoutParams(cardParams);
+        card.setBackgroundResource(R.drawable.common_bg_feature_card);
 
-            TextView prompt = new TextView(this);
-            prompt.setText(getString(R.string.numbered_question, index + 1,
-                    SafeJson.string(question, "Câu hỏi", "text", "prompt", "question")));
-            prompt.setTextColor(getColor(R.color.smartkid_text));
-            prompt.setTextSize(16);
-            prompt.setTypeface(prompt.getTypeface(), android.graphics.Typeface.BOLD);
-            card.addView(prompt);
+        TextView prompt = new TextView(this);
+        prompt.setText(getString(R.string.numbered_question, index + 1,
+                SafeJson.string(question, "Câu hỏi", "text", "prompt", "question")));
+        prompt.setTextColor(getColor(R.color.smartkid_text));
+        prompt.setTextSize(16);
+        prompt.setTypeface(prompt.getTypeface(), android.graphics.Typeface.BOLD);
+        card.addView(prompt);
 
-            JSONArray choices = SafeJson.array(question, "choices", "options");
-            String questionType = normalizeQuestionType(
-                    SafeJson.string(question, "", "type", "question_type"),
-                    choices.length());
-            TextView instruction = new TextView(this);
-            instruction.setText(questionInstruction(questionType));
-            instruction.setTextColor(getColor(R.color.smartkid_primary));
-            instruction.setTextSize(12);
-            instruction.setTypeface(instruction.getTypeface(), Typeface.BOLD);
-            LinearLayout.LayoutParams instructionParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT);
-            instructionParams.setMargins(0, dp(6), 0, 0);
-            instruction.setLayoutParams(instructionParams);
-            card.addView(instruction);
+        JSONArray choices = SafeJson.array(question, "choices", "options");
+        String questionType = normalizeQuestionType(
+                SafeJson.string(question, "", "type", "question_type"),
+                choices.length());
+        TextView instruction = new TextView(this);
+        instruction.setText(questionInstruction(questionType));
+        instruction.setTextColor(getColor(R.color.smartkid_primary));
+        instruction.setTextSize(12);
+        instruction.setTypeface(instruction.getTypeface(), Typeface.BOLD);
+        LinearLayout.LayoutParams instructionParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        instructionParams.setMargins(0, dp(6), 0, 0);
+        instruction.setLayoutParams(instructionParams);
+        card.addView(instruction);
 
-            if ("matching".equals(questionType)) {
-                View matchingView = createMatchingAnswer(question);
-                card.addView(matchingView);
-                answerViews.put(questionId, matchingView);
-            } else if ("mcq".equals(questionType) && choices.length() > 0) {
-                RadioGroup group = new RadioGroup(this);
-                group.setOrientation(RadioGroup.VERTICAL);
-                group.setPadding(0, dp(8), 0, 0);
-                for (int choiceIndex = 0; choiceIndex < choices.length(); choiceIndex++) {
-                    Object rawChoice = choices.opt(choiceIndex);
-                    JSONObject choice = rawChoice instanceof JSONObject ? (JSONObject) rawChoice : null;
-                    String choiceId = choice == null ? String.valueOf(choiceIndex)
-                            : SafeJson.string(choice, String.valueOf(choiceIndex), "id");
-                    String choiceText = choice == null ? String.valueOf(rawChoice)
-                            : SafeJson.string(choice, "Đáp án", "text", "label");
-                    RadioButton button = new RadioButton(this);
-                    button.setId(View.generateViewId());
-                    button.setTag(choiceId);
-                    button.setText(choiceText);
-                    button.setTextColor(getColor(R.color.smartkid_text));
-                    button.setPadding(0, dp(4), 0, dp(4));
-                    group.addView(button);
-                }
-                card.addView(group);
-                answerViews.put(questionId, group);
-            } else {
-                EditText answer = new EditText(this);
-                answer.setHint("Viết câu trả lời của em");
-                answer.setSingleLine(false);
-                answer.setMinLines(2);
-                answer.setTextColor(getColor(R.color.smartkid_text));
-                answer.setHintTextColor(getColor(R.color.smartkid_text_tertiary));
-                card.addView(answer);
-                answerViews.put(questionId, answer);
+        View answerView;
+        if ("matching".equals(questionType)) {
+            answerView = createMatchingAnswer(question);
+        } else if ("mcq".equals(questionType) && choices.length() > 0) {
+            RadioGroup group = new RadioGroup(this);
+            group.setOrientation(RadioGroup.VERTICAL);
+            group.setPadding(0, dp(8), 0, 0);
+            for (int choiceIndex = 0; choiceIndex < choices.length(); choiceIndex++) {
+                Object rawChoice = choices.opt(choiceIndex);
+                JSONObject choice = rawChoice instanceof JSONObject ? (JSONObject) rawChoice : null;
+                String choiceId = choice == null ? String.valueOf(choiceIndex)
+                        : SafeJson.string(choice, String.valueOf(choiceIndex), "id");
+                String choiceText = choice == null ? String.valueOf(rawChoice)
+                        : SafeJson.string(choice, "Đáp án", "text", "label");
+                RadioButton button = new RadioButton(this);
+                button.setId(View.generateViewId());
+                button.setTag(choiceId);
+                button.setText(choiceText);
+                button.setTextColor(getColor(R.color.smartkid_text));
+                button.setPadding(0, dp(4), 0, dp(4));
+                group.addView(button);
             }
-            questionsContainer.addView(card);
+            answerView = group;
+        } else {
+            EditText answer = new EditText(this);
+            answer.setHint("Viết câu trả lời của em");
+            answer.setSingleLine(false);
+            answer.setMinLines(2);
+            answer.setTextColor(getColor(R.color.smartkid_text));
+            answer.setHintTextColor(getColor(R.color.smartkid_text_tertiary));
+            answerView = answer;
         }
+        card.addView(answerView);
+        answerViews.put(questionId, answerView);
+        restoreAnswer(questionId, answerView);
+        questionsContainer.addView(card);
+        questionPosition.setText(getString(R.string.exam_question_position,
+                index + 1, attemptQuestions.length()));
+        previousQuestionButton.setEnabled(index > 0);
+        nextQuestionButton.setEnabled(index < attemptQuestions.length() - 1);
+        examScroll.post(() -> examScroll.smoothScrollTo(0, questionsContainer.getTop()));
     }
 
     private View createMatchingAnswer(JSONObject question) {
@@ -323,6 +374,75 @@ public class ExamActivity extends BaseActivity {
         return container;
     }
 
+    private void saveVisibleAnswer() {
+        if (answerViews.isEmpty()) return;
+        Map.Entry<String, View> entry = answerViews.entrySet().iterator().next();
+        try {
+            savedAnswers.put(entry.getKey(), answerFromView(entry.getValue()));
+        } catch (Exception exception) {
+            AppLogger.error(this, "ExamActivity", "Không thể giữ câu trả lời", exception);
+        }
+    }
+
+    private JSONObject answerFromView(View view) throws Exception {
+        JSONObject answer = new JSONObject();
+        if (view instanceof RadioGroup) {
+            int checked = ((RadioGroup) view).getCheckedRadioButtonId();
+            RadioButton button = checked == -1 ? null : view.findViewById(checked);
+            if (button != null && button.getTag() != null) {
+                answer.put("selected_choice_id", String.valueOf(button.getTag()));
+            }
+        } else if (view instanceof EditText) {
+            answer.put("text", ((EditText) view).getText().toString().trim());
+        } else if (view != null && view.getTag() instanceof MatchingAnswerState) {
+            MatchingAnswerState state = (MatchingAnswerState) view.getTag();
+            JSONArray pairs = new JSONArray();
+            for (int index = 0; index < state.selectors.size(); index++) {
+                int selected = state.selectors.get(index).getSelectedItemPosition();
+                if (selected <= 0 || selected > state.rightIds.size()) continue;
+                pairs.put(new JSONObject()
+                        .put("left_id", state.leftIds.get(index))
+                        .put("right_id", state.rightIds.get(selected - 1)));
+            }
+            answer.put("pairs", pairs);
+        }
+        return answer;
+    }
+
+    private void restoreAnswer(String questionId, View view) {
+        JSONObject answer = savedAnswers.optJSONObject(questionId);
+        if (answer == null || view == null) return;
+        if (view instanceof RadioGroup) {
+            String selectedId = SafeJson.string(answer, "", "selected_choice_id");
+            RadioGroup group = (RadioGroup) view;
+            for (int index = 0; index < group.getChildCount(); index++) {
+                View child = group.getChildAt(index);
+                if (child instanceof RadioButton && child.getTag() != null
+                        && selectedId.equals(String.valueOf(child.getTag()))) {
+                    ((RadioButton) child).setChecked(true);
+                    break;
+                }
+            }
+        } else if (view instanceof EditText) {
+            ((EditText) view).setText(SafeJson.string(answer, "", "text"));
+        } else if (view.getTag() instanceof MatchingAnswerState) {
+            MatchingAnswerState state = (MatchingAnswerState) view.getTag();
+            JSONArray pairs = SafeJson.array(answer, "pairs");
+            Map<String, String> selectedByLeft = new LinkedHashMap<>();
+            for (int index = 0; index < pairs.length(); index++) {
+                JSONObject pair = pairs.optJSONObject(index);
+                if (pair != null) selectedByLeft.put(
+                        SafeJson.string(pair, "", "left_id"),
+                        SafeJson.string(pair, "", "right_id"));
+            }
+            for (int index = 0; index < state.leftIds.size(); index++) {
+                String rightId = selectedByLeft.get(state.leftIds.get(index));
+                int rightIndex = rightId == null ? -1 : state.rightIds.indexOf(rightId);
+                if (rightIndex >= 0) state.selectors.get(index).setSelection(rightIndex + 1);
+            }
+        }
+    }
+
     private void confirmSubmit() {
         if (submitting) return;
         try {
@@ -374,52 +494,33 @@ public class ExamActivity extends BaseActivity {
     }
 
     private JSONObject collectAnswers() throws Exception {
-        JSONObject result = new JSONObject();
-        for (Map.Entry<String, View> entry : answerViews.entrySet()) {
-            View view = entry.getValue();
-            JSONObject answer = new JSONObject();
-            if (view instanceof RadioGroup) {
-                int checked = ((RadioGroup) view).getCheckedRadioButtonId();
-                RadioButton button = checked == -1 ? null : view.findViewById(checked);
-                if (button != null && button.getTag() != null) {
-                    answer.put("selected_choice_id", String.valueOf(button.getTag()));
-                }
-            } else if (view instanceof EditText) {
-                answer.put("text", ((EditText) view).getText().toString().trim());
-            } else if (view.getTag() instanceof MatchingAnswerState) {
-                MatchingAnswerState state = (MatchingAnswerState) view.getTag();
-                JSONArray pairs = new JSONArray();
-                for (int index = 0; index < state.selectors.size(); index++) {
-                    int selected = state.selectors.get(index).getSelectedItemPosition();
-                    if (selected <= 0 || selected > state.rightIds.size()) continue;
-                    pairs.put(new JSONObject()
-                            .put("left_id", state.leftIds.get(index))
-                            .put("right_id", state.rightIds.get(selected - 1)));
-                }
-                answer.put("pairs", pairs);
-            }
-            result.put(entry.getKey(), answer);
-        }
-        return result;
+        saveVisibleAnswer();
+        return new JSONObject(savedAnswers.toString());
     }
 
     private int countUnanswered() {
+        saveVisibleAnswer();
         int count = 0;
-        for (View view : answerViews.values()) {
-            if (view instanceof RadioGroup && ((RadioGroup) view).getCheckedRadioButtonId() == -1) count++;
-            else if (view instanceof EditText
-                    && ((EditText) view).getText().toString().trim().isEmpty()) count++;
-            else if (view.getTag() instanceof MatchingAnswerState) {
-                MatchingAnswerState state = (MatchingAnswerState) view.getTag();
-                boolean incomplete = state.selectors.isEmpty();
-                for (Spinner selector : state.selectors) {
-                    if (selector.getSelectedItemPosition() <= 0) {
-                        incomplete = true;
-                        break;
-                    }
-                }
-                if (incomplete) count++;
+        for (int index = 0; index < attemptQuestions.length(); index++) {
+            JSONObject question = attemptQuestions.optJSONObject(index);
+            String questionId = SafeJson.string(question, "", "id");
+            JSONObject answer = savedAnswers.optJSONObject(questionId);
+            JSONArray choices = SafeJson.array(question, "choices", "options");
+            String type = normalizeQuestionType(
+                    SafeJson.string(question, "", "type", "question_type"),
+                    choices.length());
+            boolean answered;
+            if ("matching".equals(type)) {
+                int expected = SafeJson.array(question, "leftItems", "left_items").length();
+                answered = answer != null && SafeJson.array(answer, "pairs").length() == expected
+                        && expected > 0;
+            } else if ("mcq".equals(type)) {
+                answered = answer != null
+                        && !SafeJson.string(answer, "", "selected_choice_id").isEmpty();
+            } else {
+                answered = answer != null && !SafeJson.string(answer, "", "text").isEmpty();
             }
+            if (!answered) count++;
         }
         return count;
     }
@@ -428,9 +529,11 @@ public class ExamActivity extends BaseActivity {
         double score = SafeJson.decimal(result, 0, "totalScore", "total_score");
         double max = SafeJson.decimal(result, 0, "maxScore", "max_score");
         int correct = SafeJson.integer(result, 0, "correctCount", "correct_count");
-        int total = SafeJson.integer(result, answerViews.size(), "totalCount", "total_count");
+        int total = SafeJson.integer(result, attemptQuestions.length(),
+                "totalCount", "total_count");
         boolean passed = SafeJson.bool(result, false, "passed");
         questionsContainer.setVisibility(View.GONE);
+        questionNavigation.setVisibility(View.GONE);
         submitButton.setVisibility(View.GONE);
         timerText.setVisibility(View.GONE);
         showStatus((passed ? "Đạt" : "Chưa đạt") + " • Điểm " + score + "/" + max

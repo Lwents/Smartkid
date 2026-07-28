@@ -241,7 +241,7 @@
                         android:layout_height="@dimen/service_tile_height"
                         android:background="@drawable/common_bg_service_tile"
                         android:clickable="true"
-                        android:contentDescription="@string/ai_tutor"
+                        android:contentDescription="@string/home_streak_content_description"
                         android:focusable="true">
 
                         <LinearLayout

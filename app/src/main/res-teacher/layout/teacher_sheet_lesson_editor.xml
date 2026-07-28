@@ -51,6 +51,58 @@
                 app:tint="@color/admin_text_secondary" />
         </LinearLayout>
 
+        <EditText
+            android:id="@+id/editSheetTextContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/admin_bg_chart_tabs"
+            android:gravity="top"
+            android:hint="Nhập nội dung bài học"
+            android:inputType="textMultiLine|textCapSentences"
+            android:minHeight="120dp"
+            android:padding="14dp"
+            android:textColor="@color/admin_text_primary"
+            android:textColorHint="@color/admin_text_secondary"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/groupSheetDocumentSource"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/admin_bg_chart_tabs"
+            android:gravity="center_vertical"
+            android:minHeight="54dp"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="10dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textSheetDocumentFile"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Chưa chọn tài liệu"
+                android:textColor="@color/admin_text_secondary"
+                android:textSize="12.5sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonSheetDocumentFilePick"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:minWidth="0dp"
+                android:text="Chọn tệp"
+                android:textAllCaps="false"
+                android:textColor="@color/admin_primary"
+                app:backgroundTint="@color/admin_primary_light"
+                app:cornerRadius="14dp" />
+        </LinearLayout>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -208,6 +260,17 @@
             android:textAllCaps="false"
             android:textStyle="bold"
             app:backgroundTint="@color/admin_primary"
+            app:cornerRadius="22dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSheetLessonDelete"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:text="Xóa bài học"
+            android:textAllCaps="false"
+            android:textColor="@color/smartkid_error"
+            app:backgroundTint="@color/admin_primary_light"
             app:cornerRadius="22dp" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

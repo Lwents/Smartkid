@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
@@ -105,6 +106,7 @@ public abstract class ContentFormActivity extends BaseActivity {
     private final Map<String, SpinnerBinding> spinners = new LinkedHashMap<>();
     private final List<FeatureItem> courseOptions = new ArrayList<>();
     private final List<QuestionFields> questions = new ArrayList<>();
+    private final List<JSONObject> compactQuestions = new ArrayList<>();
     private JSONObject existingExerciseSettings = new JSONObject();
 
     private ActivityResultLauncher<String[]> thumbnailPicker;
@@ -132,6 +134,7 @@ public abstract class ContentFormActivity extends BaseActivity {
 
     private LinearLayout container;
     private LinearLayout questionsContainer;
+    private TextView compactQuestionsSummary;
     private Spinner courseSpinner;
     private SwitchMaterial shuffleQuestionsSwitch;
     private SwitchMaterial shuffleChoicesSwitch;
@@ -149,6 +152,8 @@ public abstract class ContentFormActivity extends BaseActivity {
     private String linkedCourseId;
     private String editId;
     private int defaultPosition;
+    private String savedFormSnapshot;
+    private boolean formSubmitted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,6 +182,12 @@ public abstract class ContentFormActivity extends BaseActivity {
                 return;
             }
             repository = new ManagementRepository(this);
+            getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    requestClose();
+                }
+            });
             bindViews();
             bindToolbar();
             configureHeader();
@@ -185,7 +196,7 @@ public abstract class ContentFormActivity extends BaseActivity {
             if (kind == ContentFormKind.TEACHER_EXAM) loadCourseOptions();
             else if (kind == ContentFormKind.TEACHER_EXERCISE && !editId.isEmpty()) {
                 loadExerciseForEdit();
-            }
+            } else rememberFormState();
         } catch (Exception exception) {
             AppLogger.error(this, "ContentFormActivity", "Không thể tạo biểu mẫu", exception);
             showErrorDialog("Không thể mở biểu mẫu tạo mới");
@@ -206,8 +217,21 @@ public abstract class ContentFormActivity extends BaseActivity {
     private void bindToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.toolbarManagementCreate);
         if (toolbar == null) throw new IllegalStateException("Thiếu thanh điều hướng");
-        toolbar.setNavigationOnClickListener(view -> finish());
+        toolbar.setNavigationOnClickListener(view -> requestClose());
         toolbar.setTitle("");
+    }
+
+    private void requestClose() {
+        if (formSubmitted || !hasUnsavedChanges()) {
+            finish();
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Bỏ các thay đổi?")
+                .setMessage("Nội dung em đang nhập chưa được lưu.")
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton("Bỏ thay đổi", (dialog, which) -> finish())
+                .show();
     }
 
     private void configureHeader() {
@@ -347,6 +371,18 @@ public abstract class ContentFormActivity extends BaseActivity {
         questionsContainer.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         container.addView(questionsContainer);
+        compactQuestionsSummary = new TextView(this);
+        compactQuestionsSummary.setTextColor(ContextCompat.getColor(this,
+                R.color.role_text_secondary));
+        compactQuestionsSummary.setTextSize(12f);
+        compactQuestionsSummary.setPadding(dp(14), dp(12), dp(14), dp(12));
+        compactQuestionsSummary.setBackgroundResource(R.drawable.role_bg_chart_tabs);
+        compactQuestionsSummary.setVisibility(View.GONE);
+        LinearLayout.LayoutParams summaryParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        summaryParams.setMargins(0, dp(10), 0, 0);
+        compactQuestionsSummary.setLayoutParams(summaryParams);
+        container.addView(compactQuestionsSummary);
         addQuestionButton = new MaterialButton(this);
         addQuestionButton.setText(R.string.management_add_question);
         addQuestionButton.setTextColor(ContextCompat.getColor(this, R.color.role_primary));
@@ -753,21 +789,29 @@ private void registerFilePickers() {
     }
 
     private QuestionFields addQuestionCard() {
-        return addQuestionCard(true);
+        return addQuestionCard(true, "mcq");
     }
 
     private void addQuestionFromButton() {
-        if (AiQuestionPolicy.remainingCapacity(questions.size()) == 0) {
+        if (AiQuestionPolicy.remainingCapacity(totalQuestionCount()) == 0) {
             showShortMessage(getString(R.string.management_question_limit));
+            return;
+        }
+        if (questions.size() >= QuestionRenderPolicy.MAX_EXPANDED) {
+            showShortMessage(getString(R.string.management_manual_question_memory_limit));
             return;
         }
         addQuestionCard();
     }
 
     private QuestionFields addQuestionCard(boolean updateNumbers) {
+        return addQuestionCard(updateNumbers, "mcq");
+    }
+
+    private QuestionFields addQuestionCard(boolean updateNumbers, String initialType) {
         View row = LayoutInflater.from(this).inflate(
                 R.layout.management_item_exam_question, questionsContainer, false);
-        QuestionFields fields = new QuestionFields(row);
+        QuestionFields fields = new QuestionFields(row, initialType);
         fields.delete.setOnClickListener(view -> removeQuestion(fields));
         questions.add(fields);
         questionsContainer.addView(row);
@@ -782,13 +826,21 @@ private void registerFilePickers() {
     }
 
     private void removeQuestion(QuestionFields fields) {
-        if (questions.size() <= 1) {
+        if (totalQuestionCount() <= 1) {
             showShortMessage(getString(R.string.management_exam_requires_question));
             return;
         }
         questions.remove(fields);
         questionsContainer.removeView(fields.root);
+        if (!compactQuestions.isEmpty()
+                && questions.size() < QuestionRenderPolicy.MAX_EXPANDED) {
+            JSONObject promoted = compactQuestions.remove(0);
+            JSONObject meta = promoted.optJSONObject("meta");
+            String type = meta == null ? "mcq" : safe(meta.optString("type", "mcq"));
+            populateQuestion(addQuestionCard(false, type), promoted);
+        }
         updateQuestionNumbers();
+        updateCompactQuestionsSummary();
     }
 
     private void updateQuestionNumbers() {
@@ -798,8 +850,24 @@ private void registerFilePickers() {
         }
     }
 
+    private int totalQuestionCount() {
+        return questions.size() + compactQuestions.size();
+    }
+
+    private void updateCompactQuestionsSummary() {
+        if (compactQuestionsSummary == null) return;
+        int hidden = compactQuestions.size();
+        if (hidden == 0) {
+            compactQuestionsSummary.setVisibility(View.GONE);
+            return;
+        }
+        compactQuestionsSummary.setText(getResources().getQuantityString(
+                R.plurals.management_compact_questions_summary, hidden, hidden));
+        compactQuestionsSummary.setVisibility(View.VISIBLE);
+    }
+
     private void launchAiDocumentPicker() {
-        if (AiQuestionPolicy.remainingCapacity(questions.size()) == 0) {
+        if (AiQuestionPolicy.remainingCapacity(totalQuestionCount()) == 0) {
             showShortMessage(getString(R.string.management_question_limit));
             return;
         }
@@ -969,18 +1037,36 @@ private void registerFilePickers() {
 
     private int applyGeneratedQuestions(JSONArray generated) {
         if (generated == null || generated.length() == 0) return 0;
-        if (questions.size() == 1 && text(questions.get(0).prompt).isEmpty()) {
+        if (totalQuestionCount() == 1 && questions.size() == 1
+                && text(questions.get(0).prompt).isEmpty()) {
             questionsContainer.removeView(questions.get(0).root);
             questions.clear();
         }
         int added = 0;
         int generatedCount = Math.min(
                 AiQuestionPolicy.clampGeneratedCount(generated.length()),
-                AiQuestionPolicy.remainingCapacity(questions.size())
+                AiQuestionPolicy.remainingCapacity(totalQuestionCount())
         );
         for (int index = 0; index < generatedCount; index++) {
             JSONObject source = generated.optJSONObject(index);
-            if (source == null) continue;
+            JSONObject normalized = normalizeGeneratedQuestion(source);
+            if (normalized == null) continue;
+            if (questions.size() < QuestionRenderPolicy.MAX_EXPANDED) {
+                populateQuestion(addQuestionCard(false, "mcq"), normalized);
+            } else {
+                compactQuestions.add(normalized);
+            }
+            added++;
+        }
+        if (questions.isEmpty()) addQuestionCard();
+        updateQuestionNumbers();
+        updateCompactQuestionsSummary();
+        return added;
+    }
+
+    private JSONObject normalizeGeneratedQuestion(JSONObject source) {
+        if (source == null) return null;
+        try {
             String prompt = safe(source.optString("text",
                     source.optString("prompt", "")));
             JSONArray options = source.optJSONArray("choices");
@@ -989,27 +1075,18 @@ private void registerFilePickers() {
             String generatedType = safe(source.optString("type", ""))
                     .toLowerCase(Locale.ROOT);
             if (options == null && "boolean".equals(generatedType)) {
-                options = new JSONArray();
-                options.put(getString(R.string.management_boolean_true));
-                options.put(getString(R.string.management_boolean_false));
+                options = new JSONArray()
+                        .put(getString(R.string.management_boolean_true))
+                        .put(getString(R.string.management_boolean_false));
                 correctIndex = source.optBoolean("correct_answer", false) ? 0 : 1;
             }
-            if (prompt.isEmpty() || options == null || options.length() < 2) continue;
-            QuestionFields fields = addQuestionCard(false);
-            fields.setQuestionType("mcq");
-            fields.prompt.setText(prompt);
-            double points = source.optDouble("points", source.optDouble("score", 1d));
-            fields.score.setText(String.valueOf(points <= 0 ? 1d : points));
-            while (fields.choices.size() < Math.min(options.length(), 6)) fields.addChoice();
-            for (ChoiceFields choice : fields.choices) {
-                choice.input.setText("");
-                choice.correct.setChecked(false);
-            }
+            if (prompt.isEmpty() || options == null || options.length() < 2) return null;
             JSONArray correctIndices = source.optJSONArray("correct_indices");
             if (correctIndices != null && correctIndices.length() > 0) {
                 correctIndex = correctIndices.optInt(0, correctIndex);
             }
-            int optionCount = Math.min(options.length(), fields.choices.size());
+            JSONArray choices = new JSONArray();
+            int optionCount = Math.min(options.length(), 6);
             for (int optionIndex = 0; optionIndex < optionCount; optionIndex++) {
                 Object rawOption = options.opt(optionIndex);
                 if (rawOption == null || rawOption == JSONObject.NULL) continue;
@@ -1017,18 +1094,31 @@ private void registerFilePickers() {
                         ? (JSONObject) rawOption : null;
                 String optionText = optionObject == null ? safe(String.valueOf(rawOption))
                         : safe(optionObject.optString("text", ""));
-                fields.choices.get(optionIndex).input.setText(optionText);
+                if (optionText.isEmpty()) continue;
                 if (optionObject != null && optionObject.optBoolean("is_correct", false)) {
-                    correctIndex = optionIndex;
+                    correctIndex = choices.length();
                 }
+                choices.put(new JSONObject()
+                        .put("text", optionText)
+                        .put("position", choices.length())
+                        .put("is_correct", false));
             }
-            int safeCorrect = correctIndex < 0 || correctIndex >= optionCount ? 0 : correctIndex;
-            selectCorrectChoice(fields, fields.choices.get(safeCorrect));
-            added++;
+            if (choices.length() < 2) return null;
+            int safeCorrect = correctIndex < 0 || correctIndex >= choices.length()
+                    ? 0 : correctIndex;
+            choices.getJSONObject(safeCorrect).put("is_correct", true);
+            double points = source.optDouble("points", source.optDouble("score", 1d));
+            return new JSONObject()
+                    .put("prompt", prompt)
+                    .put("meta", new JSONObject()
+                            .put("type", "mcq")
+                            .put("points", points <= 0 ? 1d : points))
+                    .put("choices", choices);
+        } catch (Exception exception) {
+            AppLogger.error(this, "ContentFormActivity",
+                    "Không thể chuẩn hóa câu hỏi AI", exception);
+            return null;
         }
-        if (questions.isEmpty()) addQuestionCard();
-        updateQuestionNumbers();
-        return added;
     }
 
     private void loadCourseOptions() {
@@ -1046,7 +1136,19 @@ private void registerFilePickers() {
                             }
                         }
                         List<String> labels = new ArrayList<>();
-                        for (FeatureItem item : courseOptions) labels.add(item.getTitle());
+                        int preferredCourse = 0;
+                        for (int index = 0; index < courseOptions.size(); index++) {
+                            FeatureItem item = courseOptions.get(index);
+                            boolean published = SafeJson.bool(
+                                    item.getSource(), false, "published");
+                            labels.add(item.getTitle() + (published
+                                    ? " • Đã xuất bản" : " • Bản nháp"));
+                            if (published && !SafeJson.bool(
+                                    courseOptions.get(preferredCourse).getSource(),
+                                    false, "published")) {
+                                preferredCourse = index;
+                            }
+                        }
                         courseSpinner.setAdapter(spinnerAdapter(labels.toArray(new String[0])));
                         setLoading(false);
                         if (courseOptions.isEmpty()) {
@@ -1055,8 +1157,10 @@ private void registerFilePickers() {
                         } else if (!editId.isEmpty()) {
                             loadExerciseForEdit();
                         } else {
+                            courseSpinner.setSelection(preferredCourse);
                             courseSpinner.setEnabled(true);
                             statusText.setVisibility(View.GONE);
+                            rememberFormState();
                         }
                     }
 
@@ -1083,6 +1187,7 @@ private void registerFilePickers() {
                             populateExercise(data == null ? new JSONObject() : data);
                             setLoading(false);
                             statusText.setVisibility(View.GONE);
+                            rememberFormState();
                         } catch (Exception exception) {
                             AppLogger.error(ContentFormActivity.this,
                                     "ContentFormActivity",
@@ -1154,16 +1259,31 @@ private void registerFilePickers() {
         setSpinnerValue("show_answers", settings.optString("show_answers", "always"));
 
         questions.clear();
+        compactQuestions.clear();
         questionsContainer.removeAllViews();
         JSONArray sourceQuestions = exercise.optJSONArray("questions");
         if (sourceQuestions != null) {
             for (int index = 0; index < sourceQuestions.length(); index++) {
                 JSONObject source = sourceQuestions.optJSONObject(index);
-                if (source != null) populateQuestion(addQuestionCard(), source);
+                if (source != null) {
+                    if (questions.size() < QuestionRenderPolicy.MAX_EXPANDED) {
+                        JSONObject meta = source.optJSONObject("meta");
+                        String type = meta == null ? "mcq"
+                                : safe(meta.optString("type", "mcq"));
+                        populateQuestion(addQuestionCard(false, type), source);
+                    } else {
+                        try {
+                            compactQuestions.add(new JSONObject(source.toString()));
+                        } catch (Exception ignored) {
+                            // Bỏ qua câu bị hỏng thay vì làm sập toàn bộ trình chỉnh sửa.
+                        }
+                    }
+                }
             }
         }
         if (questions.isEmpty()) addQuestionCard();
         updateQuestionNumbers();
+        updateCompactQuestionsSummary();
     }
 
     private void populateQuestion(QuestionFields fields, JSONObject source) {
@@ -1285,6 +1405,7 @@ private void registerFilePickers() {
                             setLoading(false);
                             showShortMessage(successMessage());
                             setResult(RESULT_OK);
+                            formSubmitted = true;
                             // Follow-up navigation is delegated to the role-owned subclass so
                             // this neutral engine never imports a feature screen.
                             onContentCreated(data);
@@ -1466,7 +1587,7 @@ private void registerFilePickers() {
         settings.put("show_answers", spinnerValue("show_answers"));
         if (courseId != null && !courseId.isEmpty()) settings.put("course_id", courseId);
         body.put("title", title);
-        body.put("type", questions.isEmpty() ? "mcq" : questions.get(0).questionType());
+        body.put("type", firstQuestionType());
         body.put("published", "published".equals(spinnerValue("status")));
         if (lessonExercise) body.put("lesson", parentId);
         body.put("settings", settings);
@@ -1475,7 +1596,7 @@ private void registerFilePickers() {
     }
 
     private JSONArray buildQuestions() throws Exception {
-        if (questions.isEmpty()) {
+        if (totalQuestionCount() == 0) {
             showStatus(getString(R.string.management_exam_requires_question));
             return null;
         }
@@ -1485,6 +1606,7 @@ private void registerFilePickers() {
             String prompt = text(fields.prompt);
             if (prompt.isEmpty()) {
                 fields.prompt.setError(getString(R.string.required_field));
+                showStatus("Câu " + (questionIndex + 1) + " chưa có nội dung câu hỏi.");
                 return null;
             }
             String questionType = fields.questionType();
@@ -1521,6 +1643,8 @@ private void registerFilePickers() {
                 if (nonEmptyChoices < 2) {
                     fields.choices.get(0).input.setError(
                             getString(R.string.management_exam_two_choices));
+                    showStatus("Câu " + (questionIndex + 1)
+                            + " cần ít nhất 2 phương án trả lời.");
                     return null;
                 }
                 if (!correctChoiceIncluded) {
@@ -1532,6 +1656,8 @@ private void registerFilePickers() {
                 if (accepted.length() == 0) {
                     fields.acceptedAnswers.setError(
                             getString(R.string.management_short_answer_required));
+                    showStatus("Câu " + (questionIndex + 1)
+                            + " chưa có đáp án được chấp nhận.");
                     return null;
                 }
                 meta.put("accepted_answers", accepted);
@@ -1577,6 +1703,8 @@ private void registerFilePickers() {
                 if (pairIndex < 2) {
                     fields.matchingPairs.get(0).left.setError(
                             getString(R.string.management_matching_pairs_required));
+                    showStatus("Câu " + (questionIndex + 1)
+                            + " cần ít nhất 2 cặp để nối.");
                     return null;
                 }
                 meta.put("correct_pairs", correctPairs);
@@ -1589,7 +1717,20 @@ private void registerFilePickers() {
             question.put("choices", choices);
             result.put(question);
         }
+        for (JSONObject compact : compactQuestions) {
+            if (compact == null) continue;
+            result.put(new JSONObject(compact.toString()));
+        }
         return result;
+    }
+
+    private String firstQuestionType() {
+        if (!questions.isEmpty()) return questions.get(0).questionType();
+        if (!compactQuestions.isEmpty()) {
+            JSONObject meta = compactQuestions.get(0).optJSONObject("meta");
+            return meta == null ? "mcq" : safe(meta.optString("type", "mcq"));
+        }
+        return "mcq";
     }
 
     private JSONArray commaSeparatedValues(String raw) throws Exception {
@@ -1607,6 +1748,7 @@ private void registerFilePickers() {
         TextInputEditText input = inputs.get(key);
         if (value.isEmpty()) {
             if (input != null) input.setError(getString(R.string.required_field));
+            showStatus("Vui lòng điền đầy đủ các mục bắt buộc.");
             return null;
         }
         return value;
@@ -1762,6 +1904,59 @@ private void registerFilePickers() {
         return input == null || input.getText() == null ? "" : input.getText().toString().trim();
     }
 
+    private void rememberFormState() {
+        savedFormSnapshot = formSnapshot();
+    }
+
+    private boolean hasUnsavedChanges() {
+        return savedFormSnapshot != null && !savedFormSnapshot.equals(formSnapshot());
+    }
+
+    private String formSnapshot() {
+        StringBuilder state = new StringBuilder();
+        for (Map.Entry<String, TextInputEditText> entry : inputs.entrySet()) {
+            state.append(entry.getKey()).append('=').append(text(entry.getValue())).append('|');
+        }
+        for (Map.Entry<String, SpinnerBinding> entry : spinners.entrySet()) {
+            state.append(entry.getKey()).append('=').append(entry.getValue().selectedValue())
+                    .append('|');
+        }
+        state.append("grade=").append(selectedGrade).append('|');
+        int coursePosition = courseSpinner == null
+                ? -1 : courseSpinner.getSelectedItemPosition();
+        String snapshotCourseId = coursePosition >= 0 && coursePosition < courseOptions.size()
+                ? courseOptions.get(coursePosition).getId() : "";
+        state.append("course=").append(snapshotCourseId).append('|');
+        state.append("files=").append(selectedThumbnailUri).append(',')
+                .append(selectedVideoUri).append(',').append(selectedDocumentUri).append('|');
+        state.append("switches=")
+                .append(shuffleQuestionsSwitch != null && shuffleQuestionsSwitch.isChecked())
+                .append(',').append(shuffleChoicesSwitch != null && shuffleChoicesSwitch.isChecked())
+                .append(',').append(requiresExerciseSwitch != null && requiresExerciseSwitch.isChecked())
+                .append(',').append(lessonPublishedSwitch != null && lessonPublishedSwitch.isChecked())
+                .append('|');
+        for (QuestionFields question : questions) {
+            state.append("question=").append(text(question.prompt)).append(';')
+                    .append(question.questionType()).append(';')
+                    .append(text(question.acceptedAnswers)).append(';')
+                    .append(text(question.score)).append(';');
+            for (ChoiceFields choice : question.choices) {
+                state.append(text(choice.input)).append(':')
+                        .append(choice.correct.isChecked()).append(',');
+            }
+            state.append(';');
+            for (MatchingPairFields pair : question.matchingPairs) {
+                state.append(text(pair.left)).append(':').append(text(pair.right)).append(',');
+            }
+            state.append('|');
+        }
+        for (JSONObject compact : compactQuestions) {
+            state.append("compact=").append(compact == null ? "" : compact.toString())
+                    .append('|');
+        }
+        return state.toString();
+    }
+
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
@@ -1819,7 +2014,7 @@ private void registerFilePickers() {
         private String existingId = "";
         private JSONObject existingMeta = new JSONObject();
 
-        private QuestionFields(View root) {
+        private QuestionFields(View root, String initialType) {
             this.root = root;
             number = root.findViewById(R.id.textExamQuestionNumber);
             delete = root.findViewById(R.id.buttonExamQuestionDelete);
@@ -1836,6 +2031,9 @@ private void registerFilePickers() {
             score = root.findViewById(R.id.inputExamQuestionScore);
             typeSpinner.setAdapter(spinnerAdapter(new String[]{"Trắc nghiệm một đáp án",
                     "Trả lời ngắn", "Nối cặp"}));
+            int initialPosition = "short_answer".equals(initialType) ? 1
+                    : "matching".equals(initialType) ? 2 : 0;
+            typeSpinner.setSelection(initialPosition, false);
             typeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -1846,8 +2044,11 @@ private void registerFilePickers() {
             });
             addChoiceButton.setOnClickListener(view -> addChoice());
             addMatchingPairButton.setOnClickListener(view -> addMatchingPair());
-            for (int index = 0; index < 4; index++) addChoice();
-            for (int index = 0; index < 2; index++) addMatchingPair();
+            if (initialPosition == 0) {
+                for (int index = 0; index < 4; index++) addChoice();
+            } else if (initialPosition == 2) {
+                for (int index = 0; index < 2; index++) addMatchingPair();
+            }
             updateTypeVisibility();
         }
 
@@ -1936,6 +2137,11 @@ private void registerFilePickers() {
 
         private void updateTypeVisibility() {
             String type = questionType();
+            if ("mcq".equals(type) && choices.isEmpty()) {
+                for (int index = 0; index < 4; index++) addChoice();
+            } else if ("matching".equals(type) && matchingPairs.isEmpty()) {
+                for (int index = 0; index < 2; index++) addMatchingPair();
+            }
             mcqLayout.setVisibility("mcq".equals(type) ? View.VISIBLE : View.GONE);
             shortAnswerLayout.setVisibility("short_answer".equals(type)
                     ? View.VISIBLE : View.GONE);

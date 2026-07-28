@@ -20,7 +20,7 @@ public final class TeacherManagementSpec {
         add(specs, "teacher_exam_reports", "Báo cáo bài kiểm tra", "activities/exercises/?page=1&pageSize=100&include_stats=true", "teacher_exam_reports");
         add(specs, "teacher_students", "Học viên", "teacher/students/?page=1&pageSize=100", "teacher_students");
         add(specs, "teacher_progress", "Tiến độ học viên", "teacher/students/?page=1&pageSize=100", "");
-        add(specs, "teacher_feedback", "Phản hồi học viên", "teacher/lesson-questions/", "teacher_qa");
+        add(specs, "teacher_feedback", "Phản hồi đã gửi", "teacher/students/feedback/", "teacher_feedback");
         add(specs, "teacher_notifications", "Thông báo", "teacher/notifications/?limit=100", "");
         SPECS = Collections.unmodifiableMap(specs);
     }

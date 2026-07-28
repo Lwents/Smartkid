@@ -210,39 +210,15 @@
                 android:layout_marginEnd="16dp"
                 android:text="@string/teacher_activity_title" />
 
-            <LinearLayout
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="16dp"
-                android:background="@drawable/admin_bg_chart_tabs"
-                android:orientation="horizontal"
-                android:padding="4dp">
-
-                <TextView
-                    android:id="@+id/buttonTeacherChart7"
-                    style="@style/Widget.Smartkid.AdminChartTab"
-                    android:background="@drawable/admin_bg_chart_tab_selected"
-                    android:text="@string/admin_chart_7_days"
-                    android:textColor="@color/admin_primary"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/buttonTeacherChart30"
-                    style="@style/Widget.Smartkid.AdminChartTab"
-                    android:text="@string/admin_chart_30_days" />
-
-                <TextView
-                    android:id="@+id/buttonTeacherChart90"
-                    style="@style/Widget.Smartkid.AdminChartTab"
-                    android:text="@string/admin_chart_90_days" />
-
-                <TextView
-                    android:id="@+id/buttonTeacherChartCustom"
-                    style="@style/Widget.Smartkid.AdminChartTab"
-                    android:text="@string/admin_chart_custom" />
-            </LinearLayout>
+                android:text="@string/teacher_chart_scope"
+                android:textColor="@color/admin_text_secondary"
+                android:textSize="13sp" />
 
             <com.google.android.material.card.MaterialCardView
                 style="@style/Widget.Smartkid.AdminGlassCard"

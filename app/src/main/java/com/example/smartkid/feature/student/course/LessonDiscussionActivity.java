@@ -126,9 +126,11 @@ public class LessonDiscussionActivity extends BaseActivity {
                     if (!isUsable()) return;
                     setLoading(false);
                     adapter.setItems(data == null ? new ArrayList<>() : data);
-                    showStatus(data == null || data.isEmpty()
-                            ? "Chưa có câu hỏi nào. Em hãy hỏi thầy cô nhé!"
-                            : "Chạm vào một câu hỏi để xem thầy cô trả lời");
+                    if (data == null || data.isEmpty()) {
+                        statusText.setVisibility(View.GONE);
+                    } else {
+                        showStatus("Chạm vào một câu hỏi để xem thầy cô trả lời");
+                    }
                 }
 
                 @Override
@@ -369,7 +371,8 @@ public class LessonDiscussionActivity extends BaseActivity {
 
     private void showStatus(String message) {
         statusText.setText(safe(message));
-        statusText.setVisibility(View.VISIBLE);
+        statusText.setVisibility(statusText.getText().length() == 0
+                ? View.GONE : View.VISIBLE);
     }
 
     private String textOf(TextInputEditText input) {
