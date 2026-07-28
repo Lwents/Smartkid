@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /** Làm bài kiểm tra trắc nghiệm/text, đếm giờ và nộp kết quả về Django. */
 public class ExamActivity extends BaseActivity {
@@ -149,24 +150,45 @@ public class ExamActivity extends BaseActivity {
                         R.plurals.minute_count_short, minutes, minutes);
                 String examInfo = getString(R.string.exam_info_format, questionCount,
                         minuteCount, String.valueOf(pass));
+                String deadline = ExamTiming.formatLocalDateTime(
+                        SafeJson.string(data, "", "endAt", "end_at"),
+                        TimeZone.getDefault());
+                if (!deadline.isEmpty()) {
+                    examInfo += "\n" + getString(R.string.exam_deadline_format, deadline);
+                }
                 infoText.setText(description.isEmpty() ? examInfo
                         : getString(R.string.exam_info_with_description, examInfo, description));
                 boolean activeAttempt = SafeJson.bool(data, false,
                         "hasActiveAttempt", "has_active_attempt");
                 int attemptsUsed = SafeJson.integer(data, 0,
                         "attemptsUsed", "attempts_used");
+                int maxAttempts = SafeJson.integer(data, -1,
+                        "maxAttempts", "max_attempts");
                 int attemptsRemaining = SafeJson.integer(data, -1,
                         "attemptsRemaining", "attempts_remaining");
+                String attemptsSummary = maxAttempts > 0
+                        ? getString(R.string.exam_attempts_summary,
+                                attemptsUsed, maxAttempts, Math.max(0, attemptsRemaining))
+                        : getString(R.string.exam_attempts_unlimited, attemptsUsed);
                 startButton.setText(activeAttempt ? "Tiếp tục làm bài" : "Bắt đầu làm bài");
                 startButton.setEnabled(count > 0 && (activeAttempt || attemptsRemaining != 0));
                 rankingButton.setVisibility(attemptsUsed > 0 ? View.VISIBLE : View.GONE);
                 if (!activeAttempt && attemptsRemaining == 0) {
                     startButton.setVisibility(View.GONE);
-                    showStatus(getString(R.string.exam_attempt_limit_status));
-                } else if (data.has("lastScore") && !data.isNull("lastScore")) {
-                    double lastScore = SafeJson.decimal(data, 0, "lastScore", "last_score");
-                    showStatus("Lần gần nhất: " + formatScore(lastScore)
-                            + "% • Em có thể xem bảng xếp hạng bên dưới");
+                    showStatus(getString(R.string.exam_attempt_limit_with_count, attemptsSummary));
+                } else {
+                    String detailStatus = activeAttempt
+                            ? getString(R.string.exam_active_attempt_status, attemptsSummary)
+                            : attemptsSummary;
+                    if (data.has("lastScore") && !data.isNull("lastScore")) {
+                        double lastScore = SafeJson.decimal(data, 0,
+                                "lastScore", "last_score");
+                        double bestScore = SafeJson.decimal(data, lastScore,
+                                "bestScore", "best_score");
+                        detailStatus += getString(R.string.exam_previous_scores,
+                                formatScore(lastScore), formatScore(bestScore));
+                    }
+                    showStatus(detailStatus);
                 }
             }
 

@@ -67,6 +67,12 @@
     <string name="numbered_question">%1$d. %2$s</string>
     <string name="exam_info_format">%1$s • %2$s • Điểm đạt %3$s</string>
     <string name="exam_info_with_description">%1$s\n%2$s</string>
+    <string name="exam_deadline_format">Hạn làm bài: %1$s</string>
+    <string name="exam_attempts_summary">Lượt làm: %1$d/%2$d • Còn %3$d lượt</string>
+    <string name="exam_attempts_unlimited">Đã làm %1$d lượt • Không giới hạn lượt</string>
+    <string name="exam_active_attempt_status">Đang làm dở • %1$s</string>
+    <string name="exam_attempt_limit_with_count">Đã hoàn thành • %1$s</string>
+    <string name="exam_previous_scores"> • Lần gần nhất %1$s%% • Cao nhất %2$s%%</string>
     <string name="exam_timer_format">Còn %1$02d:%2$02d</string>
     <string name="time_up">Hết giờ</string>
     <plurals name="question_count_short">

@@ -3,6 +3,7 @@ package com.example.smartkid.feature.student.exam;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /** Keeps the countdown tied to the deadline issued by the server. */
 final class ExamTiming {
@@ -14,6 +15,15 @@ final class ExamTiming {
         long remainingMillis = deadlineMillis - nowMillis;
         if (remainingMillis <= 0) return 1;
         return (int) Math.min(Integer.MAX_VALUE, (remainingMillis + 999L) / 1000L);
+    }
+
+    static String formatLocalDateTime(String raw, TimeZone timeZone) {
+        long millis = parseIsoMillis(raw);
+        if (millis <= 0) return "";
+        SimpleDateFormat formatter = new SimpleDateFormat(
+                "HH:mm dd/MM/yyyy", new Locale("vi", "VN"));
+        formatter.setTimeZone(timeZone == null ? TimeZone.getDefault() : timeZone);
+        return formatter.format(new Date(millis));
     }
 
     private static long parseIsoMillis(String raw) {
