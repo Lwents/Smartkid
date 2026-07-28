@@ -74,8 +74,8 @@ public final class BusinessRules {
         if (token == null || token.trim().isEmpty()) {
             return "Vui lòng nhập mã đặt lại mật khẩu trong email";
         }
-        if (password == null || password.length() < 6) {
-            return "Mật khẩu mới phải có ít nhất 6 ký tự";
+        if (password == null || password.length() < 8) {
+            return "Mật khẩu mới phải có ít nhất 8 ký tự";
         }
         if (!password.equals(confirmation)) {
             return "Mật khẩu nhập lại không khớp";

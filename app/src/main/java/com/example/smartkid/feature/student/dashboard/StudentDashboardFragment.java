@@ -23,7 +23,7 @@ import com.example.smartkid.data.model.DashboardSummary;
 import com.example.smartkid.data.remote.ApiCallback;
 import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.DashboardRepository;
-import com.example.smartkid.data.repository.StudentFeatureRepository;
+import com.example.smartkid.data.repository.NotificationBadgeRepository;
 import com.example.smartkid.common.ui.BaseActivity;
 import com.example.smartkid.feature.student.course.CatalogActivity;
 import com.example.smartkid.feature.student.course.CourseDetailActivity;
@@ -43,7 +43,7 @@ public class StudentDashboardFragment extends Fragment {
     private Button retryButton;
     private SwipeRefreshLayout refreshLayout;
     private DashboardRepository repository;
-    private StudentFeatureRepository featureRepository;
+    private NotificationBadgeRepository notificationRepository;
     private TextView streakText;
     private TextView notificationBadge;
     private View notificationButton;
@@ -62,7 +62,7 @@ public class StudentDashboardFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         try {
             repository = new DashboardRepository(requireContext());
-            featureRepository = new StudentFeatureRepository(requireContext());
+            notificationRepository = new NotificationBadgeRepository(requireContext());
             bindViews(view);
             SessionManager sessionManager = new SessionManager(requireContext());
             String displayName = sessionManager.getUser().getFullName();
@@ -82,7 +82,7 @@ public class StudentDashboardFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (getView() != null && featureRepository != null) loadNotificationBadge();
+        if (getView() != null && notificationRepository != null) loadNotificationBadge();
     }
 
     private void bindViews(View view) {
@@ -126,28 +126,22 @@ public class StudentDashboardFragment extends Fragment {
     }
 
     private void loadNotificationBadge() {
-        featureRepository.loadNotifications(new ApiCallback<java.util.List<com.example.smartkid.data.model.FeatureItem>>() {
-            @Override
-            public void onSuccess(java.util.List<com.example.smartkid.data.model.FeatureItem> items) {
-                if (!isAdded() || notificationBadge == null || notificationButton == null) return;
-                int unread = 0;
-                if (items != null) {
-                    for (com.example.smartkid.data.model.FeatureItem item : items) {
-                        if (item != null && !com.example.smartkid.common.util.SafeJson.bool(
-                                item.getSource(), false, "is_read", "isRead")) {
-                            unread++;
-                        }
+        if (notificationRepository == null) return;
+        notificationRepository.loadUnreadCount(
+                "student/notifications/?limit=1", new ApiCallback<Integer>() {
+                    @Override
+                    public void onSuccess(Integer unread) {
+                        if (!isAdded() || notificationBadge == null
+                                || notificationButton == null) return;
+                        showNotificationBadge(unread == null ? 0 : unread);
                     }
-                }
-                showNotificationBadge(unread);
-            }
 
-            @Override
-            public void onError(ApiError error) {
-                if (!isAdded() || notificationBadge == null) return;
-                notificationBadge.setVisibility(View.GONE);
-            }
-        });
+                    @Override
+                    public void onError(ApiError error) {
+                        if (!isAdded() || notificationBadge == null) return;
+                        notificationBadge.setVisibility(View.GONE);
+                    }
+                });
     }
 
     private void showNotificationBadge(int unread) {

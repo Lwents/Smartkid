@@ -2,12 +2,18 @@ package com.example.smartkid.feature.shared.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.content.Context;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
 
 import com.example.smartkid.R;
 import com.example.smartkid.common.util.AppLogger;
@@ -27,6 +33,8 @@ public class LoginActivity extends BaseActivity {
     private TextInputEditText otpInput;
     private TextInputLayout otpLayout;
     private Button loginButton;
+    private Button forgotPasswordButton;
+    private Button registerButton;
     private ProgressBar progressBar;
     private TextView statusText;
     private AuthRepository authRepository;
@@ -51,10 +59,12 @@ public class LoginActivity extends BaseActivity {
                 otpLayout.setVisibility(View.VISIBLE);
             }
             loginButton.setOnClickListener(view -> safelyLogin());
-            findViewById(R.id.buttonForgotPassword).setOnClickListener(view ->
+            forgotPasswordButton.setOnClickListener(view ->
                     openSafely(ForgotPasswordActivity.class));
-            findViewById(R.id.buttonOpenRegister).setOnClickListener(view ->
+            registerButton.setOnClickListener(view ->
                     openSafely(RegisterActivity.class));
+            bindKeyboardActions();
+            clearStatusWhenEditing(identifierInput, passwordInput, otpInput);
         } catch (Exception exception) {
             AppLogger.error(this, "LoginActivity", "Không thể tạo màn hình đăng nhập", exception);
             showErrorDialog("Không thể mở màn hình đăng nhập: " + exception.getMessage());
@@ -76,14 +86,44 @@ public class LoginActivity extends BaseActivity {
         otpInput = findViewById(R.id.inputOtp);
         otpLayout = findViewById(R.id.layoutOtp);
         loginButton = findViewById(R.id.buttonLogin);
+        forgotPasswordButton = findViewById(R.id.buttonForgotPassword);
+        registerButton = findViewById(R.id.buttonOpenRegister);
         progressBar = findViewById(R.id.progressLogin);
         statusText = findViewById(R.id.textLoginStatus);
 
         if (identifierInput == null || passwordInput == null || otpInput == null
                 || otpLayout == null || loginButton == null || progressBar == null
+                || forgotPasswordButton == null || registerButton == null
                 || statusText == null) {
             throw new IllegalStateException("Giao diện đăng nhập thiếu thành phần bắt buộc");
         }
+    }
+
+    private void bindKeyboardActions() {
+        passwordInput.setOnEditorActionListener((view, actionId, event) ->
+                handleLoginEditorAction(actionId, event));
+        otpInput.setOnEditorActionListener((view, actionId, event) ->
+                handleLoginEditorAction(actionId, event));
+    }
+
+    private boolean handleLoginEditorAction(int actionId, KeyEvent event) {
+        boolean imeDone = actionId == EditorInfo.IME_ACTION_DONE;
+        boolean enterDown = event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                && event.getAction() == KeyEvent.ACTION_DOWN;
+        if (!imeDone && !enterDown) return false;
+        safelyLogin();
+        return true;
+    }
+
+    private void clearStatusWhenEditing(TextInputEditText... inputs) {
+        TextWatcher watcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence text, int start, int count, int after) { }
+            @Override public void onTextChanged(CharSequence text, int start, int before, int count) {
+                statusText.setVisibility(View.GONE);
+            }
+            @Override public void afterTextChanged(Editable editable) { }
+        };
+        for (TextInputEditText input : inputs) input.addTextChangedListener(watcher);
     }
 
     private void safelyLogin() {
@@ -98,19 +138,17 @@ public class LoginActivity extends BaseActivity {
 
     private void performLogin() {
         String identifier = textOf(identifierInput);
-        String password = textOf(passwordInput);
+        String password = rawTextOf(passwordInput);
         String otp = textOf(otpInput);
 
         String validationError = BusinessRules.validateLogin(identifier, password);
         if (!validationError.isEmpty()) {
-            statusText.setText(validationError);
-            statusText.setVisibility(View.VISIBLE);
+            showStatus(validationError, true);
             return;
         }
         if (otpLayout.getVisibility() == View.VISIBLE
-                && (otp.length() < 4 || otp.length() > 8)) {
-            statusText.setText(R.string.otp_length_error);
-            statusText.setVisibility(View.VISIBLE);
+                && otp.length() != 6) {
+            showStatus(getString(R.string.otp_length_error), true);
             return;
         }
 
@@ -127,9 +165,9 @@ public class LoginActivity extends BaseActivity {
                 if (result.isRequiresOtp()) {
                     otpRequired = true;
                     otpLayout.setVisibility(View.VISIBLE);
-                    statusText.setText(result.getMessage());
-                    statusText.setVisibility(View.VISIBLE);
+                    showStatus(result.getMessage(), false);
                     otpInput.requestFocus();
+                    showKeyboard(otpInput);
                     return;
                 }
                 Intent intent = new Intent(LoginActivity.this,
@@ -145,8 +183,8 @@ public class LoginActivity extends BaseActivity {
                     return;
                 }
                 setLoading(false);
-                statusText.setText(error.getMessage());
-                statusText.setVisibility(View.VISIBLE);
+                showStatus(error == null ? "Không thể đăng nhập, vui lòng thử lại"
+                        : error.getMessage(), true);
             }
         });
     }
@@ -160,13 +198,26 @@ public class LoginActivity extends BaseActivity {
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         loginButton.setEnabled(!loading);
+        forgotPasswordButton.setEnabled(!loading);
+        registerButton.setEnabled(!loading);
         identifierInput.setEnabled(!loading);
         passwordInput.setEnabled(!loading);
         otpInput.setEnabled(!loading);
     }
 
+    private void showStatus(String message, boolean error) {
+        statusText.setText(message == null ? "" : message);
+        statusText.setTextColor(ContextCompat.getColor(this,
+                error ? R.color.smartkid_error : R.color.smartkid_primary));
+        statusText.setVisibility(View.VISIBLE);
+    }
+
     private String textOf(TextInputEditText editText) {
         return editText.getText() == null ? "" : editText.getText().toString().trim();
+    }
+
+    private String rawTextOf(TextInputEditText editText) {
+        return editText.getText() == null ? "" : editText.getText().toString();
     }
 
     private void hideKeyboard() {
@@ -180,5 +231,18 @@ public class LoginActivity extends BaseActivity {
         } catch (Exception exception) {
             AppLogger.error(this, "LoginActivity", "Không thể đóng bàn phím", exception);
         }
+    }
+
+    private void showKeyboard(View target) {
+        if (target == null) return;
+        target.post(() -> {
+            try {
+                InputMethodManager manager =
+                        (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (manager != null) manager.showSoftInput(target, InputMethodManager.SHOW_IMPLICIT);
+            } catch (Exception exception) {
+                AppLogger.error(this, "LoginActivity", "Không thể mở bàn phím OTP", exception);
+            }
+        });
     }
 }

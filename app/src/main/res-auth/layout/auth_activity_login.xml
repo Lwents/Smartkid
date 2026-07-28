@@ -71,8 +71,10 @@
                         android:id="@+id/inputIdentifier"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:autofillHints="username,emailAddress"
                         android:imeOptions="actionNext"
                         android:inputType="textEmailAddress"
+                        android:maxLength="254"
                         android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -88,6 +90,7 @@
                         android:id="@+id/inputPassword"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:autofillHints="password"
                         android:imeOptions="actionDone"
                         android:inputType="textPassword"
                         android:maxLines="1" />
@@ -108,7 +111,7 @@
                         android:layout_height="wrap_content"
                         android:imeOptions="actionDone"
                         android:inputType="number"
-                        android:maxLength="8"
+                        android:maxLength="6"
                         android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -117,6 +120,7 @@
                     android:id="@+id/textLoginStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:accessibilityLiveRegion="polite"
                     android:layout_marginTop="12dp"
                     android:textColor="@color/smartkid_error"
                     android:textSize="14sp"

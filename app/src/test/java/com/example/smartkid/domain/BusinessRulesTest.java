@@ -63,6 +63,15 @@ public class BusinessRulesTest {
     }
 
     @Test
+    public void validateResetPassword_matchesTheEightCharacterServerRule() {
+        assertEquals("Mật khẩu mới phải có ít nhất 8 ký tự",
+                BusinessRules.validateResetPassword(
+                        "student@example.com", "valid-token", "1234567", "1234567"));
+        assertTrue(BusinessRules.validateResetPassword(
+                "student@example.com", "valid-token", "12345678", "12345678").isEmpty());
+    }
+
+    @Test
     public void clampProgress_alwaysStaysBetweenZeroAndOneHundred() {
         assertEquals(0, BusinessRules.clampProgress(-30));
         assertEquals(48, BusinessRules.clampProgress(48));

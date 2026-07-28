@@ -23,12 +23,12 @@
     <string name="identifier_hint">Tên đăng nhập hoặc email</string>
     <string name="password_hint">Mật khẩu</string>
     <string name="otp_hint">Mã OTP</string>
-    <string name="otp_length_error">Mã OTP phải có từ 4 đến 8 ký tự</string>
+    <string name="otp_length_error">Mã OTP gồm đúng 6 chữ số</string>
     <string name="login">Đăng nhập</string>
     <string name="forgot_password">Quên mật khẩu?</string>
     <string name="open_register">Chưa có tài khoản? Đăng ký</string>
     <string name="register_title">Tạo tài khoản học viên</string>
-    <string name="register_subtitle">Thông tin sẽ được lưu trực tiếp trên PostgreSQL của server</string>
+    <string name="register_subtitle">Thông tin của em sẽ được bảo mật trên hệ thống SmartEdu</string>
     <string name="username_hint">Tên đăng nhập</string>
     <string name="register_username_hint">Tên tài khoản (không dấu, không khoảng trắng)</string>
     <string name="email_hint">Email</string>
@@ -43,7 +43,7 @@
     <string name="forgot_subtitle">Nhập email của bạn để nhận link đặt lại mật khẩu</string>
     <string name="send_reset_email">Gửi link đặt lại</string>
     <string name="forgot_resend_email">Gửi lại email</string>
-    <string name="forgot_success_message">Đã gửi link đặt lại mật khẩu đến email của bạn!</string>
+    <string name="forgot_success_message">Nếu email đã đăng ký, hướng dẫn đặt lại mật khẩu sẽ được gửi đến bạn.</string>
     <string name="reset_title">Đặt lại mật khẩu</string>
     <string name="reset_token_hint">Mã đặt lại trong email</string>
     <string name="new_password_hint">Mật khẩu mới</string>
