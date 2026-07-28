@@ -69,6 +69,7 @@ public class ManagementRepository {
             {"course", "Khóa học"},
             {"exam", "Bài kiểm tra"},
             {"system", "Hệ thống"},
+            {"admin_broadcast", "Thông báo từ nhà trường"},
             {"info", "Thông tin"},
             {"authSession", "Đăng nhập và phiên"},
             {"logging", "Ghi log"},
@@ -514,6 +515,15 @@ public class ManagementRepository {
 
     private FeatureItem itemFromObject(String fallbackId, JSONObject item) {
         String id = SafeJson.string(item, fallbackId, "id", "uuid", "user_id", "course_id", "jti");
+        // Thông báo Admin: ẩn mã category kỹ thuật và làm rõ trạng thái đọc.
+        if (item.has("is_read") && item.has("category") && item.has("message")) {
+            boolean isRead = SafeJson.bool(item, false, "is_read", "isRead");
+            return new FeatureItem(id,
+                    SafeJson.string(item, "Thông báo", "title"),
+                    notificationCategoryLabel(SafeJson.string(item, "system", "category")),
+                    SafeJson.string(item, "", "message"),
+                    isRead ? "Đã đọc" : "Chưa đọc", item);
+        }
         // Nhật ký hoạt động: hành động + người thực hiện + thời gian
         if (item.has("action") && item.has("userEmail")) {
             return new FeatureItem(id,
@@ -662,6 +672,19 @@ public class ManagementRepository {
             case "success": return "Thành công";
             case "failed": return "Thất bại";
             default: return status;
+        }
+    }
+
+    private String notificationCategoryLabel(String category) {
+        switch (category) {
+            case "admin_broadcast": return "Thông báo từ nhà trường";
+            case "system_health": return "Sức khỏe hệ thống";
+            case "learning_report": return "Báo cáo học tập";
+            case "security": return "Bảo mật";
+            case "course": return "Khóa học";
+            case "exam": return "Bài kiểm tra";
+            case "system": return "Thông báo hệ thống";
+            default: return "Thông báo";
         }
     }
 

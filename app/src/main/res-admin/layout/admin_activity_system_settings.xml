@@ -140,6 +140,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:hint="@string/admin_config_language"
+                        android:visibility="gone"
                         app:endIconMode="dropdown_menu">
 
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -171,6 +172,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:hint="@string/admin_config_currency"
+                        android:visibility="gone"
                         app:endIconMode="dropdown_menu">
 
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -185,7 +187,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:hint="@string/admin_config_logo_url">
+                        android:hint="@string/admin_config_logo_url"
+                        android:visibility="gone">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputConfigLogoUrl"
@@ -240,7 +243,8 @@
                         android:layout_marginTop="8dp"
                         android:minHeight="48dp"
                         android:text="@string/admin_config_force_https"
-                        android:textColor="@color/admin_text_primary" />
+                        android:textColor="@color/admin_text_primary"
+                        android:visibility="gone" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchConfigHsts"
@@ -248,7 +252,8 @@
                         android:layout_height="wrap_content"
                         android:minHeight="48dp"
                         android:text="@string/admin_config_hsts"
-                        android:textColor="@color/admin_text_primary" />
+                        android:textColor="@color/admin_text_primary"
+                        android:visibility="gone" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.Smartkid.GlassInput"
@@ -334,14 +339,24 @@
                         android:text="@string/admin_config_smtp_password_note"
                         android:textColor="@color/admin_text_secondary"
                         android:textSize="12sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonConfigTestEmail"
+                        style="@style/Widget.Smartkid.GlassButton.Outlined"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/admin_config_test_email" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardConfigSessionUnsupported"
                 style="@style/Widget.Smartkid.RoleCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp">
+                android:layout_marginTop="14dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -440,10 +455,12 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardConfigMaintenanceUnsupported"
                 style="@style/Widget.Smartkid.RoleCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp">
+                android:layout_marginTop="14dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -546,6 +563,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
                         android:hint="@string/admin_config_backup_schedule"
+                        android:visibility="gone"
                         app:endIconMode="dropdown_menu">
 
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -578,7 +596,8 @@
                         android:layout_marginTop="8dp"
                         android:minHeight="48dp"
                         android:text="@string/admin_config_backup_encrypted"
-                        android:textColor="@color/admin_text_primary" />
+                        android:textColor="@color/admin_text_primary"
+                        android:visibility="gone" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.Smartkid.GlassInput"
@@ -586,6 +605,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:hint="@string/admin_config_log_level"
+                        android:visibility="gone"
                         app:endIconMode="dropdown_menu">
 
                         <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -601,7 +621,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:hint="@string/admin_config_log_retention">
+                        android:hint="@string/admin_config_log_retention"
+                        android:visibility="gone">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputConfigLogRetention"
@@ -618,15 +639,18 @@
                         android:layout_marginTop="8dp"
                         android:minHeight="48dp"
                         android:text="@string/admin_config_trace_id"
-                        android:textColor="@color/admin_text_primary" />
+                        android:textColor="@color/admin_text_primary"
+                        android:visibility="gone" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardConfigIntegrationsUnsupported"
                 style="@style/Widget.Smartkid.RoleCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp">
+                android:layout_marginTop="14dp"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"

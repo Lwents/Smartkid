@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.android.volley.Request;
 import com.example.smartkid.R;
 import com.example.smartkid.common.navigation.UserRole;
@@ -210,8 +212,10 @@ public final class AdminSettingsActivity extends BaseActivity {
         configStorageProvider = required(R.id.inputConfigStorageProvider);
         configStorageBucket = required(R.id.inputConfigStorageBucket);
         configStorageRegion = required(R.id.inputConfigStorageRegion);
+        MaterialButton testEmailButton = required(R.id.buttonConfigTestEmail);
         toolbar.setNavigationOnClickListener(view -> finish());
         saveButton.setOnClickListener(view -> saveSystem());
+        testEmailButton.setOnClickListener(view -> showTestEmailDialog());
         configureDropdowns();
     }
 
@@ -460,6 +464,55 @@ public final class AdminSettingsActivity extends BaseActivity {
                 });
     }
 
+    private void showTestEmailDialog() {
+        View form = getLayoutInflater().inflate(R.layout.admin_dialog_test_email, null, false);
+        TextInputLayout layout = form.findViewById(R.id.layoutAdminTestEmail);
+        TextInputEditText input = form.findViewById(R.id.inputAdminTestEmail);
+        if (layout == null || input == null) {
+            showErrorDialog(getString(R.string.admin_settings_save_error));
+            return;
+        }
+        input.setText(text(configFromEmail));
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.admin_config_test_email)
+                .setView(form)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.admin_config_test_email, null)
+                .create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(view -> {
+                    String email = text(input);
+                    boolean valid = !email.isEmpty() && AdminSettingsRules.validOptionalEmail(email);
+                    layout.setError(valid ? null : getString(R.string.admin_settings_invalid_email));
+                    if (!valid) return;
+                    dialog.dismiss();
+                    sendTestEmail(email);
+                }));
+        dialog.show();
+    }
+
+    private void sendTestEmail(String email) {
+        try {
+            setLoading(true, getString(R.string.admin_config_test_email));
+            repository.action(Request.Method.POST, "admin/system/test-email/",
+                    new JSONObject().put("email", email), new ApiCallback<JSONObject>() {
+                        @Override public void onSuccess(JSONObject data) {
+                            if (!isUsable()) return;
+                            setLoading(false, getString(R.string.admin_config_test_email_sent));
+                            showShortMessage(getString(R.string.admin_config_test_email_sent));
+                        }
+
+                        @Override public void onError(ApiError error) {
+                            if (!isUsable()) return;
+                            setLoading(false, getString(R.string.admin_settings_save_error));
+                            handleApiError(error);
+                        }
+                    });
+        } catch (Exception exception) {
+            failSave(exception);
+        }
+    }
+
     private Integer number(TextInputLayout layout, TextInputEditText input, int min, int max) {
         Integer value = AdminSettingsRules.boundedInteger(text(input), min, max);
         layout.setError(value == null
@@ -576,9 +629,20 @@ public final class AdminSettingsActivity extends BaseActivity {
     }
 
     private static String shortTimestamp(String raw) {
-        if (raw == null) return "";
-        String normalized = raw.trim().replace('T', ' ');
-        return normalized.length() > 16 ? normalized.substring(0, 16) : normalized;
+        if (raw == null || raw.trim().isEmpty()) return "";
+        String value = raw.trim();
+        try {
+            java.text.SimpleDateFormat parser = new java.text.SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US);
+            parser.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            java.util.Date parsed = parser.parse(value.substring(0, Math.min(19, value.length())));
+            java.text.SimpleDateFormat printer = new java.text.SimpleDateFormat(
+                    "dd/MM/yyyy HH:mm", java.util.Locale.US);
+            printer.setTimeZone(java.util.TimeZone.getDefault());
+            return parsed == null ? value : printer.format(parsed);
+        } catch (Exception ignored) {
+            return value.replace('T', ' ');
+        }
     }
 
     private static String safe(String value) {

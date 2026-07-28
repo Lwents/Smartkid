@@ -472,7 +472,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 "Thông số vận hành, email và cấu hình API",
                 R.drawable.admin_ic_settings, 0xFF64748B, 0xFF94A3B8, ""));
         tools.add(tool("admin_backups", "Sao lưu hệ thống",
-                "Kiểm tra lịch sao lưu và khôi phục dữ liệu",
+                "Tạo và kiểm tra các bản sao lưu dữ liệu",
                 R.drawable.admin_ic_refresh, 0xFF0284C7, 0xFF38BDF8, ""));
         tools.add(tool("admin_report_learning", "Báo cáo học tập",
                 "Tiến độ, điểm số và thời gian học tập",

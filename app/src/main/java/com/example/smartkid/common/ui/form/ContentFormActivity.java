@@ -283,7 +283,7 @@ public abstract class ContentFormActivity extends BaseActivity {
             addInput("password", getString(R.string.password),
                     InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD, false);
             addSpinner("role", getString(R.string.management_role),
-                    new String[]{"Học viên", "Giáo viên", "Quản trị viên"},
+                    new String[]{"Học sinh", "Giáo viên", "Quản trị viên"},
                     new String[]{"student", "instructor", "admin"});
             return;
         }

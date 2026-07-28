@@ -6,6 +6,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ import com.example.smartkid.data.remote.ApiError;
 import com.example.smartkid.data.repository.ManagementRepository;
 import com.example.smartkid.feature.admin.users.AdminUserCreateActivity;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -126,6 +128,11 @@ public class AdminManagementActivity extends BaseActivity {
             ((TextView) refreshButton).setText(R.string.admin_create_backup);
             refreshButton.setOnClickListener(view -> confirmCreateBackup());
             addRefreshAction(toolbar);
+        } else if (supportsNotifications()) {
+            ((TextView) refreshButton).setText(R.string.admin_send_notification);
+            refreshButton.setOnClickListener(view -> showSendNotification());
+            addReadAllAction(toolbar);
+            addRefreshAction(toolbar);
         } else {
             ((TextView) refreshButton).setText(R.string.refresh);
             refreshButton.setOnClickListener(view -> loadSafely());
@@ -141,12 +148,25 @@ public class AdminManagementActivity extends BaseActivity {
         });
     }
 
+    private void addReadAllAction(MaterialToolbar toolbar) {
+        android.view.MenuItem readAll = toolbar.getMenu().add(R.string.admin_notification_read_all);
+        readAll.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_NEVER);
+        readAll.setOnMenuItemClickListener(item -> {
+            markAllNotificationsRead();
+            return true;
+        });
+    }
+
     private boolean supportsCreate() {
         return "admin_users".equals(spec == null ? "" : spec.getActionKind());
     }
 
     private boolean supportsBackup() {
         return "admin_backups".equals(spec == null ? "" : spec.getActionKind());
+    }
+
+    private boolean supportsNotifications() {
+        return "admin_notifications".equals(spec == null ? "" : spec.getKey());
     }
 
     private void openCreate() {
@@ -231,9 +251,7 @@ public class AdminManagementActivity extends BaseActivity {
                 new ApiCallback<JSONObject>() {
                     @Override
                     public void onSuccess(JSONObject data) {
-                        try { item.getSource().put("is_read", true); }
-                        catch (Exception ignored) { }
-                        if (adapter != null) adapter.notifyDataSetChanged();
+                        if (isUsable()) loadSafely();
                     }
 
                     @Override public void onError(ApiError error) { }
@@ -261,7 +279,17 @@ public class AdminManagementActivity extends BaseActivity {
             appendLine(detail, "Giá trị", item.getSubtitle());
         } else if ("admin_notifications".equals(specKey)) {
             appendLine(detail, "", SafeJson.string(source, item.getDetail(), "message"));
+            appendLine(detail, "Nhóm", item.getSubtitle());
+            appendLine(detail, "Trạng thái",
+                    SafeJson.bool(source, false, "is_read", "isRead") ? "Đã đọc" : "Chưa đọc");
             appendLine(detail, "Thời gian", shortTime(SafeJson.string(source, "", "created_at")));
+        } else if ("admin_activity".equals(specKey)) {
+            appendLine(detail, "Người thực hiện", SafeJson.string(source, "", "userEmail"));
+            appendLine(detail, "Thời gian", shortTime(SafeJson.string(source, "", "timestamp")));
+            appendLine(detail, "Trạng thái", item.getStatus());
+            appendLine(detail, "Địa chỉ IP", SafeJson.string(source, "", "ip"));
+            appendLine(detail, "Thiết bị", SafeJson.string(source, "", "userAgent"));
+            appendLine(detail, "Chi tiết", readableJson(source.optJSONObject("details")));
         } else if ("admin_sessions".equals(specKey)) {
             appendLine(detail, "Tài khoản", SafeJson.string(source, "", "userEmail"));
             appendLine(detail, "Thiết bị", SafeJson.string(source, item.getTitle(), "device"));
@@ -288,6 +316,20 @@ public class AdminManagementActivity extends BaseActivity {
         if (target.length() > 0) target.append('\n');
         if (!label.isEmpty()) target.append(label).append(": ");
         target.append(value.trim());
+    }
+
+    private String readableJson(JSONObject source) {
+        if (source == null || source.length() == 0) return "";
+        StringBuilder result = new StringBuilder();
+        java.util.Iterator<String> keys = source.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            Object value = source.opt(key);
+            if (value == null || value == JSONObject.NULL) continue;
+            if (result.length() > 0) result.append(" • ");
+            result.append(key.replace('_', ' ')).append(": ").append(String.valueOf(value));
+        }
+        return result.toString();
     }
 
     private String statusLabel(String status) {
@@ -505,6 +547,111 @@ public class AdminManagementActivity extends BaseActivity {
                 .show();
     }
 
+    private void showSendNotification() {
+        View form = LayoutInflater.from(this).inflate(
+                R.layout.admin_dialog_send_notification, null, false);
+        MaterialAutoCompleteTextView audience = form.findViewById(
+                R.id.inputAdminNotificationAudience);
+        TextInputLayout titleLayout = form.findViewById(R.id.layoutAdminNotificationTitle);
+        TextInputLayout messageLayout = form.findViewById(R.id.layoutAdminNotificationMessage);
+        TextInputEditText title = form.findViewById(R.id.inputAdminNotificationTitle);
+        TextInputEditText message = form.findViewById(R.id.inputAdminNotificationMessage);
+        if (audience == null || titleLayout == null || messageLayout == null
+                || title == null || message == null) {
+            showErrorDialog("Không thể mở biểu mẫu thông báo");
+            return;
+        }
+        String[] audiences = {
+                getString(R.string.admin_notification_audience_all),
+                getString(R.string.admin_notification_audience_students),
+                getString(R.string.admin_notification_audience_teachers),
+        };
+        audience.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, audiences));
+        audience.setText(audiences[0], false);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.admin_notification_send_title)
+                .setView(form)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.admin_send_notification, null)
+                .create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener(view -> {
+                    String titleValue = inputText(title);
+                    String messageValue = inputText(message);
+                    titleLayout.setError(titleValue.isEmpty()
+                            ? getString(R.string.admin_notification_required) : null);
+                    messageLayout.setError(messageValue.isEmpty()
+                            ? getString(R.string.admin_notification_required) : null);
+                    if (titleValue.isEmpty() || messageValue.isEmpty()) return;
+                    String audienceLabel = audience.getText() == null
+                            ? "" : audience.getText().toString().trim();
+                    dialog.dismiss();
+                    sendNotification(titleValue, messageValue,
+                            notificationAudienceCode(audienceLabel));
+                }));
+        dialog.show();
+    }
+
+    private String notificationAudienceCode(String label) {
+        if (getString(R.string.admin_notification_audience_students).equals(label)) {
+            return "student";
+        }
+        if (getString(R.string.admin_notification_audience_teachers).equals(label)) {
+            return "instructor";
+        }
+        return "all";
+    }
+
+    private void sendNotification(String title, String message, String audience) {
+        try {
+            JSONObject body = new JSONObject()
+                    .put("title", title)
+                    .put("message", message)
+                    .put("audience", audience)
+                    .put("type", "info");
+            setLoading(true);
+            repository.action(Request.Method.POST, "admin/notifications/", body,
+                    new ApiCallback<JSONObject>() {
+                        @Override public void onSuccess(JSONObject data) {
+                            if (!isUsable()) return;
+                            int count = SafeJson.integer(data, 0, "created_count");
+                            showShortMessage(getString(R.string.admin_notification_sent, count));
+                            loadSafely();
+                        }
+
+                        @Override public void onError(ApiError error) {
+                            if (!isUsable()) return;
+                            setLoading(false);
+                            handleApiError(error);
+                        }
+                    });
+        } catch (Exception exception) {
+            AppLogger.error(this, "AdminManagementActivity",
+                    "Không thể chuẩn bị thông báo", exception);
+            showErrorDialog("Không thể gửi thông báo");
+        }
+    }
+
+    private void markAllNotificationsRead() {
+        setLoading(true);
+        repository.action(Request.Method.PATCH, "admin/notifications/read-all/",
+                new JSONObject(), new ApiCallback<JSONObject>() {
+                    @Override public void onSuccess(JSONObject data) {
+                        if (!isUsable()) return;
+                        showShortMessage(getString(R.string.admin_notification_read_all_done));
+                        loadSafely();
+                    }
+
+                    @Override public void onError(ApiError error) {
+                        if (!isUsable()) return;
+                        setLoading(false);
+                        handleApiError(error);
+                    }
+                });
+    }
+
     private void createBackup() {
         setLoading(true);
         JSONObject body = new JSONObject();
@@ -529,9 +676,14 @@ public class AdminManagementActivity extends BaseActivity {
     }
 
     private void confirmSessionRevoke(FeatureItem item) {
+        JSONObject source = item == null ? new JSONObject() : item.getSource();
+        String account = SafeJson.string(source, "", "userEmail");
+        String ip = SafeJson.string(source, "", "ip");
+        String device = SafeJson.string(source, item == null ? "" : item.getTitle(), "device");
+        String target = (account + "\n" + device + (ip.isEmpty() ? "" : " • IP " + ip)).trim();
         new AlertDialog.Builder(this)
                 .setTitle("Thu hồi phiên đăng nhập")
-                .setMessage("Thiết bị này sẽ không thể làm mới phiên đăng nhập sau khi bị thu hồi.")
+                .setMessage(target + "\n\nThiết bị này sẽ không thể làm mới phiên đăng nhập sau khi bị thu hồi.")
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton("Thu hồi", (dialog, which) -> revokeSession(item))
                 .show();

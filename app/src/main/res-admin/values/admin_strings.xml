@@ -2,6 +2,18 @@
 <resources>
     <string name="admin_create_new">Tạo mới</string>
     <string name="admin_create_backup">Tạo sao lưu</string>
+    <string name="admin_send_notification">Gửi thông báo</string>
+    <string name="admin_notification_send_title">Thông báo cho người dùng</string>
+    <string name="admin_notification_audience">Gửi tới</string>
+    <string name="admin_notification_audience_all">Tất cả giáo viên và học sinh</string>
+    <string name="admin_notification_audience_students">Học sinh</string>
+    <string name="admin_notification_audience_teachers">Giáo viên</string>
+    <string name="admin_notification_title">Tiêu đề</string>
+    <string name="admin_notification_message">Nội dung dễ hiểu</string>
+    <string name="admin_notification_required">Vui lòng nhập đầy đủ tiêu đề và nội dung</string>
+    <string name="admin_notification_sent">Đã gửi thông báo tới %1$d người dùng</string>
+    <string name="admin_notification_read_all">Đọc tất cả</string>
+    <string name="admin_notification_read_all_done">Đã đánh dấu tất cả là đã đọc</string>
     <string name="admin_dashboard_title">SmartKid Admin</string>
     <string name="admin_dashboard_subtitle">Trung tâm quản trị hệ thống</string>
     <string name="admin_role_name">Quản trị viên</string>
@@ -159,7 +171,7 @@
     <string name="admin_security_rbac_note">Nguyên tắc cấp quyền cho quản trị viên và giáo viên</string>
 
     <string name="admin_config_form_title">Cấu hình vận hành</string>
-    <string name="admin_config_form_subtitle">Thiết lập nhận diện, tên miền, email, phiên đăng nhập và vận hành hệ thống.</string>
+    <string name="admin_config_form_subtitle">Thiết lập tên hệ thống, email gửi tin và thời gian lưu bản sao.</string>
     <string name="admin_config_general_title">Thông tin chung</string>
     <string name="admin_config_site_name">Tên hệ thống</string>
     <string name="admin_config_language">Ngôn ngữ</string>
@@ -175,7 +187,10 @@
     <string name="admin_config_smtp_username">Tài khoản SMTP</string>
     <string name="admin_config_sender_name">Tên người gửi</string>
     <string name="admin_config_from_email">Email người gửi</string>
-    <string name="admin_config_smtp_password_note">Mật khẩu SMTP là bí mật máy chủ và không hiển thị trong ứng dụng.</string>
+    <string name="admin_config_smtp_password_note">Mật khẩu SMTP là bí mật máy chủ. Hãy lưu thay đổi trước khi gửi email kiểm tra.</string>
+    <string name="admin_config_test_email">Gửi email kiểm tra</string>
+    <string name="admin_config_test_email_hint">Nhập email sẽ nhận thư kiểm tra</string>
+    <string name="admin_config_test_email_sent">Đã gửi email kiểm tra</string>
     <string name="admin_config_session_title">Đăng nhập và phiên</string>
     <string name="admin_config_idle_timeout">Tự khóa khi không hoạt động (phút)</string>
     <string name="admin_config_max_session">Thời lượng phiên tối đa (giờ)</string>
@@ -188,9 +203,9 @@
     <string name="admin_config_maintenance_day">Ngày trong tuần (0 Chủ nhật – 6 Thứ bảy)</string>
     <string name="admin_config_maintenance_start">Bắt đầu (HH:mm)</string>
     <string name="admin_config_maintenance_end">Kết thúc (HH:mm)</string>
-    <string name="admin_config_backup_title">Sao lưu và nhật ký</string>
+    <string name="admin_config_backup_title">Lưu trữ bản sao lưu</string>
     <string name="admin_config_backup_schedule">Lịch sao lưu</string>
-    <string name="admin_config_backup_retention">Lưu bản sao (ngày)</string>
+    <string name="admin_config_backup_retention">Tự xóa bản sao sau (ngày)</string>
     <string name="admin_config_backup_encrypted">Mã hóa bản sao lưu</string>
     <string name="admin_config_log_level">Mức ghi nhật ký</string>
     <string name="admin_config_log_retention">Lưu nhật ký (ngày)</string>
