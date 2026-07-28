@@ -31,7 +31,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Admin manages course state; each video itself can only be viewed or removed. */
+/** Admin can inspect course information and view or remove individual videos. */
 public final class AdminCourseVideosActivity extends BaseActivity {
     public static final String EXTRA_COURSE_ID = "admin_course_id";
     public static final String EXTRA_COURSE_TITLE = "admin_course_title";
@@ -48,11 +48,6 @@ public final class AdminCourseVideosActivity extends BaseActivity {
     private TextView courseStatus;
     private TextView empty;
     private LinearLayout videosContainer;
-    private MaterialButton approveCourseButton;
-    private MaterialButton rejectCourseButton;
-    private MaterialButton publishCourseButton;
-    private MaterialButton archiveCourseButton;
-    private String currentCourseTitle = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,15 +87,9 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         courseStatus = findViewById(R.id.textAdminCourseStatus);
         empty = findViewById(R.id.textAdminCourseVideoEmpty);
         videosContainer = findViewById(R.id.containerAdminCourseVideos);
-        approveCourseButton = findViewById(R.id.buttonAdminApproveCourse);
-        rejectCourseButton = findViewById(R.id.buttonAdminRejectCourse);
-        publishCourseButton = findViewById(R.id.buttonAdminPublishCourse);
-        archiveCourseButton = findViewById(R.id.buttonAdminArchiveCourse);
         if (toolbar == null || progress == null || content == null || status == null
                 || courseTitle == null || courseMeta == null || courseTeacher == null
-                || courseStatus == null || empty == null || videosContainer == null
-                || approveCourseButton == null || rejectCourseButton == null
-                || publishCourseButton == null || archiveCourseButton == null) {
+                || courseStatus == null || empty == null || videosContainer == null) {
             throw new IllegalStateException("Giao diện video khóa học chưa đầy đủ");
         }
         toolbar.setNavigationOnClickListener(view -> finish());
@@ -132,7 +121,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
     }
 
     private void bindCourse(JSONObject source) {
-        currentCourseTitle = SafeJson.string(source,
+        String currentCourseTitle = SafeJson.string(source,
                 getString(R.string.admin_course_fallback), "title");
         courseTitle.setText(currentCourseTitle);
         int lessons = SafeJson.integer(source, 0, "lessonsCount");
@@ -142,7 +131,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         courseTeacher.setText(teacher.isEmpty() ? ""
                 : getString(R.string.admin_course_video_teacher, teacher));
         courseTeacher.setVisibility(teacher.isEmpty() ? View.GONE : View.VISIBLE);
-        bindCourseActions(SafeJson.string(source, "draft", "status"));
+        bindCourseStatus(SafeJson.string(source, "draft", "status"));
 
         videos.clear();
         JSONArray sections = SafeJson.array(source, "sections");
@@ -171,86 +160,13 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         renderVideos();
     }
 
-    private void bindCourseActions(String rawStatus) {
+    private void bindCourseStatus(String rawStatus) {
         String normalized = safe(rawStatus).toLowerCase(java.util.Locale.ROOT);
         boolean published = "published".equals(normalized);
         boolean archived = "archived".equals(normalized);
         courseStatus.setText(getString(R.string.admin_course_status_value,
                 getString(archived ? R.string.status_archived
                         : published ? R.string.status_published : R.string.status_draft)));
-
-        approveCourseButton.setVisibility(published || archived ? View.GONE : View.VISIBLE);
-        rejectCourseButton.setVisibility(archived ? View.GONE : View.VISIBLE);
-        archiveCourseButton.setVisibility(archived ? View.GONE : View.VISIBLE);
-
-        approveCourseButton.setOnClickListener(view -> confirmCourseAction(
-                AdminCourseVideoActions.ACTION_APPROVE,
-                R.string.admin_course_approve,
-                R.string.admin_course_approve_confirm));
-        rejectCourseButton.setOnClickListener(view -> confirmCourseAction(
-                AdminCourseVideoActions.ACTION_REJECT,
-                R.string.admin_course_reject,
-                R.string.admin_course_reject_confirm));
-        archiveCourseButton.setOnClickListener(view -> confirmCourseAction(
-                AdminCourseVideoActions.ACTION_ARCHIVE,
-                R.string.admin_course_archive,
-                R.string.admin_course_archive_confirm));
-
-        if (archived) {
-            publishCourseButton.setText(R.string.admin_course_restore);
-            publishCourseButton.setOnClickListener(view -> confirmCourseAction(
-                    AdminCourseVideoActions.ACTION_RESTORE,
-                    R.string.admin_course_restore,
-                    R.string.admin_course_restore_confirm));
-        } else if (published) {
-            publishCourseButton.setText(R.string.admin_course_unpublish);
-            publishCourseButton.setOnClickListener(view -> confirmCourseAction(
-                    AdminCourseVideoActions.ACTION_UNPUBLISH,
-                    R.string.admin_course_unpublish,
-                    R.string.admin_course_unpublish_confirm));
-        } else {
-            publishCourseButton.setText(R.string.admin_course_publish);
-            publishCourseButton.setOnClickListener(view -> confirmCourseAction(
-                    AdminCourseVideoActions.ACTION_PUBLISH,
-                    R.string.admin_course_publish,
-                    R.string.admin_course_publish_confirm));
-        }
-    }
-
-    private void confirmCourseAction(String action, int titleRes, int messageRes) {
-        new AlertDialog.Builder(this)
-                .setTitle(titleRes)
-                .setMessage(getString(messageRes, currentCourseTitle))
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.admin_course_confirm_action,
-                        (dialog, which) -> performCourseAction(action, titleRes))
-                .show();
-    }
-
-    private void performCourseAction(String action, int actionLabelRes) {
-        setLoading(true, getString(R.string.admin_course_action_processing));
-        repository.action(Request.Method.POST,
-                AdminCourseVideoActions.courseActionEndpoint(courseId, action),
-                new JSONObject(), new ApiCallback<JSONObject>() {
-                    @Override
-                    public void onSuccess(JSONObject data) {
-                        if (!isUsable()) return;
-                        showShortMessage(getString(R.string.admin_course_action_success,
-                                getString(actionLabelRes)));
-                        loadCourse();
-                    }
-
-                    @Override
-                    public void onError(ApiError error) {
-                        if (!isUsable()) return;
-                        setLoading(false, "");
-                        if (error == null) {
-                            showErrorDialog(getString(R.string.admin_course_action_error));
-                        } else {
-                            handleApiError(error);
-                        }
-                    }
-                });
     }
 
     private void renderVideos() {

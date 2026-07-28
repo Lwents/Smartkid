@@ -253,7 +253,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 color(R.color.admin_cyan));
 
         LinearLayout content = findViewById(R.id.containerAdminContentActions);
-        addSectionAction(content, "admin_courses", "Quản lý khóa học",
+        addSectionAction(content, "admin_courses", "Khóa học và video",
                 getString(R.string.admin_action_courses_description), R.drawable.admin_ic_course,
                 color(R.color.admin_green));
         addSectionAction(content, "admin_report_content", "Báo cáo nội dung",
@@ -453,8 +453,8 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 R.drawable.admin_ic_users, 0xFF3B82F6, 0xFF60A5FA, active + " online"));
         tools.add(tool("admin_users", "Quản lý người dùng", "Phân quyền, đặt lại mật khẩu và khóa tài khoản",
                 R.drawable.admin_ic_users, 0xFF635BFF, 0xFF818CF8, ""));
-        tools.add(tool("admin_courses", "Quản lý khóa học",
-                "Duyệt, xuất bản, lưu trữ khóa học và xử lý video vi phạm",
+        tools.add(tool("admin_courses", "Khóa học và video",
+                "Xem thông tin khóa học, kiểm tra hoặc xóa video khi cần",
                 R.drawable.admin_ic_course, 0xFF10B981, 0xFF34D399, ""));
         tools.add(tool("admin_health", "Sức khỏe hệ thống",
                 "CPU " + cpu + "% • RAM " + ram + "% • Disk " + disk + "%",

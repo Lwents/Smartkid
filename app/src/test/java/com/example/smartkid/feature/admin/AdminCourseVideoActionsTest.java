@@ -14,10 +14,6 @@ public class AdminCourseVideoActionsTest {
                 AdminCourseVideoActions.courseDetailEndpoint(" course-1 "));
         assertEquals("admin/courses/course-1/lessons/lesson-2/video/",
                 AdminCourseVideoActions.deleteVideoEndpoint("course-1", "lesson-2"));
-        assertEquals("admin/courses/course-1/approve/",
-                AdminCourseVideoActions.courseActionEndpoint("course-1", "approve"));
-        assertEquals("admin/courses/course-1/archive/",
-                AdminCourseVideoActions.courseActionEndpoint("course-1", "archive"));
     }
 
     @Test
@@ -28,6 +24,6 @@ public class AdminCourseVideoActionsTest {
         assertThrows(IllegalArgumentException.class,
                 () -> AdminCourseVideoActions.deleteVideoEndpoint("", "lesson-2"));
         assertThrows(IllegalArgumentException.class,
-                () -> AdminCourseVideoActions.courseActionEndpoint("course-1", "delete"));
+                () -> AdminCourseVideoActions.deleteVideoEndpoint("course-1", ""));
     }
 }

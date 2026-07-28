@@ -434,7 +434,7 @@ public class AdminManagementActivity extends BaseActivity {
                 .setTitle(R.string.admin_user_role_confirm_title)
                 .setMessage(message)
                 .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.admin_course_confirm_action,
+                .setPositiveButton(R.string.admin_confirm_action,
                         (dialog, which) -> updateUserRole(item, role))
                 .show();
     }
@@ -717,7 +717,7 @@ public class AdminManagementActivity extends BaseActivity {
                 .setMessage(getString(R.string.admin_user_status_confirm,
                         label, item.getTitle()))
                 .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.admin_course_confirm_action,
+                .setPositiveButton(R.string.admin_confirm_action,
                         (dialog, which) -> updateUserStatus(item, activate))
                 .show();
     }
