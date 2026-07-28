@@ -50,6 +50,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
     private LinearLayout videosContainer;
     private MaterialButton deleteCourseButton;
     private String currentCourseTitle = "";
+    private int totalLessons;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,9 +130,10 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         currentCourseTitle = SafeJson.string(source,
                 getString(R.string.admin_course_fallback), "title");
         courseTitle.setText(currentCourseTitle);
-        int lessons = SafeJson.integer(source, 0, "lessonsCount");
+        totalLessons = SafeJson.integer(source, 0, "lessonsCount");
         int enrollments = SafeJson.integer(source, 0, "enrollments");
-        courseMeta.setText(getString(R.string.admin_course_video_meta, lessons, enrollments));
+        courseMeta.setText(getString(
+                R.string.admin_course_video_meta, totalLessons, enrollments));
         String teacher = SafeJson.string(source, "", "teacherName");
         courseTeacher.setText(teacher.isEmpty() ? ""
                 : getString(R.string.admin_course_video_teacher, teacher));
@@ -213,6 +215,11 @@ public final class AdminCourseVideosActivity extends BaseActivity {
     private void renderVideos() {
         videosContainer.removeAllViews();
         empty.setVisibility(videos.isEmpty() ? View.VISIBLE : View.GONE);
+        if (videos.isEmpty()) {
+            empty.setText(totalLessons > 0
+                    ? getString(R.string.admin_course_video_empty_with_lessons, totalLessons)
+                    : getString(R.string.admin_course_video_empty));
+        }
         for (VideoEntry video : videos) {
             View row = LayoutInflater.from(this).inflate(
                     R.layout.admin_item_course_video, videosContainer, false);

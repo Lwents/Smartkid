@@ -91,7 +91,8 @@
     <string name="admin_course_video_policy">Admin có thể xem hoặc xóa khóa học. Với từng video, admin có thể mở để kiểm tra hoặc xóa khi cần.</string>
     <string name="admin_course_video_section_title">Danh sách video</string>
     <string name="admin_course_video_section_subtitle">Mở video để kiểm tra nội dung trước khi quyết định xóa.</string>
-    <string name="admin_course_video_empty">Khóa học này chưa có video nào.</string>
+    <string name="admin_course_video_empty">Khóa học này chưa có bài học hoặc video.</string>
+    <string name="admin_course_video_empty_with_lessons">Khóa học có %1$d bài học nhưng chưa bài nào có video.</string>
     <string name="admin_course_video_item_meta">%1$s • %2$s • %3$s</string>
     <string name="admin_course_video_source_file">Video tải lên</string>
     <string name="admin_course_video_source_link">Video liên kết</string>
