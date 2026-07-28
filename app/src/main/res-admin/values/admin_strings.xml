@@ -65,7 +65,7 @@
     <string name="admin_action_manage_users_description">Phân quyền, đặt lại mật khẩu, khóa và mở khóa tài khoản</string>
     <string name="admin_action_active_users_description">Theo dõi người dùng trực tuyến gần đây</string>
     <string name="admin_action_security_description">Kiểm tra chính sách và cảnh báo bảo mật</string>
-    <string name="admin_action_courses_description">Xem khóa học và kiểm tra video khi cần</string>
+    <string name="admin_action_courses_description">Xem hoặc xóa khóa học, kiểm tra video khi cần</string>
     <string name="admin_action_report_content_description">Đánh giá hiệu quả và mức độ tương tác</string>
     <string name="admin_action_report_learning_description">Tiến độ, điểm số và thời gian học</string>
     <string name="admin_confirm_action">Xác nhận</string>
@@ -81,7 +81,14 @@
     <string name="admin_course_video_meta">%1$d bài học • %2$d học sinh đang học</string>
     <string name="admin_course_video_teacher">Giáo viên: %1$s</string>
     <string name="admin_course_status_value">Trạng thái: %1$s</string>
-    <string name="admin_course_video_policy">Admin chỉ xem thông tin khóa học. Với từng video, admin có thể mở để kiểm tra hoặc xóa khi cần.</string>
+    <string name="admin_course_delete">Xóa khóa học</string>
+    <string name="admin_course_delete_title">Xóa khóa học này?</string>
+    <string name="admin_course_delete_message">Khóa học “%1$s” cùng các chương, bài học, tiến độ và lượt ghi danh liên quan sẽ bị xóa. Thao tác này không thể hoàn tác.</string>
+    <string name="admin_course_delete_confirm">Xóa khóa học</string>
+    <string name="admin_course_deleting">Đang xóa khóa học…</string>
+    <string name="admin_course_deleted">Đã xóa khóa học</string>
+    <string name="admin_course_delete_error">Không thể xóa khóa học lúc này</string>
+    <string name="admin_course_video_policy">Admin có thể xem hoặc xóa khóa học. Với từng video, admin có thể mở để kiểm tra hoặc xóa khi cần.</string>
     <string name="admin_course_video_section_title">Danh sách video</string>
     <string name="admin_course_video_section_subtitle">Mở video để kiểm tra nội dung trước khi quyết định xóa.</string>
     <string name="admin_course_video_empty">Khóa học này chưa có video nào.</string>

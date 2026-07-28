@@ -454,7 +454,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         tools.add(tool("admin_users", "Quản lý người dùng", "Phân quyền, đặt lại mật khẩu và khóa tài khoản",
                 R.drawable.admin_ic_users, 0xFF635BFF, 0xFF818CF8, ""));
         tools.add(tool("admin_courses", "Khóa học và video",
-                "Xem thông tin khóa học, kiểm tra hoặc xóa video khi cần",
+                "Xem hoặc xóa khóa học, kiểm tra và xóa video khi cần",
                 R.drawable.admin_ic_course, 0xFF10B981, 0xFF34D399, ""));
         tools.add(tool("admin_health", "Sức khỏe hệ thống",
                 "CPU " + cpu + "% • RAM " + ram + "% • Disk " + disk + "%",

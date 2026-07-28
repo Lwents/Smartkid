@@ -31,7 +31,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Admin can inspect course information and view or remove individual videos. */
+/** Admin can inspect or remove a course, and view or remove individual videos. */
 public final class AdminCourseVideosActivity extends BaseActivity {
     public static final String EXTRA_COURSE_ID = "admin_course_id";
     public static final String EXTRA_COURSE_TITLE = "admin_course_title";
@@ -48,6 +48,8 @@ public final class AdminCourseVideosActivity extends BaseActivity {
     private TextView courseStatus;
     private TextView empty;
     private LinearLayout videosContainer;
+    private MaterialButton deleteCourseButton;
+    private String currentCourseTitle = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +89,15 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         courseStatus = findViewById(R.id.textAdminCourseStatus);
         empty = findViewById(R.id.textAdminCourseVideoEmpty);
         videosContainer = findViewById(R.id.containerAdminCourseVideos);
+        deleteCourseButton = findViewById(R.id.buttonAdminDeleteCourse);
         if (toolbar == null || progress == null || content == null || status == null
                 || courseTitle == null || courseMeta == null || courseTeacher == null
-                || courseStatus == null || empty == null || videosContainer == null) {
+                || courseStatus == null || empty == null || videosContainer == null
+                || deleteCourseButton == null) {
             throw new IllegalStateException("Giao diện video khóa học chưa đầy đủ");
         }
         toolbar.setNavigationOnClickListener(view -> finish());
+        deleteCourseButton.setOnClickListener(view -> confirmDeleteCourse());
         String title = getIntent().getStringExtra(EXTRA_COURSE_TITLE);
         toolbar.setTitle(safe(title).isEmpty()
                 ? getString(R.string.admin_course_videos_title) : title);
@@ -121,7 +126,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
     }
 
     private void bindCourse(JSONObject source) {
-        String currentCourseTitle = SafeJson.string(source,
+        currentCourseTitle = SafeJson.string(source,
                 getString(R.string.admin_course_fallback), "title");
         courseTitle.setText(currentCourseTitle);
         int lessons = SafeJson.integer(source, 0, "lessonsCount");
@@ -167,6 +172,42 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         courseStatus.setText(getString(R.string.admin_course_status_value,
                 getString(archived ? R.string.status_archived
                         : published ? R.string.status_published : R.string.status_draft)));
+    }
+
+    private void confirmDeleteCourse() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.admin_course_delete_title)
+                .setMessage(getString(R.string.admin_course_delete_message, currentCourseTitle))
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.admin_course_delete_confirm,
+                        (dialog, which) -> deleteCourse())
+                .show();
+    }
+
+    private void deleteCourse() {
+        setLoading(true, getString(R.string.admin_course_deleting));
+        repository.action(Request.Method.DELETE,
+                AdminCourseVideoActions.deleteCourseEndpoint(courseId),
+                new JSONObject(), new ApiCallback<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject data) {
+                        if (!isUsable()) return;
+                        showShortMessage(getString(R.string.admin_course_deleted));
+                        setResult(RESULT_OK);
+                        finish();
+                    }
+
+                    @Override
+                    public void onError(ApiError error) {
+                        if (!isUsable()) return;
+                        setLoading(false, "");
+                        if (error == null) {
+                            showErrorDialog(getString(R.string.admin_course_delete_error));
+                        } else {
+                            handleApiError(error);
+                        }
+                    }
+                });
     }
 
     private void renderVideos() {

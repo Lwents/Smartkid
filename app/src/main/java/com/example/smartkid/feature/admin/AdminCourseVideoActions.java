@@ -9,6 +9,10 @@ public final class AdminCourseVideoActions {
         return "admin/courses/" + requiredId(courseId) + "/";
     }
 
+    public static String deleteCourseEndpoint(String courseId) {
+        return courseDetailEndpoint(courseId);
+    }
+
     public static String deleteVideoEndpoint(String courseId, String lessonId) {
         return "admin/courses/" + requiredId(courseId)
                 + "/lessons/" + requiredId(lessonId) + "/video/";
