@@ -469,7 +469,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         TextInputLayout layout = form.findViewById(R.id.layoutAdminTestEmail);
         TextInputEditText input = form.findViewById(R.id.inputAdminTestEmail);
         if (layout == null || input == null) {
-            showErrorDialog(getString(R.string.admin_settings_save_error));
+            showErrorDialog(getString(R.string.admin_config_test_email_error));
             return;
         }
         input.setText(text(configFromEmail));
@@ -504,12 +504,15 @@ public final class AdminSettingsActivity extends BaseActivity {
 
                         @Override public void onError(ApiError error) {
                             if (!isUsable()) return;
-                            setLoading(false, getString(R.string.admin_settings_save_error));
+                            setLoading(false, getString(R.string.admin_config_test_email_error));
                             handleApiError(error);
                         }
                     });
         } catch (Exception exception) {
-            failSave(exception);
+            AppLogger.error(this, "AdminSettingsActivity",
+                    "Không thể chuẩn bị email kiểm tra", exception);
+            setLoading(false, getString(R.string.admin_config_test_email_error));
+            showErrorDialog(getString(R.string.admin_config_test_email_error));
         }
     }
 

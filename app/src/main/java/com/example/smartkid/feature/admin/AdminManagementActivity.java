@@ -2,6 +2,8 @@ package com.example.smartkid.feature.admin;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -42,6 +44,7 @@ import com.example.smartkid.common.util.SwipeRefreshFix;
 /** Admin-owned management list backed by real APIs, with admin-only actions. */
 public class AdminManagementActivity extends BaseActivity {
     public static final String EXTRA_SPEC_KEY = "admin_spec_key";
+    private static final long REALTIME_REFRESH_MS = 30_000L;
 
     private FeatureSpec spec;
     private ManagementRepository repository;
@@ -51,6 +54,18 @@ public class AdminManagementActivity extends BaseActivity {
     private View refreshButton;
     private SwipeRefreshLayout refreshLayout;
     private String currentSearchQuery = "";
+    private boolean loadFailed;
+    private boolean loading;
+    private int loadGeneration;
+    private final Handler realtimeHandler = new Handler(Looper.getMainLooper());
+    private final Runnable realtimeRefreshTask = new Runnable() {
+        @Override
+        public void run() {
+            if (!isUsable() || !supportsRealtimeRefresh()) return;
+            if (!loading) loadSafely(true);
+            realtimeHandler.postDelayed(this, REALTIME_REFRESH_MS);
+        }
+    };
 
     @Override
     public void finish() {
@@ -62,6 +77,27 @@ public class AdminManagementActivity extends BaseActivity {
     protected void onRestart() {
         super.onRestart();
         if (repository != null && spec != null && spec.isAvailable()) loadSafely();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        realtimeHandler.removeCallbacks(realtimeRefreshTask);
+        if (supportsRealtimeRefresh()) {
+            realtimeHandler.postDelayed(realtimeRefreshTask, REALTIME_REFRESH_MS);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        realtimeHandler.removeCallbacks(realtimeRefreshTask);
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        realtimeHandler.removeCallbacks(realtimeRefreshTask);
+        super.onDestroy();
     }
 
     @Override
@@ -99,7 +135,6 @@ public class AdminManagementActivity extends BaseActivity {
             toolbar.setNavigationOnClickListener(view -> finish());
             refreshLayout.setOnRefreshListener(this::loadSafely);
             configurePrimaryAction(toolbar);
-            emptyText.setText(R.string.no_server_data);
             adapter = new FeatureItemAdapter(this);
             list.setAdapter(adapter);
             list.setEmptyView(emptyText);
@@ -109,6 +144,7 @@ public class AdminManagementActivity extends BaseActivity {
                 @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                     currentSearchQuery = s == null ? "" : s.toString();
                     adapter.filter(currentSearchQuery);
+                    updateEmptyState();
                 }
                 @Override public void afterTextChanged(Editable s) { }
             });
@@ -169,6 +205,10 @@ public class AdminManagementActivity extends BaseActivity {
         return "admin_notifications".equals(spec == null ? "" : spec.getKey());
     }
 
+    private boolean supportsRealtimeRefresh() {
+        return AdminManagementSpec.isRealtimeList(spec == null ? "" : spec.getKey());
+    }
+
     private void openCreate() {
         try {
             startActivity(new Intent(this, AdminUserCreateActivity.class));
@@ -179,23 +219,83 @@ public class AdminManagementActivity extends BaseActivity {
     }
 
     private void loadSafely() {
-        setLoading(true);
+        loadSafely(false);
+    }
+
+    private void loadSafely(boolean quiet) {
+        int generation = ++loadGeneration;
+        loadFailed = false;
+        if (quiet) {
+            loading = true;
+        } else {
+            setLoading(true);
+        }
+        if (supportsNotifications()) {
+            loadNotifications(generation);
+            return;
+        }
         repository.load(spec.getEndpoint(), new ApiCallback<List<FeatureItem>>() {
             @Override
             public void onSuccess(List<FeatureItem> data) {
-                if (!isUsable()) return;
-                setLoading(false);
-                adapter.setItems(data);
-                adapter.filter(currentSearchQuery);
+                if (!isCurrentLoad(generation)) return;
+                showLoadedItems(data);
             }
 
             @Override
             public void onError(ApiError error) {
-                if (!isUsable()) return;
-                setLoading(false);
-                handleApiError(error);
+                if (!isCurrentLoad(generation)) return;
+                showLoadError(error, quiet);
             }
         });
+    }
+
+    /** Hộp thư admin và lịch sử gửi nằm ở hai API thật, nên ghép chúng thành một danh sách. */
+    private void loadNotifications(int generation) {
+        NotificationLoadResult result = new NotificationLoadResult(generation);
+        loadNotificationSource(spec.getEndpoint(), result);
+        loadNotificationSource(AdminManagementSpec.notificationHistoryEndpoint(), result);
+    }
+
+    private void loadNotificationSource(String endpoint, NotificationLoadResult result) {
+        repository.load(endpoint, new ApiCallback<List<FeatureItem>>() {
+            @Override
+            public void onSuccess(List<FeatureItem> data) {
+                result.complete(data, null);
+            }
+
+            @Override
+            public void onError(ApiError error) {
+                result.complete(null, error);
+            }
+        });
+    }
+
+    private void showLoadedItems(List<FeatureItem> data) {
+        loadFailed = false;
+        setLoading(false);
+        adapter.setItems(data);
+        adapter.filter(currentSearchQuery);
+        updateEmptyState();
+    }
+
+    private void showLoadError(ApiError error) {
+        showLoadError(error, false);
+    }
+
+    private void showLoadError(ApiError error, boolean quiet) {
+        if (quiet && adapter != null && adapter.getCount() > 0) {
+            loadFailed = false;
+            setLoading(false);
+            return;
+        }
+        loadFailed = true;
+        setLoading(false);
+        updateEmptyState();
+        if (!quiet) handleApiError(error);
+    }
+
+    private boolean isCurrentLoad(int generation) {
+        return generation == loadGeneration && isUsable();
     }
 
     private void showItem(FeatureItem item) {
@@ -205,7 +305,7 @@ public class AdminManagementActivity extends BaseActivity {
                 openCourseVideos(item);
                 return;
             }
-            if ("admin_notifications".equals(spec.getKey())) {
+            if (supportsNotifications() && item.getSource().has("is_read")) {
                 markNotificationRead(item);
             }
             AlertDialog.Builder builder = new AlertDialog.Builder(this)
@@ -278,11 +378,28 @@ public class AdminManagementActivity extends BaseActivity {
         } else if (specKey.startsWith("admin_report")) {
             appendLine(detail, "Giá trị", item.getSubtitle());
         } else if ("admin_notifications".equals(specKey)) {
-            appendLine(detail, "", SafeJson.string(source, item.getDetail(), "message"));
-            appendLine(detail, "Nhóm", item.getSubtitle());
-            appendLine(detail, "Trạng thái",
-                    SafeJson.bool(source, false, "is_read", "isRead") ? "Đã đọc" : "Chưa đọc");
-            appendLine(detail, "Thời gian", shortTime(SafeJson.string(source, "", "created_at")));
+            if ("notification.broadcast".equals(SafeJson.string(source, "", "action"))) {
+                JSONObject history = source.optJSONObject("details");
+                appendLine(detail, getString(R.string.admin_notification_history_sender),
+                        SafeJson.string(source, "", "userEmail"));
+                appendLine(detail, getString(R.string.admin_notification_history_audience),
+                        notificationAudienceDisplay(
+                                SafeJson.string(history, "all", "audience")));
+                appendLine(detail, getString(R.string.admin_notification_history_recipients),
+                        getString(R.string.admin_notification_history_recipient_count,
+                                SafeJson.integer(history, 0, "recipientCount")));
+                appendLine(detail, "Trạng thái", item.getStatus());
+                appendLine(detail, "Thời gian",
+                        shortTime(SafeJson.string(source, "", "timestamp")));
+            } else {
+                appendLine(detail, "", SafeJson.string(source, item.getDetail(), "message"));
+                appendLine(detail, "Nhóm", item.getSubtitle());
+                appendLine(detail, "Trạng thái",
+                        SafeJson.bool(source, false, "is_read", "isRead")
+                                ? "Đã đọc" : "Chưa đọc");
+                appendLine(detail, "Thời gian",
+                        shortTime(SafeJson.string(source, "", "created_at")));
+            }
         } else if ("admin_activity".equals(specKey)) {
             appendLine(detail, "Người thực hiện", SafeJson.string(source, "", "userEmail"));
             appendLine(detail, "Thời gian", shortTime(SafeJson.string(source, "", "timestamp")));
@@ -604,6 +721,16 @@ public class AdminManagementActivity extends BaseActivity {
         return "all";
     }
 
+    private String notificationAudienceDisplay(String audience) {
+        if ("student".equals(audience)) {
+            return getString(R.string.admin_notification_audience_students);
+        }
+        if ("instructor".equals(audience) || "teacher".equals(audience)) {
+            return getString(R.string.admin_notification_audience_teachers);
+        }
+        return getString(R.string.admin_notification_audience_all);
+    }
+
     private void sendNotification(String title, String message, String audience) {
         try {
             JSONObject body = new JSONObject()
@@ -617,7 +744,9 @@ public class AdminManagementActivity extends BaseActivity {
                         @Override public void onSuccess(JSONObject data) {
                             if (!isUsable()) return;
                             int count = SafeJson.integer(data, 0, "created_count");
-                            showShortMessage(getString(R.string.admin_notification_sent, count));
+                            showShortMessage(count > 0
+                                    ? getString(R.string.admin_notification_sent, count)
+                                    : getString(R.string.admin_notification_sent_none));
                             loadSafely();
                         }
 
@@ -630,7 +759,8 @@ public class AdminManagementActivity extends BaseActivity {
         } catch (Exception exception) {
             AppLogger.error(this, "AdminManagementActivity",
                     "Không thể chuẩn bị thông báo", exception);
-            showErrorDialog("Không thể gửi thông báo");
+            setLoading(false);
+            showErrorDialog(getString(R.string.admin_notification_send_error));
         }
     }
 
@@ -640,7 +770,10 @@ public class AdminManagementActivity extends BaseActivity {
                 new JSONObject(), new ApiCallback<JSONObject>() {
                     @Override public void onSuccess(JSONObject data) {
                         if (!isUsable()) return;
-                        showShortMessage(getString(R.string.admin_notification_read_all_done));
+                        int count = SafeJson.integer(data, 0, "updated_count");
+                        showShortMessage(getString(count > 0
+                                ? R.string.admin_notification_read_all_done
+                                : R.string.admin_notification_read_all_none));
                         loadSafely();
                     }
 
@@ -774,14 +907,93 @@ public class AdminManagementActivity extends BaseActivity {
         return role == null ? "" : role.trim().toLowerCase(java.util.Locale.ROOT);
     }
 
+    private void updateEmptyState() {
+        if (emptyText == null || adapter == null) return;
+        if (loading) {
+            emptyText.setVisibility(View.GONE);
+            return;
+        }
+        int message = emptyMessage();
+        if (loadFailed) {
+            message = R.string.admin_empty_load_error;
+        } else if (!currentSearchQuery.trim().isEmpty()
+                && adapter.getUnfilteredCount() > 0 && adapter.getCount() == 0) {
+            message = R.string.admin_empty_search;
+        }
+        emptyText.setText(message);
+        emptyText.setVisibility(adapter.getCount() == 0 ? View.VISIBLE : View.GONE);
+    }
+
+    private int emptyMessage() {
+        String key = spec == null ? "" : spec.getKey();
+        switch (key) {
+            case "admin_active_users": return R.string.admin_empty_active_users;
+            case "admin_users": return R.string.admin_empty_users;
+            case "admin_courses": return R.string.admin_empty_courses;
+            case "admin_activity": return R.string.admin_empty_activity;
+            case "admin_sessions": return R.string.admin_empty_sessions;
+            case "admin_backups": return R.string.admin_empty_backups;
+            case "admin_notifications": return R.string.admin_empty_notifications;
+            case "admin_health": return R.string.admin_empty_health;
+            case "admin_report_learning": return R.string.admin_empty_learning_report;
+            case "admin_report_content": return R.string.admin_empty_content_report;
+            case "admin_dashboard": return R.string.admin_empty_dashboard;
+            default: return R.string.admin_empty_generic;
+        }
+    }
+
     private void setLoading(boolean loading) {
+        this.loading = loading;
         if (!loading && refreshLayout != null) {
             refreshLayout.setRefreshing(false);
         }
         boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
         progressBar.setVisibility(loading && !swiping ? View.VISIBLE : View.GONE);
         refreshButton.setEnabled(!loading);
+        if (loading && adapter != null && adapter.getCount() == 0 && emptyText != null) {
+            emptyText.setVisibility(View.GONE);
+        }
     }
 
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
+
+    private final class NotificationLoadResult {
+        private final int generation;
+        private final List<FeatureItem> items = new ArrayList<>();
+        private int remaining = 2;
+        private int successes;
+        private ApiError error;
+
+        NotificationLoadResult(int generation) {
+            this.generation = generation;
+        }
+
+        void complete(List<FeatureItem> data, ApiError sourceError) {
+            if (!isCurrentLoad(generation)) return;
+            if (sourceError == null) {
+                successes++;
+                if (data != null) items.addAll(data);
+            } else if (error == null) {
+                error = sourceError;
+            }
+            remaining--;
+            if (remaining > 0) return;
+
+            if (successes == 0 || (items.isEmpty() && error != null)) {
+                showLoadError(error);
+                return;
+            }
+            items.sort((first, second) -> notificationTimestamp(second)
+                    .compareTo(notificationTimestamp(first)));
+            showLoadedItems(items);
+            if (error != null) {
+                showShortMessage(getString(R.string.admin_notification_partial_load));
+            }
+        }
+    }
+
+    private String notificationTimestamp(FeatureItem item) {
+        JSONObject source = item == null ? null : item.getSource();
+        return SafeJson.string(source, "", "created_at", "timestamp", "createdAt");
+    }
 }

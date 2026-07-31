@@ -20,7 +20,7 @@ public final class AdminDashboardData {
         this.activeUsers = activeUsers == null ? new ActiveUsers(0, 10) : activeUsers;
         this.security = security == null ? new Security(0, 0, 0) : security;
         this.systemHealth = systemHealth == null
-                ? new SystemHealth(0, 0, 0, "", "") : systemHealth;
+                ? new SystemHealth(-1, -1, -1, "", "") : systemHealth;
     }
 
     public Kpis getKpis() { return kpis; }
@@ -114,9 +114,9 @@ public final class AdminDashboardData {
 
         public SystemHealth(int cpuPercent, int ramPercent, int diskPercent,
                             String backupLastRun, String backupStatus) {
-            this.cpuPercent = clamp(cpuPercent);
-            this.ramPercent = clamp(ramPercent);
-            this.diskPercent = clamp(diskPercent);
+            this.cpuPercent = normalizeMetric(cpuPercent);
+            this.ramPercent = normalizeMetric(ramPercent);
+            this.diskPercent = normalizeMetric(diskPercent);
             this.backupLastRun = safe(backupLastRun);
             this.backupStatus = safe(backupStatus);
         }
@@ -127,7 +127,9 @@ public final class AdminDashboardData {
         public String getBackupLastRun() { return backupLastRun; }
         public String getBackupStatus() { return backupStatus; }
 
-        private static int clamp(int value) { return Math.max(0, Math.min(100, value)); }
+        private static int normalizeMetric(int value) {
+            return value < 0 ? -1 : Math.min(100, value);
+        }
     }
 
     public static final class ActivityPoint {

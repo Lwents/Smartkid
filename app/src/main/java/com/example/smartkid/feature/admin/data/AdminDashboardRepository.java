@@ -97,7 +97,8 @@ public final class AdminDashboardRepository {
                 SafeJson.integer(security, 0, "sslDaysToExpire"));
 
         AdminDashboardData.SystemHealth parsedSystem = new AdminDashboardData.SystemHealth(
-                rounded(system, "cpuP95"), rounded(system, "ramP95"), rounded(system, "disk"),
+                roundedMetric(system, "cpuP95"), roundedMetric(system, "ramP95"),
+                roundedMetric(system, "disk"),
                 SafeJson.string(backup, "Chưa có", "lastRun"),
                 SafeJson.string(backup, "Chưa có bản sao lưu", "status"));
 
@@ -124,7 +125,8 @@ public final class AdminDashboardRepository {
         return value == null ? new JSONObject() : value;
     }
 
-    private static int rounded(JSONObject object, String key) {
-        return (int) Math.round(SafeJson.decimal(object, 0, key));
+    private static int roundedMetric(JSONObject object, String key) {
+        if (object == null || !object.has(key) || object.isNull(key)) return -1;
+        return (int) Math.round(SafeJson.decimal(object, -1, key));
     }
 }

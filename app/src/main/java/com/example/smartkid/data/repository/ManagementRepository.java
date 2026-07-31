@@ -524,6 +524,18 @@ public class ManagementRepository {
                     SafeJson.string(item, "", "message"),
                     isRead ? "Đã đọc" : "Chưa đọc", item);
         }
+        // Lịch sử gửi thông báo được backend lưu trong nhật ký quản trị.
+        if ("notification.broadcast".equals(SafeJson.string(item, "", "action"))) {
+            JSONObject details = item.optJSONObject("details");
+            String audience = SafeJson.string(details, "all", "audience");
+            int recipients = SafeJson.integer(details, 0, "recipientCount");
+            return new FeatureItem(id,
+                    SafeJson.string(details, "Thông báo đã gửi", "title"),
+                    notificationAudienceLabel(audience),
+                    recipients + " người nhận • "
+                            + shortTime(SafeJson.string(item, "", "timestamp")),
+                    notificationDeliveryStatus(recipients), item);
+        }
         // Nhật ký hoạt động: hành động + người thực hiện + thời gian
         if (item.has("action") && item.has("userEmail")) {
             return new FeatureItem(id,
@@ -599,12 +611,15 @@ public class ManagementRepository {
         }
         // Người dùng đang hoạt động: tên + vai trò/email + lần hoạt động gần nhất
         if (item.has("lastActive") && item.has("name")) {
-            String roleLabel = SafeJson.string(item, "", "roleLabel", "role");
-            String email = SafeJson.string(item, "", "email");
-            return new FeatureItem(id,
+            ActiveUserPresentation presentation = activeUserPresentation(
                     SafeJson.string(item, "Người dùng", "name"),
-                    roleLabel + (email.isEmpty() || roleLabel.isEmpty() ? email : " • " + email),
-                    "Hoạt động: " + shortTime(SafeJson.string(item, "", "lastActive")),
+                    SafeJson.string(item, "", "roleLabel", "role"),
+                    SafeJson.string(item, "", "email"),
+                    SafeJson.string(item, "", "lastActive"));
+            return new FeatureItem(id,
+                    presentation.title,
+                    presentation.subtitle,
+                    presentation.detail,
                     "", item);
         }
         // Phiên đăng nhập: thiết bị + IP/vị trí + hoạt động gần nhất
@@ -688,6 +703,15 @@ public class ManagementRepository {
         }
     }
 
+    private String notificationAudienceLabel(String audience) {
+        switch (audience) {
+            case "student": return "Học sinh";
+            case "instructor":
+            case "teacher": return "Giáo viên";
+            default: return "Tất cả giáo viên và học sinh";
+        }
+    }
+
     /** Nhận biết JSON đang là bài kiểm tra dựa vào trường type. */
     private boolean isExerciseType(String type) {
         return "mcq".equals(type) || "short_answer".equals(type) || "matching".equals(type);
@@ -740,12 +764,13 @@ public class ManagementRepository {
             case "system.backup.create": return "Tạo bản sao lưu";
             case "security.policy.update": return "Cập nhật chính sách bảo mật";
             case "security.session.revoke": return "Thu hồi phiên đăng nhập";
+            case "notification.broadcast": return "Gửi thông báo";
             default: return action.isEmpty() ? "Hoạt động" : action;
         }
     }
 
     /** "2026-07-26T10:42:59...+00:00" (UTC) -> "26/07/2026 17:42" theo giờ máy. */
-    private String shortTime(String isoValue) {
+    private static String shortTime(String isoValue) {
         if (isoValue == null || isoValue.trim().isEmpty()) return "";
         String raw = isoValue.trim();
         try {
@@ -759,6 +784,39 @@ public class ManagementRepository {
             return parsed == null ? raw : printer.format(parsed);
         } catch (Exception ignored) {
             return raw.replace('T', ' ');
+        }
+    }
+
+    static ActiveUserPresentation activeUserPresentation(
+            String name, String roleLabel, String email, String lastActive) {
+        String safeName = clean(name);
+        String safeRole = clean(roleLabel);
+        String safeEmail = clean(email);
+        String subtitle = safeRole
+                + (safeEmail.isEmpty() || safeRole.isEmpty() ? safeEmail : " • " + safeEmail);
+        return new ActiveUserPresentation(
+                safeName.isEmpty() ? "Người dùng" : safeName,
+                subtitle,
+                "Hoạt động: " + shortTime(lastActive));
+    }
+
+    static String notificationDeliveryStatus(int recipients) {
+        return recipients > 0 ? "Đã gửi" : "Không có người nhận";
+    }
+
+    private static String clean(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    static final class ActiveUserPresentation {
+        final String title;
+        final String subtitle;
+        final String detail;
+
+        ActiveUserPresentation(String title, String subtitle, String detail) {
+            this.title = title;
+            this.subtitle = subtitle;
+            this.detail = detail;
         }
     }
 }

@@ -69,13 +69,16 @@
                 android:dividerHeight="9dp"
                 android:paddingBottom="14dp" />
             <TextView
-                android:background="@null"
                 android:id="@+id/textFeatureListEmpty"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@null"
+                android:drawablePadding="14dp"
                 android:gravity="center"
                 android:padding="24dp"
-                android:textColor="@color/smartkid_text_secondary" />
+                android:textColor="@color/smartkid_text_secondary"
+                android:textSize="14sp"
+                app:drawableTopCompat="@drawable/common_ic_empty_state" />
         </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

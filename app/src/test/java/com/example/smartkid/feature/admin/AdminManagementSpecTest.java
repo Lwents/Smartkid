@@ -1,6 +1,8 @@
 package com.example.smartkid.feature.admin;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.example.smartkid.common.ui.FeatureSpec;
 
@@ -19,5 +21,9 @@ public class AdminManagementSpecTest {
         assertEquals("admin/system/backups/", backups.getEndpoint());
         assertEquals("admin_courses", courses.getActionKind());
         assertEquals("admin/courses/?page=1&pageSize=100", courses.getEndpoint());
+        assertEquals("admin/activity-logs/?action=notification.broadcast&page=1&pageSize=100",
+                AdminManagementSpec.notificationHistoryEndpoint());
+        assertTrue(AdminManagementSpec.isRealtimeList("admin_active_users"));
+        assertFalse(AdminManagementSpec.isRealtimeList("admin_users"));
     }
 }

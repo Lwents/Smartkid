@@ -154,12 +154,14 @@
                 android:id="@+id/textAdminCourseVideoEmpty"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
+                android:drawablePadding="12dp"
                 android:gravity="center"
                 android:padding="24dp"
                 android:text="@string/admin_course_video_empty"
                 android:textColor="@color/admin_text_secondary"
                 android:textSize="14sp"
-                android:visibility="gone" />
+                android:visibility="gone"
+                app:drawableTopCompat="@drawable/common_ic_empty_state" />
 
             <LinearLayout
                 android:id="@+id/containerAdminCourseVideos"

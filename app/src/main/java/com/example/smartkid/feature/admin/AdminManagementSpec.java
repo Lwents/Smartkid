@@ -9,6 +9,8 @@ import java.util.Map;
 
 /** Typed registry of Admin-owned management features and their real API endpoints. */
 public final class AdminManagementSpec {
+    private static final String NOTIFICATION_HISTORY_ENDPOINT =
+            "admin/activity-logs/?action=notification.broadcast&page=1&pageSize=100";
     private static final Map<String, FeatureSpec> SPECS;
 
     static {
@@ -33,6 +35,13 @@ public final class AdminManagementSpec {
 
     public static FeatureSpec get(String key) { return SPECS.get(key); }
     public static Map<String, FeatureSpec> all() { return SPECS; }
+    public static String notificationHistoryEndpoint() {
+        return NOTIFICATION_HISTORY_ENDPOINT;
+    }
+
+    public static boolean isRealtimeList(String key) {
+        return "admin_active_users".equals(key);
+    }
 
     private static void add(Map<String, FeatureSpec> target, String key, String title,
                             String endpoint, String actionKind) {

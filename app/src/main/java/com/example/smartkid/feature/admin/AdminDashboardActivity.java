@@ -442,23 +442,27 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     }
 
     private List<ToolSpec> tools(AdminDashboardData data) {
+        boolean loaded = data != null;
         int active = data == null ? 0 : data.getActiveUsers().getCount();
         int window = data == null ? 10 : data.getActiveUsers().getWindowMinutes();
-        int cpu = data == null ? 0 : data.getSystemHealth().getCpuPercent();
-        int ram = data == null ? 0 : data.getSystemHealth().getRamPercent();
-        int disk = data == null ? 0 : data.getSystemHealth().getDiskPercent();
+        int cpu = data == null ? -1 : data.getSystemHealth().getCpuPercent();
+        int ram = data == null ? -1 : data.getSystemHealth().getRamPercent();
+        int disk = data == null ? -1 : data.getSystemHealth().getDiskPercent();
         List<ToolSpec> tools = new ArrayList<>();
         tools.add(tool("admin_active_users", "Người dùng đang hoạt động",
-                "Theo dõi người dùng trực tuyến trong " + window + " phút gần nhất",
-                R.drawable.admin_ic_users, 0xFF3B82F6, 0xFF60A5FA, active + " online"));
+                loaded ? "Có thao tác trong " + window + " phút gần nhất"
+                        : "Đang tải dữ liệu hoạt động…",
+                R.drawable.admin_ic_users, 0xFF3B82F6, 0xFF60A5FA,
+                loaded ? active + " hoạt động" : ""));
         tools.add(tool("admin_users", "Quản lý người dùng", "Phân quyền, đặt lại mật khẩu và khóa tài khoản",
                 R.drawable.admin_ic_users, 0xFF635BFF, 0xFF818CF8, ""));
         tools.add(tool("admin_courses", "Khóa học và video",
                 "Xem hoặc xóa khóa học, kiểm tra và xóa video khi cần",
                 R.drawable.admin_ic_course, 0xFF10B981, 0xFF34D399, ""));
         tools.add(tool("admin_health", "Sức khỏe hệ thống",
-                "CPU " + cpu + "% • RAM " + ram + "% • Disk " + disk + "%",
-                R.drawable.admin_ic_health, 0xFFEF4444, 0xFFF87171, cpu + "%"));
+                loaded ? healthDescription(cpu, ram, disk) : "Đang tải số liệu máy chủ…",
+                R.drawable.admin_ic_health, 0xFFEF4444, 0xFFF87171,
+                loaded ? (cpu < 0 ? "Chưa có" : cpu + "%") : ""));
         tools.add(tool("admin_activity", "Nhật ký hoạt động",
                 "Theo dõi lịch sử thao tác của quản trị viên",
                 R.drawable.admin_ic_chart, 0xFF8B5CF6, 0xFFA78BFA, ""));
@@ -503,18 +507,20 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                     @Override
                     public void onSuccess(List<AdminDashboardData.ActivityPoint> data) {
                         if (!isUsable()) return;
-                        renderChart(label, data);
+                        renderChart(label, data, false);
                     }
 
                     @Override
                     public void onError(ApiError error) {
                         if (!isUsable()) return;
-                        renderChart(label, new ArrayList<>());
+                        renderChart(label, new ArrayList<>(), true);
+                        if (error != null && error.isSessionExpired()) handleApiError(error);
                     }
                 });
     }
 
-    private void renderChart(String label, List<AdminDashboardData.ActivityPoint> points) {
+    private void renderChart(String label, List<AdminDashboardData.ActivityPoint> points,
+                             boolean loadFailed) {
         chartProgress.setVisibility(View.GONE);
         chartPeriod.setVisibility(View.VISIBLE);
         chartPeriod.setText(label);
@@ -533,7 +539,21 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
             }
         }
         activityChart.setData(labels, values);
-        chartEmpty.setVisibility(values.isEmpty() ? View.VISIBLE : View.GONE);
+        chartEmpty.setText(loadFailed
+                ? R.string.admin_chart_load_error : R.string.admin_chart_empty);
+        chartEmpty.setVisibility(loadFailed || values.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private String healthDescription(int cpu, int ram, int disk) {
+        if (cpu < 0 && ram < 0 && disk < 0) {
+            return getString(R.string.admin_empty_health);
+        }
+        return "CPU " + healthMetric(cpu) + " • RAM " + healthMetric(ram)
+                + " • Ổ đĩa " + healthMetric(disk);
+    }
+
+    private String healthMetric(int value) {
+        return value < 0 ? "—" : value + "%";
     }
 
     private void selectCustomChartRange() {

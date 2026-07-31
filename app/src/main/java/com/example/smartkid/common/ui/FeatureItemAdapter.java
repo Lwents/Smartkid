@@ -52,6 +52,9 @@ public class FeatureItemAdapter extends BaseAdapter {
 
     @Override public int getCount() { return displayed.size(); }
 
+    /** Số mục trước khi lọc, dùng để phân biệt danh sách rỗng với tìm kiếm không có kết quả. */
+    public int getUnfilteredCount() { return source.size(); }
+
     @Override
     public FeatureItem getItem(int position) {
         return position >= 0 && position < displayed.size() ? displayed.get(position) : null;
@@ -101,10 +104,13 @@ public class FeatureItemAdapter extends BaseAdapter {
         String normalized = normalize(value);
         int color = R.color.smartkid_success;
         if (normalized.contains("loi") || normalized.contains("cao")
-                || normalized.contains("gan het") || normalized.contains("that bai")) {
+                || normalized.contains("gan het") || normalized.contains("that bai")
+                || normalized.contains("khoa")) {
             color = R.color.smartkid_error;
         } else if (normalized.contains("can") || normalized.contains("sap")
-                || normalized.contains("chua") || normalized.contains("khong co")) {
+                || normalized.contains("chua") || normalized.contains("khong co")
+                || normalized.contains("ban nhap") || normalized.contains("thu hoi")
+                || normalized.contains("het han")) {
             color = R.color.smartkid_accent;
         }
         view.setTextColor(ContextCompat.getColor(context, color));
