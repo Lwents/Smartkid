@@ -31,6 +31,7 @@ public class ForgotPasswordActivity extends BaseActivity {
     private TextView statusText;
     private AuthRepository repository;
 
+    /** Khởi tạo form yêu cầu email đặt lại mật khẩu và trạng thái gửi lại. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +76,7 @@ public class ForgotPasswordActivity extends BaseActivity {
         }
     }
 
+    /** Kiểm tra email và gửi yêu cầu cấp mã đặt lại mật khẩu. */
     private void requestSafely() {
         try {
             String email = textOf(emailInput);
@@ -108,6 +110,7 @@ public class ForgotPasswordActivity extends BaseActivity {
         }
     }
 
+    /** Chuyển form sang trạng thái thành công sau khi server chấp nhận yêu cầu. */
     private void showSuccessState(String message) {
         emailInput.setEnabled(false);
         sendButton.setVisibility(View.GONE);
@@ -117,6 +120,7 @@ public class ForgotPasswordActivity extends BaseActivity {
                 ? getString(R.string.forgot_success_message) : message, true);
     }
 
+    /** Hiển thị lại form để người dùng sửa email hoặc gửi lại yêu cầu. */
     private void showRequestForm() {
         successGroup.setVisibility(View.GONE);
         sendButton.setVisibility(View.VISIBLE);
@@ -126,11 +130,13 @@ public class ForgotPasswordActivity extends BaseActivity {
         showStatus("", false);
     }
 
+    /** Gửi lại yêu cầu bằng email hiện tại và vẫn áp dụng kiểm tra đầu vào. */
     private void resendSafely() {
         showRequestForm();
         requestSafely();
     }
 
+    /** Khóa các thao tác trong thời gian request quên mật khẩu đang chạy. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         sendButton.setEnabled(!loading);
@@ -140,15 +146,18 @@ public class ForgotPasswordActivity extends BaseActivity {
         emailInput.setEnabled(!loading);
     }
 
+    /** Hiển thị hoặc ẩn thông báo trạng thái của request. */
     private void showStatus(String message, boolean visible) {
         statusText.setText(message);
         statusText.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
+    /** Lấy email đã loại khoảng trắng ở đầu và cuối. */
     private String textOf(TextInputEditText input) {
         return input.getText() == null ? "" : input.getText().toString().trim();
     }
 
+    /** Bảo vệ callback khỏi cập nhật một Activity đã đóng. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

@@ -18,6 +18,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Adapter khóa học của Student, chịu trách nhiệm lọc, sắp xếp và gắn dữ liệu lên từng thẻ. */
 public class CourseAdapter extends BaseAdapter {
     private final Context context;
     private final LayoutInflater inflater;
@@ -31,6 +32,7 @@ public class CourseAdapter extends BaseAdapter {
         this.inflater = LayoutInflater.from(context);
     }
 
+    /** Thay danh sách khóa học gốc rồi áp dụng lại từ khóa và thứ tự hiện tại. */
     public void setCourses(List<Course> courses) {
         allCourses.clear();
         if (courses != null) {
@@ -39,11 +41,13 @@ public class CourseAdapter extends BaseAdapter {
         applyFilterAndSort();
     }
 
+    /** Lưu từ khóa tìm kiếm và dựng lại danh sách khóa học đang hiển thị. */
     public void filter(String keyword) {
         currentKeyword = keyword == null ? "" : keyword;
         applyFilterAndSort();
     }
 
+    /** Đảo chiều sắp xếp tên khóa học và trả về chiều mới cho nút giao diện. */
     public boolean toggleSort() {
         ascending = !ascending;
         applyFilterAndSort();
@@ -66,6 +70,7 @@ public class CourseAdapter extends BaseAdapter {
         return position;
     }
 
+    /** Gắn thông tin, tiến độ và ảnh khóa học lên thẻ; có phương án dự phòng nếu dữ liệu lỗi. */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -119,6 +124,7 @@ public class CourseAdapter extends BaseAdapter {
         return convertView;
     }
 
+    /** Dùng BusinessRules để lọc/sắp xếp mà không sửa trực tiếp danh sách dữ liệu gốc. */
     private void applyFilterAndSort() {
         displayedCourses.clear();
         List<Course> filtered = BusinessRules.filterCourses(allCourses, currentKeyword);

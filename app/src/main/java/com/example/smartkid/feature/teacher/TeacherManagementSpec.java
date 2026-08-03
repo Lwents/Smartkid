@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Typed registry of Teacher-owned management features and their real API endpoints. */
+/** Danh bạ chức năng Teacher cùng endpoint thật và loại hành động của từng mục. */
 public final class TeacherManagementSpec {
     private static final Map<String, FeatureSpec> SPECS;
 
@@ -27,9 +27,12 @@ public final class TeacherManagementSpec {
 
     private TeacherManagementSpec() { }
 
+    /** Lấy cấu hình một chức năng Teacher theo key truyền qua Intent. */
     public static FeatureSpec get(String key) { return SPECS.get(key); }
+    /** Trả toàn bộ danh bạ bất biến để dashboard có thể duyệt an toàn. */
     public static Map<String, FeatureSpec> all() { return SPECS; }
 
+    /** Thêm một chức năng thuộc quyền Teacher vào danh bạ khởi tạo. */
     private static void add(Map<String, FeatureSpec> target, String key, String title,
                             String endpoint, String actionKind) {
         target.put(key, new FeatureSpec(key, title, endpoint, actionKind, "", UserRole.TEACHER));

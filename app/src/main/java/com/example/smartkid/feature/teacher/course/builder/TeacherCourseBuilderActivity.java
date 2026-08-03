@@ -58,6 +58,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
     private String courseTitle;
     private int loadGeneration;
 
+    /** Khởi tạo trình xây dựng khóa học và kiểm tra quyền Teacher. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,10 +89,12 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
         }
     }
 
+    /** Chỉ cho phép role Teacher truy cập các thao tác soạn khóa học. */
     private boolean isTeacher() {
         return UserRole.fromString(new SessionManager(this).getUser().getRole()).isTeacher();
     }
 
+    /** Ánh xạ RecyclerView module, toolbar, trạng thái lưu và các nút tạo. */
     private void bindViews() {
         recycler = findViewById(R.id.recyclerTeacherBuilder);
         progress = findViewById(R.id.progressTeacherBuilder);
@@ -117,9 +120,10 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
     }
 
     // ------------------------------------------------------------------
-    // Load
+    // Tải cấu trúc module và lesson của khóa học.
     // ------------------------------------------------------------------
 
+    /** Tải module của khóa học và bắt đầu một generation tải mới. */
     private void loadModules() {
         int generation = ++loadGeneration;
         setLoading(true);
@@ -162,6 +166,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                 });
     }
 
+    /** Tải lesson cho từng module và bỏ callback thuộc generation cũ. */
     private void loadLessonsForAll(int generation) {
         final int[] pending = {modules.size()};
         for (int i = 0; i < modules.size(); i++) {
@@ -194,9 +199,10 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
     }
 
     // ------------------------------------------------------------------
-    // Add module / lesson
+    // Thêm chương / bài học
     // ------------------------------------------------------------------
 
+    /** Hiển thị form nhập tên module trước khi tạo. */
     private void promptAddModule() {
         final EditText input = new EditText(this);
         input.setHint(R.string.builder_add_module_hint);
@@ -213,6 +219,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                 .show();
     }
 
+    /** Gọi API tạo module mới ở cuối khóa học. */
     private void createModule(String title) {
         showSaving();
         JSONObject body = new JSONObject();
@@ -249,6 +256,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                 });
     }
 
+    /** Tạo lesson mới trong module từ thao tác của adapter. */
     @Override
     public void onAddLesson(BuilderModule module, String title, EditText input, ProgressBar progressBar) {
         input.setEnabled(false);
@@ -292,9 +300,10 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
     }
 
     // ------------------------------------------------------------------
-    // Reorder
+    // Sắp xếp lại thứ tự
     // ------------------------------------------------------------------
 
+    /** Gửi thứ tự module hiện tại lên server sau thao tác kéo thả. */
     private void persistModuleOrder() {
         showSaving();
         JSONObject orderMap = new JSONObject();
@@ -313,6 +322,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                 "content/courses/" + courseId + "/modules/reorder/", body, saveCallback());
     }
 
+    /** Gửi thứ tự lesson mới của một module lên server. */
     @Override
     public void onLessonReordered(BuilderModule module) {
         showSaving();
@@ -333,9 +343,10 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
     }
 
     // ------------------------------------------------------------------
-    // Edit titles
+    // Chỉnh sửa tiêu đề
     // ------------------------------------------------------------------
 
+    /** Hiển thị menu đổi tên hoặc xóa module được chọn. */
     @Override
     public void onModuleMenuClicked(BuilderModule module) {
         final EditText input = new EditText(this);
@@ -357,6 +368,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                 .show();
     }
 
+    /** Cập nhật tên module bằng PATCH và đồng bộ lại model cục bộ. */
     private void patchModuleTitle(BuilderModule module, String title) {
         showSaving();
         JSONObject body = new JSONObject();
@@ -368,6 +380,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                 saveCallback());
     }
 
+    /** Yêu cầu xác nhận trước khi xóa module cùng các lesson bên trong. */
     private void confirmDeleteModule(BuilderModule module) {
         new MaterialAlertDialogBuilder(this)
                 .setMessage(R.string.builder_delete_module_confirm)
@@ -376,6 +389,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                 .show();
     }
 
+    /** Xóa module trên server rồi loại nó khỏi RecyclerView. */
     private void deleteModule(BuilderModule module) {
         showSaving();
         int index = modules.indexOf(module);
@@ -402,6 +416,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
                 });
     }
 
+    /** Hiển thị form đổi tên khóa học và gửi PATCH khi xác nhận. */
     private void promptEditCourseTitle() {
         final EditText input = new EditText(this);
         input.setText(courseTitle);
@@ -428,9 +443,10 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
     }
 
     // ------------------------------------------------------------------
-    // Lesson tap -> bottom sheet
+    // Chạm vào bài học để mở bảng chỉnh sửa phía dưới
     // ------------------------------------------------------------------
 
+    /** Mở bottom sheet chỉnh sửa lesson được giáo viên chọn. */
     @Override
     public void onLessonClicked(String moduleId, FeatureItem lesson) {
         LessonEditorBottomSheet sheet = LessonEditorBottomSheet.newInstance(
@@ -467,15 +483,17 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
         sheet.show(getSupportFragmentManager(), "lesson_editor");
     }
 
+    /** Bắt đầu kéo module khi người dùng giữ drag handle. */
     @Override
     public void onModuleDragStart(RecyclerView.ViewHolder holder) {
         if (moduleTouchHelper != null) moduleTouchHelper.startDrag(holder);
     }
 
     // ------------------------------------------------------------------
-    // Helpers
+    // Các hàm hỗ trợ
     // ------------------------------------------------------------------
 
+    /** Tạo callback chung để báo trạng thái lưu và tải lại dữ liệu khi cần. */
     private ApiCallback<JSONObject> saveCallback() {
         return new ApiCallback<JSONObject>() {
             @Override
@@ -501,12 +519,14 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
         return frame;
     }
 
+    /** Hiển thị trạng thái đang đồng bộ thay đổi. */
     private void showSaving() {
         autosaveText.setText(R.string.builder_saving);
         autosaveBadge.setVisibility(View.VISIBLE);
         if (hideBadgeRunnable != null) mainHandler.removeCallbacks(hideBadgeRunnable);
     }
 
+    /** Báo đã lưu và tự ẩn nhãn sau một khoảng ngắn. */
     private void showSaved() {
         autosaveText.setText(R.string.builder_autosaved);
         autosaveBadge.setVisibility(View.VISIBLE);
@@ -517,19 +537,23 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
         mainHandler.postDelayed(hideBadgeRunnable, 2000);
     }
 
+    /** Hiển thị lỗi khi không thể đồng bộ cấu trúc khóa học. */
     private void showSaveError() {
         showStatus(getString(R.string.builder_save_error));
         autosaveBadge.setVisibility(View.INVISIBLE);
     }
 
+    /** Khóa thao tác xây dựng trong lúc tải toàn bộ cây nội dung. */
     private void setLoading(boolean loading) {
         progress.setVisibility(loading ? View.VISIBLE : View.GONE);
     }
 
+    /** Hiển thị hướng dẫn tạo module khi khóa học chưa có nội dung. */
     private void updateEmpty() {
         empty.setVisibility(modules.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
+    /** Hiển thị thông báo nghiệp vụ của trình xây dựng khóa học. */
     private void showStatus(String message) {
         status.setText(message == null ? getString(R.string.unknown_error) : message);
         status.setVisibility(View.VISIBLE);
@@ -538,6 +562,7 @@ public final class TeacherCourseBuilderActivity extends BaseActivity
         }, 4000);
     }
 
+    /** Xác nhận Activity còn hợp lệ trước khi callback cập nhật RecyclerView. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

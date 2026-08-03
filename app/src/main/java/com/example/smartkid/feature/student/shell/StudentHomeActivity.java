@@ -37,6 +37,7 @@ public class StudentHomeActivity extends BaseActivity {
     private NetworkStateReceiver networkReceiver;
     private boolean receiverRegistered;
 
+    /** Khởi tạo khung chính của học viên gồm toolbar, ViewPager và thanh điều hướng. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,18 +71,21 @@ public class StudentHomeActivity extends BaseActivity {
         }
     }
 
+    /** Đăng ký lắng nghe trạng thái mạng khi màn hình bắt đầu hiển thị. */
     @Override
     protected void onStart() {
         super.onStart();
         registerNetworkReceiverSafely();
     }
 
+    /** Gỡ NetworkStateReceiver để tránh giữ Activity khi màn hình không còn hiển thị. */
     @Override
     protected void onStop() {
         unregisterNetworkReceiverSafely();
         super.onStop();
     }
 
+    /** Gắn sự kiện cho bốn mục Dashboard, Khóa học, Bài thi và Hồ sơ. */
     private void bindNavigationItems() {
         for (int navigationId : navigationIds) {
             View item = findViewById(navigationId);
@@ -97,6 +101,7 @@ public class StudentHomeActivity extends BaseActivity {
         }
     }
 
+    /** Cấu hình ViewPager2, hiệu ứng chuyển trang và đồng bộ trạng thái thanh điều hướng. */
     private void configurePager() {
         studentPager.setAdapter(new StudentPagerAdapter(this));
         studentPager.setUserInputEnabled(true);
@@ -123,6 +128,7 @@ public class StudentHomeActivity extends BaseActivity {
         });
     }
 
+    /** Đổi ID mục điều hướng thành vị trí trang trong ViewPager. */
     private int navigationIndex(int itemId) {
         for (int index = 0; index < navigationIds.length; index++) {
             if (navigationIds[index] == itemId) return index;
@@ -130,6 +136,7 @@ public class StudentHomeActivity extends BaseActivity {
         return -1;
     }
 
+    /** Chọn tiêu đề toolbar tương ứng với trang Student hiện tại. */
     private String navigationTitle(int itemId) {
         if (itemId == R.id.nav_courses) return getString(R.string.title_my_courses);
         if (itemId == R.id.nav_exams) return getString(R.string.exams);
@@ -137,6 +144,7 @@ public class StudentHomeActivity extends BaseActivity {
         return getString(R.string.title_home);
     }
 
+    /** Ghi nhận trang đang chọn rồi cập nhật tiêu đề và trạng thái các nút. */
     private void applyNavigationState(int position) {
         if (position < 0 || position >= navigationIds.length) return;
         selectedNavigationId = navigationIds[position];
@@ -144,6 +152,7 @@ public class StudentHomeActivity extends BaseActivity {
         toolbar.setTitle(navigationTitle(selectedNavigationId));
     }
 
+    /** Di chuyển thanh chỉ báo theo vị trí và tiến độ vuốt của ViewPager. */
     private void updateIndicatorPosition(int position, float positionOffset) {
         int availableWidth = bottomNavigation.getWidth()
                 - bottomNavigation.getPaddingLeft() - bottomNavigation.getPaddingRight();
@@ -166,6 +175,7 @@ public class StudentHomeActivity extends BaseActivity {
         return Math.round(dp * metrics.density);
     }
 
+    /** Đánh dấu mục điều hướng đang hoạt động và bỏ chọn các mục còn lại. */
     private void updateNavigationSelection() {
         for (int navigationId : navigationIds) {
             View item = findViewById(navigationId);
@@ -175,12 +185,14 @@ public class StudentHomeActivity extends BaseActivity {
         }
     }
 
+    /** Lưu tab Student đang mở để khôi phục sau khi Activity được tạo lại. */
     @Override
     protected void onSaveInstanceState(@androidx.annotation.NonNull Bundle outState) {
         outState.putInt(STATE_SELECTED_NAVIGATION, selectedNavigationId);
         super.onSaveInstanceState(outState);
     }
 
+    /** Đăng ký receiver theo phiên bản Android và tránh đăng ký lặp. */
     private void registerNetworkReceiverSafely() {
         if (receiverRegistered || networkReceiver == null) {
             return;
@@ -195,6 +207,7 @@ public class StudentHomeActivity extends BaseActivity {
         }
     }
 
+    /** Gỡ receiver nếu đã đăng ký và bỏ qua lỗi lifecycle không nguy hiểm. */
     private void unregisterNetworkReceiverSafely() {
         if (!receiverRegistered || networkReceiver == null) {
             return;
@@ -208,6 +221,7 @@ public class StudentHomeActivity extends BaseActivity {
         }
     }
 
+    /** Thông báo cho học viên khi mất hoặc khôi phục kết nối mạng. */
     private void showNetworkState(boolean connected) {
         try {
             if (!connected) {
@@ -221,10 +235,12 @@ public class StudentHomeActivity extends BaseActivity {
     }
 
     private static final class StudentPagerAdapter extends FragmentStateAdapter {
+        /** Tạo adapter cung cấp bốn Fragment chính của học viên. */
         StudentPagerAdapter(StudentHomeActivity activity) {
             super(activity);
         }
 
+        /** Tạo Fragment đúng với vị trí của tab Student. */
         @androidx.annotation.NonNull
         @Override
         public Fragment createFragment(int position) {

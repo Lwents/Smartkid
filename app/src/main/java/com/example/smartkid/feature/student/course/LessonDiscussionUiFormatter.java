@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-/** Converts discussion API fields into short labels suitable for young students. */
+/** Chuyển dữ liệu thảo luận từ API thành nhãn ngắn, dễ hiểu cho học viên nhỏ tuổi. */
 final class LessonDiscussionUiFormatter {
     private LessonDiscussionUiFormatter() { }
 

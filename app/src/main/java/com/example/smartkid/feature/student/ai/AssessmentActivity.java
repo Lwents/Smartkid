@@ -37,6 +37,7 @@ public class AssessmentActivity extends BaseActivity {
     private JSONArray questions = new JSONArray();
     private final List<RadioGroup> answerGroups = new ArrayList<>();
 
+    /** Khởi tạo bài đánh giá đầu vào và đọc courseId nếu được truyền vào. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +67,7 @@ public class AssessmentActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ câu hỏi, nhóm lựa chọn, nút nộp và vùng kết quả. */
     private void bindViews() {
         questionContainer = findViewById(R.id.containerAssessmentQuestions);
         progressBar = findViewById(R.id.progressAssessment);
@@ -77,6 +79,7 @@ public class AssessmentActivity extends BaseActivity {
         }
     }
 
+    /** Gọi API tạo bài đánh giá và lưu danh sách câu hỏi nhận được. */
     private void loadSafely() {
         setLoading(true);
         repository.startAssessment(courseId, new ApiCallback<JSONObject>() {
@@ -107,6 +110,7 @@ public class AssessmentActivity extends BaseActivity {
         });
     }
 
+    /** Dựng các lựa chọn trả lời từ JSON câu hỏi của server. */
     private void renderQuestions() {
         questionContainer.removeAllViews();
         answerGroups.clear();
@@ -139,6 +143,7 @@ public class AssessmentActivity extends BaseActivity {
         submitButton.setEnabled(!answerGroups.isEmpty());
     }
 
+    /** Thu thập lựa chọn, kiểm tra câu chưa trả lời và gửi kết quả đánh giá. */
     private void submitSafely() {
         try {
             JSONArray answers = new JSONArray();
@@ -187,6 +192,7 @@ public class AssessmentActivity extends BaseActivity {
         }
     }
 
+    /** Trình bày mức đánh giá và khuyến nghị học tập server trả về. */
     private void showResult(JSONObject data) {
         String message = "Trình độ: " + SafeJson.string(data, "Đang cập nhật", "level_text")
                 + "\nĐiểm: " + SafeJson.decimal(data, 0, "score")
@@ -197,16 +203,19 @@ public class AssessmentActivity extends BaseActivity {
                 .setPositiveButton("Hoàn tất", (dialog, which) -> finish()).show();
     }
 
+    /** Chuyển màn hình giữa trạng thái tải, làm bài và chờ kết quả. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         submitButton.setEnabled(!loading && !answerGroups.isEmpty());
     }
 
+    /** Hiển thị lỗi hoặc hướng dẫn cho bài đánh giá. */
     private void showStatus(String message) {
         statusText.setText(message == null ? getString(R.string.unknown_error) : message);
         statusText.setVisibility(View.VISIBLE);
     }
 
+    /** Bảo vệ UI khỏi callback trả về sau khi Activity đóng. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
     private static String safe(String value) { return value == null ? "" : value.trim(); }
 }

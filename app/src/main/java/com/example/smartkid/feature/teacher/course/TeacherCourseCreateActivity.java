@@ -9,7 +9,7 @@ import com.example.smartkid.feature.teacher.course.builder.TeacherCourseBuilderA
 
 import org.json.JSONObject;
 
-/** Teacher-owned form for creating a course. Opens the course builder right after creation. */
+/** Form Teacher tạo khóa học; mở trình xây dựng khóa học ngay sau khi tạo thành công. */
 public final class TeacherCourseCreateActivity extends ContentFormActivity {
 
     @Override

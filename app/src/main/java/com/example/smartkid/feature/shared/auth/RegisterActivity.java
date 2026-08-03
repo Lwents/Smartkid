@@ -30,6 +30,7 @@ public class RegisterActivity extends BaseActivity {
     private TextView statusText;
     private AuthRepository repository;
 
+    /** Khởi tạo form đăng ký học viên và gắn hành động gửi dữ liệu. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +46,7 @@ public class RegisterActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ các trường đăng ký và kiểm tra layout có đủ thành phần bắt buộc. */
     private void bindViews() {
         usernameInput = findViewById(R.id.inputRegisterUsername);
         emailInput = findViewById(R.id.inputRegisterEmail);
@@ -63,6 +65,7 @@ public class RegisterActivity extends BaseActivity {
         }
     }
 
+    /** Kiểm tra dữ liệu đầu vào rồi gọi API đăng ký tài khoản học viên. */
     private void registerSafely() {
         try {
             String username = textOf(usernameInput);
@@ -107,6 +110,7 @@ public class RegisterActivity extends BaseActivity {
         }
     }
 
+    /** Ngăn gửi trùng và phản ánh trạng thái request trên nút đăng ký. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         registerButton.setEnabled(!loading);
@@ -117,11 +121,13 @@ public class RegisterActivity extends BaseActivity {
         confirmationInput.setEnabled(!loading);
     }
 
+    /** Cập nhật vùng thông báo của form đăng ký. */
     private void showStatus(String message, boolean visible) {
         statusText.setText(message);
         statusText.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
+    /** Hiển thị lỗi kiểm tra cục bộ trước khi gọi server. */
     private void showValidationError(String message) {
         if (message != null && message.toLowerCase(java.util.Locale.ROOT).contains("số điện thoại")) {
             phoneInputLayout.setError(message);
@@ -131,6 +137,7 @@ public class RegisterActivity extends BaseActivity {
         showStatus(message, true);
     }
 
+    /** Hiển thị lỗi do API đăng ký trả về. */
     private void showRegistrationError(String message) {
         String normalized = message == null ? "" : message.toLowerCase(java.util.Locale.ROOT);
         if (normalized.contains("phone") || normalized.contains("số điện thoại")) {
@@ -143,14 +150,17 @@ public class RegisterActivity extends BaseActivity {
         showStatus(message, true);
     }
 
+    /** Lấy chuỗi đã trim cho các trường văn bản thông thường. */
     private String textOf(TextInputEditText input) {
         return rawTextOf(input).trim();
     }
 
+    /** Lấy nguyên văn mật khẩu trước khi gửi lên server. */
     private String rawTextOf(TextInputEditText input) {
         return input.getText() == null ? "" : input.getText().toString();
     }
 
+    /** Chỉ cho callback cập nhật UI khi Activity vẫn còn hoạt động. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

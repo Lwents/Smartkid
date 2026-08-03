@@ -52,6 +52,7 @@ public class StudentProfileFragment extends Fragment {
     private TextView statScoreText;
 
     @Nullable
+    /** Tạo layout hồ sơ của học viên. */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
@@ -59,6 +60,7 @@ public class StudentProfileFragment extends Fragment {
         return inflater.inflate(R.layout.profile_fragment_profile, container, false);
     }
 
+    /** Khởi tạo Repository, gắn điều hướng hồ sơ và tải dữ liệu tài khoản. */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -77,6 +79,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Gắn các mục hồ sơ với màn hình chỉnh sửa, phụ huynh, mật khẩu và thống kê. */
     private void bindFeatureNavigation(View view) {
         View rowEdit = view.findViewById(R.id.rowEditProfile);
         if (rowEdit != null) {
@@ -124,6 +127,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Mở danh sách dùng chung theo mode chức năng được chọn. */
     private void openFeature(String mode) {
         if (!isAdded()) return;
         try {
@@ -136,6 +140,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Điều hướng đến một Activity hồ sơ nội bộ. */
     private void openActivity(Class<?> destination) {
         if (!isAdded()) return;
         try {
@@ -146,6 +151,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Ánh xạ avatar, thông tin tài khoản, thống kê và trạng thái tải. */
     private void bindViews(View view) {
         avatarText = view.findViewById(R.id.textProfileAvatar);
         fullNameText = view.findViewById(R.id.textProfileName);
@@ -172,6 +178,7 @@ public class StudentProfileFragment extends Fragment {
     }
 
     /** 3 ô thống kê lấy số thật: khóa học đã tham gia, khóa đã hoàn thành, điểm trung bình. */
+    /** Tải thống kê khóa học và streak để bổ sung cho hồ sơ. */
     private void loadStats() {
         if (statCoursesText == null) return;
         new com.example.smartkid.data.repository.CourseRepository(requireContext()).loadMyCourses(
@@ -214,6 +221,7 @@ public class StudentProfileFragment extends Fragment {
                 });
     }
 
+    /** Tải hồ sơ mới nhất từ server và đồng bộ lại SessionManager. */
     private void safelyLoadProfile() {
         try {
             setLoading(true);
@@ -251,6 +259,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Gắn dữ liệu User vào avatar, tên, email, role và lớp học. */
     private void bindUser(User user) {
         User safeUser = user == null
                 ? new User("", "", "", "", "student", "") : user;
@@ -272,6 +281,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Lấy chữ cái đầu để hiển thị avatar khi người dùng chưa có ảnh. */
     private String initialOf(String value) {
         String normalized = value == null ? "" : value.trim();
         if (normalized.isEmpty()) {
@@ -280,11 +290,13 @@ public class StudentProfileFragment extends Fragment {
         return normalized.substring(0, 1).toUpperCase(java.util.Locale.getDefault());
     }
 
+    /** Dùng nhãn đang cập nhật khi dữ liệu server chưa sẵn sàng. */
     private String valueOrUpdating(String value) {
         return value == null || value.trim().isEmpty()
                 ? getString(R.string.updating) : value.trim();
     }
 
+    /** Yêu cầu xác nhận trước khi kết thúc phiên đăng nhập. */
     private void confirmLogout() {
         if (!isAdded()) {
             return;
@@ -303,6 +315,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Gọi API đăng xuất, xóa session và quay về Login. */
     private void safelyLogout() {
         try {
             setLoading(true);
@@ -334,6 +347,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Xóa back stack và mở màn hình đăng nhập. */
     private void openLogin() {
         if (!isAdded() || getActivity() == null) {
             return;
@@ -350,6 +364,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Chuyển hồ sơ giữa trạng thái tải và nội dung. */
     private void setLoading(boolean loading) {
         if (!loading && refreshLayout != null) {
             refreshLayout.setRefreshing(false);
@@ -363,6 +378,7 @@ public class StudentProfileFragment extends Fragment {
         }
     }
 
+    /** Hiển thị thông báo lỗi/trạng thái ngay trên Fragment. */
     private void showStatus(String message) {
         if (statusText != null) {
             statusText.setText(message == null ? getString(R.string.unknown_error) : message);

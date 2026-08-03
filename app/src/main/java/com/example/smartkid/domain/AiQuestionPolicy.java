@@ -11,10 +11,12 @@ public final class AiQuestionPolicy {
     private AiQuestionPolicy() {
     }
 
+    /** Trả bản sao các mức số lượng câu hỏi được phép chọn trên giao diện. */
     public static int[] allowedCounts() {
         return Arrays.copyOf(ALLOWED_COUNTS, ALLOWED_COUNTS.length);
     }
 
+    /** Kiểm tra số lượng yêu cầu có thuộc các mức sản phẩm hỗ trợ hay không. */
     public static boolean isAllowedCount(int count) {
         for (int allowed : ALLOWED_COUNTS) {
             if (count == allowed) return true;
@@ -22,14 +24,17 @@ public final class AiQuestionPolicy {
         return false;
     }
 
+    /** Ép số câu AI trả về vào khoảng an toàn từ 0 đến giới hạn tối đa. */
     public static int clampGeneratedCount(int count) {
         return Math.max(0, Math.min(MAX_GENERATED_QUESTIONS, count));
     }
 
+    /** Tính số câu còn có thể thêm mà không vượt giới hạn của form. */
     public static int remainingCapacity(int existingCount) {
         return Math.max(0, MAX_GENERATED_QUESTIONS - Math.max(0, existingCount));
     }
 
+    /** Chấp nhận kích thước chưa xác định hoặc tệp không vượt quá 20 MB. */
     public static boolean acceptsDocumentSize(long bytes) {
         return bytes < 0 || bytes <= MAX_DOCUMENT_BYTES;
     }

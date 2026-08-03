@@ -37,12 +37,14 @@ public class ExamsFragment extends Fragment {
     private ExamRepository repository;
 
     @Nullable
+    /** Tạo layout danh sách bài thi của học viên. */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.common_fragment_feature_items, container, false);
     }
 
+    /** Khởi tạo Repository, adapter và tải danh sách bài thi. */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -79,6 +81,7 @@ public class ExamsFragment extends Fragment {
         }
     }
 
+    /** Tải danh sách bài thi và chuẩn hóa lỗi thành trạng thái hiển thị. */
     private void loadSafely() {
         try {
             setLoading(true);
@@ -105,6 +108,7 @@ public class ExamsFragment extends Fragment {
         }
     }
 
+    /** Mở bài thi được chọn và truyền examId sang ExamActivity. */
     private void openExam(FeatureItem item) {
         if (item == null || item.getId().isEmpty() || !isAdded()) return;
         try {
@@ -117,6 +121,7 @@ public class ExamsFragment extends Fragment {
         }
     }
 
+    /** Hiển thị tiến trình và khóa thao tác trong lúc tải danh sách. */
     private void setLoading(boolean loading) {
         if (!loading && refreshLayout != null) refreshLayout.setRefreshing(false);
         boolean swiping = loading && refreshLayout != null && refreshLayout.isRefreshing();
@@ -125,5 +130,6 @@ public class ExamsFragment extends Fragment {
         }
     }
 
+    /** Xác nhận Fragment còn gắn với view trước khi callback thay đổi UI. */
     private boolean isUsable() { return isAdded() && getView() != null; }
 }

@@ -9,13 +9,16 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+/** Chuyển dữ liệu kỹ thuật của API thông báo thành nội dung tiếng Việt cho giao diện. */
 final class NotificationUiFormatter {
     private NotificationUiFormatter() { }
 
+    /** Đọc trạng thái đã xem, hỗ trợ cả tên trường snake_case và camelCase. */
     static boolean isRead(JSONObject source) {
         return SafeJson.bool(source, false, "is_read", "isRead");
     }
 
+    /** Dịch mã loại thông báo của backend thành nhãn dễ hiểu. */
     static String categoryLabel(JSONObject source) {
         String category = SafeJson.string(source, "", "category");
         switch (category) {
@@ -34,6 +37,7 @@ final class NotificationUiFormatter {
         }
     }
 
+    /** Chọn tiêu đề thân thiện theo loại thông báo, dùng tiêu đề gốc nếu không có quy tắc riêng. */
     static String displayTitle(JSONObject source, String fallback) {
         String category = SafeJson.string(source, "", "category");
         if ("lesson_question_reply".equals(category)) return "Thầy cô đã trả lời em";
@@ -43,6 +47,7 @@ final class NotificationUiFormatter {
         return fallback == null || fallback.trim().isEmpty() ? "Thông báo mới" : fallback.trim();
     }
 
+    /** Đổi thời gian UTC từ API thành dạng tương đối hoặc ngày giờ theo múi giờ thiết bị. */
     static String timeLabel(JSONObject source) {
         String raw = SafeJson.string(source, "", "created_at", "createdAt");
         if (raw.isEmpty()) return "";
@@ -72,6 +77,7 @@ final class NotificationUiFormatter {
         return contextLabel(source, "");
     }
 
+    /** Ghép tên khóa học với bài học/bài thi để người dùng biết thông báo thuộc nội dung nào. */
     static String contextLabel(JSONObject source, String fallbackTitle) {
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
         String course = SafeJson.string(metadata, "", "course_title");
@@ -85,6 +91,7 @@ final class NotificationUiFormatter {
         return course.isEmpty() ? lesson : course;
     }
 
+    /** Khôi phục tên bài học từ tiêu đề của dữ liệu cũ chưa có metadata. */
     private static String lessonFromLegacyTitle(String title) {
         if (title == null) return "";
         String value = title.trim();
@@ -95,26 +102,31 @@ final class NotificationUiFormatter {
         return "";
     }
 
+    /** Lấy ID bài học dùng khi mở thông báo đến đúng LessonPlayerActivity. */
     static String lessonId(JSONObject source) {
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
         return SafeJson.string(metadata, "", "lesson_id");
     }
 
+    /** Lấy ID khóa học trong metadata để truyền kèm khi điều hướng. */
     static String courseId(JSONObject source) {
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
         return SafeJson.string(metadata, "", "course_id");
     }
 
+    /** Lấy tên bài học để hiển thị ngữ cảnh của thông báo. */
     static String lessonTitle(JSONObject source) {
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
         return SafeJson.string(metadata, "", "lesson_title");
     }
 
+    /** Lấy ID bài thi/bài tập để mở đúng màn làm bài. */
     static String examId(JSONObject source) {
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
         return SafeJson.string(metadata, "", "exam_id", "exercise_id");
     }
 
+    /** Lấy tên bài thi/bài tập từ metadata của thông báo. */
     static String examTitle(JSONObject source) {
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
         return SafeJson.string(metadata, "", "exam_title", "exercise_title");

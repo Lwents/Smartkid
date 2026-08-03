@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-/** Native XML implementation of the former Flutter admin experience. */
+/** Dashboard Admin native dùng XML, thay thế giao diện Flutter trước đây. */
 public final class AdminDashboardActivity extends RoleDashboardActivity {
     private static final int PAGE_OVERVIEW = 0;
     private static final int PAGE_USERS = 1;
@@ -90,6 +90,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     private int selectedPage;
     private float swipeStartX;
 
+    /** Khởi tạo dashboard Admin, các trang chức năng và thanh điều hướng. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,12 +122,14 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         }
     }
 
+    /** Tải lại dữ liệu sau khi quay về từ màn quản lý hoặc cài đặt. */
     @Override
     protected void onRestart() {
         super.onRestart();
         if (repository != null) refreshDashboard();
     }
 
+    /** Tiếp tục badge và trạng thái dashboard khi Activity trở lại foreground. */
     @Override
     protected void onResume() {
         super.onResume();
@@ -134,12 +137,14 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         notificationHandler.postDelayed(notificationRefreshTask, NOTIFICATION_REFRESH_MS);
     }
 
+    /** Dừng animation khi dashboard mất focus. */
     @Override
     protected void onPause() {
         notificationHandler.removeCallbacks(notificationRefreshTask);
         super.onPause();
     }
 
+    /** Hủy callback và animation khi dashboard bị hủy. */
     @Override
     protected void onDestroy() {
         notificationHandler.removeCallbacks(notificationRefreshTask);
@@ -147,6 +152,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         super.onDestroy();
     }
 
+    /** Ánh xạ header, ViewPager, KPI, biểu đồ và trạng thái tải. */
     private void bindViews() {
         progressBar = findViewById(R.id.progressAdminDashboard);
         statusText = findViewById(R.id.textAdminDashboardStatus);
@@ -186,6 +192,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         }
     }
 
+    /** Hiển thị tên/avatar Admin và gắn menu tài khoản. */
     private void bindIdentity() {
         User user = currentUser();
         String name = firstNonEmpty(user.getFullName(), user.getUsername(),
@@ -199,6 +206,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
     }
 
     @SuppressLint("ClickableViewAccessibility")
+    /** Gắn các mục điều hướng Dashboard, Users, Content và Settings. */
     private void bindNavigation() {
         navItems[0].setOnClickListener(view -> selectPage(PAGE_OVERVIEW, true));
         navItems[1].setOnClickListener(view -> selectPage(PAGE_USERS, true));
@@ -220,6 +228,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         });
     }
 
+    /** Gắn các thẻ hành động nhanh của dashboard với feature tương ứng. */
     private void bindDashboardActions() {
         findViewById(R.id.buttonAdminMenu).setOnClickListener(view ->
                 scrollTo(findViewById(R.id.textAdminManagementTitle)));
@@ -240,6 +249,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         disableCard(R.id.cardAdminKpiLessons);
     }
 
+    /** Gắn nội dung và hành động cho các trang con của Admin. */
     private void bindSectionPages() {
         LinearLayout users = findViewById(R.id.containerAdminUserActions);
         addSectionAction(users, "admin_users", getString(R.string.manage_users),
@@ -267,6 +277,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 R.drawable.admin_ic_bell, color(R.color.admin_orange));
     }
 
+    /** Cấu hình các mục điều hướng đến bảo mật và cài đặt hệ thống. */
     private void bindSettings() {
         configureSetting(R.id.buttonAdminSettingsSecurity, R.drawable.role_ic_security,
                 getString(R.string.security_overview_title),
@@ -281,6 +292,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 R.string.admin_logout_dialog_message);
     }
 
+    /** Gắn các tab khoảng thời gian và hành động chọn ngày cho biểu đồ. */
     private void bindChart() {
         chartTabs[0].setOnClickListener(view -> loadChartPeriod(
                 "7_days", 7, getString(R.string.admin_chart_7_days)));
@@ -291,6 +303,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         chartTabs[3].setOnClickListener(view -> selectCustomChartRange());
     }
 
+    /** Chọn trang Admin, cập nhật chỉ báo và animation chuyển trang. */
     private void selectPage(int page, boolean animate) {
         if (page < PAGE_OVERVIEW || page > PAGE_SETTINGS) return;
         boolean pageChanged = page != selectedPage || pageFlipper.getDisplayedChild() != page;
@@ -352,12 +365,14 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         }
     }
 
+    /** Lưu trang Admin đang chọn để khôi phục khi Activity được tạo lại. */
     @Override
     protected void onSaveInstanceState(@androidx.annotation.NonNull Bundle outState) {
         outState.putInt(STATE_SELECTED_PAGE, selectedPage);
         super.onSaveInstanceState(outState);
     }
 
+    /** Tải KPI, sức khỏe hệ thống và khóa học nổi bật của Admin. */
     private void loadDashboard() {
         setLoading(true, "");
         repository.load(new ApiCallback<AdminDashboardData>() {
@@ -378,11 +393,13 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         });
     }
 
+    /** Làm mới dashboard và badge thông báo theo yêu cầu người dùng. */
     private void refreshDashboard() {
         loadDashboard();
         loadNotificationBadge();
     }
 
+    /** Tải số thông báo Admin chưa đọc để cập nhật badge. */
     private void loadNotificationBadge() {
         if (notificationRepository == null || notificationBadge == null) return;
         notificationRepository.loadUnreadCount(
@@ -400,6 +417,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 });
     }
 
+    /** Gắn toàn bộ dữ liệu AdminDashboardData vào KPI và các trang. */
     private void render(AdminDashboardData data) {
         AdminDashboardData.Kpis kpis = data.getKpis();
         setText(R.id.textAdminDau, number(kpis.getDailyActiveUsers()));
@@ -411,6 +429,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         renderAdminTools(data);
     }
 
+    /** Dựng các thẻ công cụ vận hành dựa trên quyền và dữ liệu hệ thống. */
     private void renderAdminTools(AdminDashboardData data) {
         LinearLayout container = findViewById(R.id.containerAdminManagement);
         container.removeAllViews();
@@ -490,12 +509,14 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         return tools;
     }
 
+    /** Tải biểu đồ cho một khoảng số ngày tính đến hôm nay. */
     private void loadChartPeriod(String key, int days, String label) {
         long to = todayUtcMillis();
         long from = to - Math.max(0, days - 1L) * DAY_MILLIS;
         loadChartRange(key, label, from, to);
     }
 
+    /** Tải dữ liệu biểu đồ trong khoảng ngày tùy chọn. */
     private void loadChartRange(String key, String label, long from, long to) {
         selectChartTab(key);
         chartProgress.setVisibility(View.VISIBLE);
@@ -519,6 +540,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
                 });
     }
 
+    /** Chuyển các điểm hoạt động thành nhãn/giá trị và cập nhật ActivityChartView. */
     private void renderChart(String label, List<AdminDashboardData.ActivityPoint> points,
                              boolean loadFailed) {
         chartProgress.setVisibility(View.GONE);
@@ -556,6 +578,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         return value < 0 ? "—" : value + "%";
     }
 
+    /** Hiển thị bộ chọn ngày bắt đầu/kết thúc cho biểu đồ tùy chỉnh. */
     private void selectCustomChartRange() {
         MaterialDatePicker<androidx.core.util.Pair<Long, Long>> picker =
                 MaterialDatePicker.Builder.dateRangePicker()
@@ -624,6 +647,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         card.setFocusable(false);
     }
 
+    /** Mở AdminManagementActivity bằng feature key đã đăng ký. */
     private void openManagementFeature(String key) {
         FeatureSpec spec = AdminManagementSpec.get(key);
         if (spec == null || !spec.isAllowedForRole(currentRole())) {
@@ -656,6 +680,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         dashboardScroll.post(() -> dashboardScroll.smoothScrollTo(0, target.getTop()));
     }
 
+    /** Chuyển dashboard giữa trạng thái tải, lỗi và nội dung. */
     private void setLoading(boolean loading, String message) {
         boolean swiping = false;
         if (refreshLayouts != null) {
@@ -755,6 +780,7 @@ public final class AdminDashboardActivity extends RoleDashboardActivity {
         return new ToolSpec(key, title, description, icon, startColor, endColor, badge);
     }
 
+    /** Chỉ xử lý callback khi dashboard Admin còn hoạt động. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

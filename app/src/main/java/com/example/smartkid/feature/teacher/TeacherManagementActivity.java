@@ -52,7 +52,7 @@ import org.json.JSONObject;
 import java.util.List;
 import com.example.smartkid.common.util.SwipeRefreshFix;
 
-/** Teacher-owned management list backed by real APIs, with teacher-only actions. */
+/** Danh sách quản lý thuộc Teacher, dùng API thật và chỉ cung cấp hành động của giáo viên. */
 public class TeacherManagementActivity extends BaseActivity {
     public static final String EXTRA_SPEC_KEY = "teacher_spec_key";
 
@@ -69,18 +69,21 @@ public class TeacherManagementActivity extends BaseActivity {
     private SwipeRefreshLayout refreshLayout;
     private String currentSearchQuery = "";
 
+    /** Kết thúc màn hình với animation quay lại dashboard. */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(R.anim.common_slide_in_left, R.anim.common_slide_out_right);
     }
 
+    /** Tải lại dữ liệu sau khi quay về từ form tạo hoặc chỉnh sửa. */
     @Override
     protected void onRestart() {
         super.onRestart();
         if (repository != null && spec != null && spec.isAvailable()) loadSafely();
     }
 
+    /** Đọc feature key, kiểm tra quyền Teacher và cấu hình layout quản lý phù hợp. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,6 +159,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Cấu hình nút hành động chính theo feature: tạo, làm mới hoặc thao tác đặc biệt. */
     private void configurePrimaryAction(MaterialToolbar toolbar) {
         if (supportsCreate()) {
             ((TextView) refreshButton).setText(isExamFeature() ? "Tạo bài" : "Tạo mới");
@@ -172,11 +176,13 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Xác định feature hiện tại có cho phép Teacher tạo dữ liệu mới hay không. */
     private boolean supportsCreate() {
         String kind = spec == null ? "" : spec.getActionKind();
         return "teacher_courses".equals(kind) || "teacher_exams".equals(kind);
     }
 
+    /** Mở đúng form tạo khóa học hoặc bài kiểm tra theo actionKind. */
     private void openCreate() {
         try {
             String kind = spec.getActionKind();
@@ -195,6 +201,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Tải endpoint từ FeatureSpec và cập nhật danh sách quản lý. */
     private void loadSafely() {
         setLoading(true);
         repository.load(spec.getEndpoint(), new ApiCallback<List<FeatureItem>>() {
@@ -214,12 +221,14 @@ public class TeacherManagementActivity extends BaseActivity {
         });
     }
 
+    /** Lấy item đang hiển thị và kiểm tra vị trí còn hợp lệ. */
     private FeatureItem itemAt(int position) {
         if (questionAdapter != null) return questionAdapter.getItem(position);
         if (examAdapter != null) return examAdapter.getItem(position);
         return adapter == null ? null : adapter.getItem(position);
     }
 
+    /** Lưu dữ liệu nguồn, áp dụng bộ lọc và cập nhật thống kê/empty state. */
     private void setItems(List<FeatureItem> items) {
         if (questionAdapter != null) {
             questionAdapter.setItems(items);
@@ -235,12 +244,14 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Lọc danh sách Teacher theo từ khóa tìm kiếm hiện tại. */
     private void filterItems(String keyword) {
         if (questionAdapter != null) questionAdapter.filter(keyword);
         else if (examAdapter != null) examAdapter.filter(keyword);
         else if (adapter != null) adapter.filter(keyword);
     }
 
+    /** Tính số câu hỏi đang chờ và đã trả lời cho màn hỏi đáp. */
     private void updateQuestionSummary() {
         if (questionSummary == null || questionAdapter == null) return;
         int total = questionAdapter.getTotalCount();
@@ -260,6 +271,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Tính số bài kiểm tra theo trạng thái để cập nhật phần tóm tắt. */
     private void updateExamSummary() {
         if (examSummary == null || examAdapter == null) return;
         int total = examAdapter.getTotalCount();
@@ -281,6 +293,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Chọn thông báo rỗng phù hợp với feature và bộ lọc hiện tại. */
     private void updateEmptyMessage() {
         if (emptyText == null || !isExamFeature()) return;
         emptyText.setText(currentSearchQuery.trim().isEmpty()
@@ -307,6 +320,7 @@ public class TeacherManagementActivity extends BaseActivity {
         return standalone;
     }
 
+    /** Điều phối click item đến chi tiết, menu hành động hoặc màn nội dung phù hợp. */
     private void showItem(FeatureItem item) {
         if (item == null) return;
         try {
@@ -446,6 +460,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 });
     }
 
+    /** Hiển thị chi tiết thông báo Teacher và đánh dấu đã đọc nếu cần. */
     private void showNotificationDetail(FeatureItem item) {
         JSONObject source = item.getSource();
         JSONObject metadata = source == null ? null : source.optJSONObject("metadata");
@@ -469,6 +484,7 @@ public class TeacherManagementActivity extends BaseActivity {
 
     /** Hỏi đáp: đọc toàn bộ cuộc trò chuyện và trả lời ngay trong bottom sheet. */
     @SuppressLint("InflateParams")
+    /** Tải và hiển thị bottom sheet câu hỏi cùng các phản hồi hiện có. */
     private void showQuestionDetail(FeatureItem item) {
         if (item == null) return;
         try {
@@ -532,6 +548,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Dựng danh sách phản hồi trong bottom sheet hỏi đáp. */
     private void bindQuestionReplies(View content, JSONObject question, JSONArray replies) {
         LinearLayout container = content.findViewById(R.id.layoutTeacherQuestionReplies);
         TextView empty = content.findViewById(R.id.textTeacherQuestionNoReplies);
@@ -640,6 +657,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Mở lại màn hỏi đáp chuyên biệt từ feature tổng quát. */
     private void openQaScreen() {
         Intent intent = new Intent(this, TeacherManagementActivity.class);
         intent.putExtra(EXTRA_SPEC_KEY, "teacher_qa");
@@ -654,6 +672,7 @@ public class TeacherManagementActivity extends BaseActivity {
         return spec != null && "teacher_exams".equals(spec.getActionKind());
     }
 
+    /** Hiển thị menu hành động theo loại item Teacher đang quản lý. */
     private void showActions(FeatureItem item) {
         if (item == null) return;
         String kind = spec.getActionKind();
@@ -683,6 +702,7 @@ public class TeacherManagementActivity extends BaseActivity {
     }
 
     @SuppressLint("InflateParams")
+    /** Hiển thị các hành động xuất bản, thống kê, sửa hoặc xóa bài kiểm tra. */
     private void showExamActions(FeatureItem item) {
         try {
             JSONObject source = item.getSource();
@@ -748,6 +768,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Mở form chỉnh sửa bài kiểm tra với dữ liệu hiện có. */
     private void openExamEditor(FeatureItem item) {
         if (item == null || item.getId().isEmpty()) {
             showErrorDialog("Bài kiểm tra không có mã hợp lệ");
@@ -781,6 +802,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 + "  •  " + questionTypeLabel(SafeJson.string(source, "mcq", "type"));
     }
 
+    /** Yêu cầu xác nhận trước các thao tác thay đổi trạng thái quan trọng. */
     private void confirmAction(FeatureItem item, String label) {
         if ("Quản lý nội dung".equals(label)) {
             openCourseContent(item);
@@ -845,6 +867,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 .show();
     }
 
+    /** Mở cây module/lesson của khóa học Teacher được chọn. */
     private void openCourseContent(FeatureItem item) {
         if (item == null || item.getId().isEmpty()) {
             showErrorDialog("Khóa học không có mã hợp lệ");
@@ -883,6 +906,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 : "Hãy thêm ít nhất một câu hỏi trước khi xuất bản.";
     }
 
+    /** Mở form thêm câu hỏi vào bài kiểm tra. */
     private void promptQuestion(FeatureItem item) {
         showChoiceQuestionDialog(item);
     }
@@ -936,6 +960,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Tạo payload câu hỏi và gửi vào bài kiểm tra hiện tại. */
     private void addExamQuestion(FeatureItem item, String prompt, JSONArray options,
                                  int correctIndex) {
         try {
@@ -959,6 +984,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Tải thống kê tổng quan của bài kiểm tra. */
     private void showStatistics(FeatureItem item) {
         String endpoint = "activities/exercises/" + item.getId() + "/stats/";
         setLoading(true);
@@ -978,6 +1004,7 @@ public class TeacherManagementActivity extends BaseActivity {
     }
 
     @SuppressLint("InflateParams")
+    /** Trình bày thống kê điểm, lượt nộp và tỷ lệ hoàn thành trong bottom sheet. */
     private void showExamStatistics(FeatureItem item, JSONObject data) {
         try {
             BottomSheetDialog sheet = new BottomSheetDialog(
@@ -1023,6 +1050,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 : String.format(java.util.Locale.US, "%.1f", value);
     }
 
+    /** Tải và hiển thị danh sách attempt của bài kiểm tra. */
     private void showAttempts(FeatureItem item) {
         setLoading(true);
         repository.load("activities/exercises/" + item.getId() + "/attempts/",
@@ -1050,6 +1078,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 });
     }
 
+    /** Xóa khóa học hoặc bài kiểm tra theo loại feature hiện tại. */
     private void deleteItem(FeatureItem item) {
         // Khóa học và bài kiểm tra nằm ở hai API khác nhau.
         String endpoint = "teacher_courses".equals(spec == null ? "" : spec.getActionKind())
@@ -1091,6 +1120,7 @@ public class TeacherManagementActivity extends BaseActivity {
                 ? "" : input.getText().toString().trim();
     }
 
+    /** Gửi hành động dạng văn bản như trả lời câu hỏi lên endpoint tương ứng. */
     private void performTextAction(FeatureItem item, String label, String value) {
         try {
             JSONObject body = new JSONObject();
@@ -1106,6 +1136,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Hiển thị form nhập nội dung và mức đánh giá cho học viên. */
     private void promptFeedback(FeatureItem item) {
         try {
             LinearLayout container = new LinearLayout(this);
@@ -1155,6 +1186,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Gửi phản hồi của Teacher cho học viên rồi tải lại danh sách. */
     private void sendFeedback(FeatureItem item, String message, double rating) {
         try {
             JSONObject body = new JSONObject();
@@ -1206,6 +1238,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
+    /** Tạo callback CRUD chung để báo thành công và tải lại dữ liệu. */
     private ApiCallback<JSONObject> actionCallback(String message) {
         return new ApiCallback<JSONObject>() {
             @Override
@@ -1224,6 +1257,7 @@ public class TeacherManagementActivity extends BaseActivity {
         };
     }
 
+    /** Ánh xạ nhãn hành động thành HTTP method, endpoint và request body cụ thể. */
     private void performAction(FeatureItem item, String label) {
         try {
             String kind = spec.getActionKind();
@@ -1273,6 +1307,7 @@ public class TeacherManagementActivity extends BaseActivity {
         return value.length() > 3000 ? value.substring(0, 3000) + "…" : value;
     }
 
+    /** Khóa danh sách và hiện tiến trình trong lúc request quản lý đang chạy. */
     private void setLoading(boolean loading) {
         if (!loading && refreshLayout != null) {
             refreshLayout.setRefreshing(false);
@@ -1282,6 +1317,7 @@ public class TeacherManagementActivity extends BaseActivity {
         refreshButton.setEnabled(!loading);
     }
 
+    /** Chỉ cho callback cập nhật UI khi Activity còn hoạt động. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
 
     private interface TextValueAction { void run(String value); }

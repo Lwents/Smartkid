@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/** Teacher-focused question cards with pending/answered state. */
+/** Thẻ câu hỏi dành cho giáo viên, phân biệt rõ trạng thái đang chờ và đã trả lời. */
 final class TeacherQuestionAdapter extends BaseAdapter {
     private final Context context;
     private final LayoutInflater inflater;

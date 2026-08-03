@@ -85,6 +85,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     private boolean hasExistingDocument;
     private boolean saving;
 
+    /** Tạo bottom sheet cùng ID và tiêu đề lesson cần chỉnh sửa. */
     public static LessonEditorBottomSheet newInstance(String lessonId, String lessonTitle) {
         LessonEditorBottomSheet sheet = new LessonEditorBottomSheet();
         Bundle args = new Bundle();
@@ -94,14 +95,17 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         return sheet;
     }
 
+    /** Đăng ký callback để màn cha nhận lesson sau khi lưu. */
     public void setOnSavedListener(OnSavedListener listener) {
         this.savedListener = listener;
     }
 
+    /** Đăng ký callback để màn cha loại lesson sau khi xóa. */
     public void setOnDeletedListener(OnDeletedListener listener) {
         this.deletedListener = listener;
     }
 
+    /** Đọc arguments và khởi tạo Repository cho bottom sheet. */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,18 +120,21 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     }
 
     @NonNull
+    /** Cấu hình dialog chiếm chiều rộng phù hợp và hỗ trợ bàn phím. */
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         return new BottomSheetDialog(requireContext(), getTheme());
     }
 
     @Nullable
+    /** Tạo layout chỉnh sửa nội dung lesson. */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.teacher_sheet_lesson_editor, container, false);
     }
 
+    /** Ánh xạ view, gắn file picker và tải dữ liệu lesson hiện tại. */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -140,6 +147,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         loadLesson();
     }
 
+    /** Ánh xạ tiêu đề, loại nội dung, URL, tệp và các nút lưu/xóa. */
     private void bindViews(View view) {
         contentTypeSpinner = view.findViewById(R.id.spinnerSheetLessonContentType);
         videoSourceGroup = view.findViewById(R.id.groupSheetVideoSource);
@@ -157,6 +165,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         view.findViewById(R.id.buttonSheetDocumentFilePick).setOnClickListener(v -> pickDocument());
     }
 
+    /** Cấu hình Spinner loại nội dung và cập nhật các trường phụ thuộc. */
     private void bindContentTypeSpinner() {
         String[] labels = {
                 getString(R.string.teacher_content_type_video),
@@ -183,6 +192,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     }
 
 
+    /** Hiện/ẩn trường URL, video hoặc tài liệu theo loại lesson được chọn. */
     private void updateContentFields() {
         boolean video = "video".equals(selectedContentType());
         boolean text = "text".equals(selectedContentType());
@@ -214,9 +224,10 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     }
 
     // ------------------------------------------------------------------
-    // Load existing lesson
+    // Tải lesson hiện có để điền vào form.
     // ------------------------------------------------------------------
 
+    /** Tải JSON lesson hiện tại để điền vào form. */
     private void loadLesson() {
         if (lessonId.isEmpty()) return;
         repository.loadObject("content/lessons/" + lessonId + "/",
@@ -229,11 +240,12 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
 
                     @Override
                     public void onError(ApiError error) {
-                        // Prefill remains at defaults; user can still edit and save.
+                        // Giữ giá trị mặc định nếu tải lỗi; giáo viên vẫn có thể sửa và lưu.
                     }
                 });
     }
 
+    /** Điền dữ liệu server vào các trường mà không làm phát sinh trạng thái thay đổi giả. */
     private void prefill(JSONObject data) {
         String type = SafeJson.string(data, "lesson", "content_type", "type");
         selectContentType(type);
@@ -249,7 +261,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     }
 
     // ------------------------------------------------------------------
-    // Video file picker
+    // Chọn tệp video
     // ------------------------------------------------------------------
 
     private void pickVideo() {
@@ -261,18 +273,20 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         }
     }
 
+    /** Kiểm tra video người dùng chọn và lưu URI chờ upload. */
     private void handleSelectedVideo(Uri uri) {
         if (uri == null) return;
         try {
             requireContext().getContentResolver().takePersistableUriPermission(uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (Exception ignored) {
-            // Still readable for this session.
+            // URI vẫn đọc được trong phiên hiện tại.
         }
         selectedVideoUri = uri;
         videoFileName.setText(fileDisplayName(uri));
     }
 
+    /** Mở trình chọn tài liệu cho lesson dạng file. */
     private void pickDocument() {
         try {
             if ("pdf".equals(selectedContentType())) {
@@ -288,6 +302,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         }
     }
 
+    /** Kiểm tra tài liệu và lưu URI để gửi multipart khi lưu. */
     private void handleSelectedDocument(Uri uri) {
         if (uri == null) return;
         try {
@@ -300,9 +315,10 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     }
 
     // ------------------------------------------------------------------
-    // Save (PATCH, multipart when a file is chosen)
+    // Lưu bằng PATCH; chuyển sang multipart khi người dùng chọn tệp.
     // ------------------------------------------------------------------
 
+    /** Kiểm tra form, tạo JSON và chọn request PATCH thường hoặc multipart. */
     private void save() {
         if (saving || lessonId.isEmpty()) return;
         String contentType = selectedContentType();
@@ -349,6 +365,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         }
     }
 
+    /** Xử lý kết quả lưu, báo màn cha và đóng bottom sheet. */
     private ApiCallback<JSONObject> saveCallback() {
         return new ApiCallback<JSONObject>() {
             @Override
@@ -371,6 +388,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
         };
     }
 
+    /** Yêu cầu xác nhận trước khi xóa lesson. */
     private void confirmDelete() {
         if (saving || lessonId.isEmpty()) return;
         new AlertDialog.Builder(requireContext())
@@ -381,6 +399,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
                 .show();
     }
 
+    /** Gọi DELETE lesson rồi thông báo cho màn cha cập nhật danh sách. */
     private void deleteLesson() {
         setSaving(true);
         repository.action(Request.Method.DELETE, "content/lessons/" + lessonId + "/",
@@ -404,7 +423,7 @@ public final class LessonEditorBottomSheet extends BottomSheetDialogFragment {
     }
 
     // ------------------------------------------------------------------
-    // Helpers
+    // Các hàm hỗ trợ
     // ------------------------------------------------------------------
 
 private String fileDisplayName(Uri uri) {
@@ -421,17 +440,20 @@ private String fileDisplayName(Uri uri) {
         return name.isEmpty() ? safe(uri.getLastPathSegment()) : name;
     }
 
+    /** Khóa form và hiển thị tiến trình trong lúc lưu/xóa. */
     private void setSaving(boolean value) {
         saving = value;
         doneButton.setEnabled(!value);
         doneButton.setText(value ? R.string.sheet_lesson_saving : R.string.sheet_done);
     }
 
+    /** Hiển thị lỗi kiểm tra hoặc lỗi API trong bottom sheet. */
     private void showStatus(String message) {
         statusView.setText(message == null ? getString(R.string.unknown_error) : message);
         statusView.setVisibility(View.VISIBLE);
     }
 
+    /** Kiểm tra Fragment vẫn gắn với Activity trước khi cập nhật UI. */
     private boolean isUsable() {
         return isAdded() && getContext() != null;
     }

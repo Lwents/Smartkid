@@ -44,6 +44,7 @@ public class CoursesFragment extends Fragment {
     private CourseRepository repository;
 
     @Nullable
+    /** Tạo layout danh sách khóa học của học viên. */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
@@ -51,6 +52,7 @@ public class CoursesFragment extends Fragment {
         return inflater.inflate(R.layout.course_fragment_courses, container, false);
     }
 
+    /** Khởi tạo adapter, Repository, tìm kiếm và hành động mở danh mục. */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -92,12 +94,14 @@ public class CoursesFragment extends Fragment {
         }
     }
 
+    /** Tải lại danh sách khi học viên quay về từ chi tiết hoặc danh mục. */
     @Override
     public void onResume() {
         super.onResume();
         if (repository != null && adapter != null) safeLoadCourses();
     }
 
+    /** Giải phóng tham chiếu view và báo Repository kết thúc lifecycle màn hình. */
     @Override
     public void onDestroyView() {
         if (repository != null) {
@@ -106,6 +110,7 @@ public class CoursesFragment extends Fragment {
         super.onDestroyView();
     }
 
+    /** Ánh xạ danh sách, trạng thái rỗng, loading và các nút thao tác. */
     private void bindViews(View view) {
         progressBar = view.findViewById(R.id.progressCourses);
         searchInput = view.findViewById(R.id.inputSearchCourse);
@@ -124,6 +129,7 @@ public class CoursesFragment extends Fragment {
         }
     }
 
+    /** Bao bước tải khóa học để mọi exception đều được hiển thị thành lỗi thân thiện. */
     private void safeLoadCourses() {
         try {
             loadCourses();
@@ -133,6 +139,7 @@ public class CoursesFragment extends Fragment {
         }
     }
 
+    /** Tải khóa học đã ghi danh và cập nhật adapter hoặc trạng thái rỗng. */
     private void loadCourses() {
         setLoading(true);
         repository.loadMyCourses(new ApiCallback<CourseListResult>() {
@@ -168,6 +175,7 @@ public class CoursesFragment extends Fragment {
         });
     }
 
+    /** Mở danh mục để học viên tìm và ghi danh khóa học mới. */
     private void openCatalog() {
         try {
             startActivity(new Intent(requireContext(), CatalogActivity.class));
@@ -177,6 +185,7 @@ public class CoursesFragment extends Fragment {
         }
     }
 
+    /** Mở chi tiết khóa học được chọn và truyền ID/title qua Intent. */
     private void openCourse(Course course) {
         if (course == null || course.getId().isEmpty()) {
             showErrorState("Khóa học này không có mã hợp lệ");
@@ -193,6 +202,7 @@ public class CoursesFragment extends Fragment {
         }
     }
 
+    /** Khóa thao tác làm mới trong lúc danh sách đang tải. */
     private void setLoading(boolean loading) {
         if (!loading && refreshLayout != null) {
             refreshLayout.setRefreshing(false);
@@ -203,6 +213,7 @@ public class CoursesFragment extends Fragment {
         }
     }
 
+    /** Hiển thị lỗi tải danh sách cùng nút thử lại. */
     private void showErrorState(String message) {
         if (emptyText != null) {
             emptyText.setText(message);

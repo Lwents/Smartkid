@@ -10,7 +10,7 @@ import com.example.smartkid.data.remote.ApiError;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-/** Loads the server-backed unread count used by role dashboard bells. */
+/** Tải số thông báo chưa đọc từ server cho biểu tượng chuông của các dashboard. */
 public final class NotificationBadgeRepository {
     private final ApiClient apiClient;
 

@@ -53,6 +53,7 @@ public class LearningAnalysisActivity extends BaseActivity {
 
     // ===== KHỞI TẠO MÀN HÌNH =====
 
+    /** Khởi tạo màn phân tích học tập, các ô thống kê và nút khôi phục streak. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +73,7 @@ public class LearningAnalysisActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ KPI, gợi ý học tập, thông điệp động viên và trạng thái tải. */
     private void bindViews() {
         progressBar = findViewById(R.id.progressLearningAnalysis);
         refreshLayout = findViewById(R.id.refreshLearningAnalysis);
@@ -97,6 +99,7 @@ public class LearningAnalysisActivity extends BaseActivity {
     // ===== 5 Ô CHỈ SỐ =====
 
     /** Gắn sẵn biểu tượng, màu và nhãn cho từng ô; số liệu điền sau khi có dữ liệu. */
+    /** Cấu hình biểu tượng, màu và nhãn cố định cho các ô thống kê. */
     private void prepareStatTiles() {
         setupStat(statLessons, R.drawable.ai_ic_lessons, R.drawable.ai_bg_circle_purple,
                 R.string.analysis_stat_lessons);
@@ -110,6 +113,7 @@ public class LearningAnalysisActivity extends BaseActivity {
                 R.string.analysis_stat_streak);
     }
 
+    /** Khởi tạo cách trình bày cho một ô thống kê. */
     private void setupStat(View tile, int iconRes, int backgroundRes, int labelRes) {
         if (tile == null) return;
         ((ImageView) tile.findViewById(R.id.iconStat)).setImageResource(iconRes);
@@ -118,6 +122,7 @@ public class LearningAnalysisActivity extends BaseActivity {
     }
 
     /** Điền số liệu: phần đạt được in đậm, phần "/ tổng" nhạt hơn (để trống nếu không có tổng). */
+    /** Điền giá trị hiện tại và tổng mục tiêu vào ô thống kê. */
     private void fillStat(View tile, String value, String total) {
         if (tile == null) return;
         ((TextView) tile.findViewById(R.id.textStatValue)).setText(value);
@@ -128,6 +133,7 @@ public class LearningAnalysisActivity extends BaseActivity {
 
     // ===== TẢI VÀ ĐỔ DỮ LIỆU =====
 
+    /** Tải phân tích học tập từ server và chuyển lỗi thành trạng thái rỗng. */
     private void loadSafely() {
         setLoading(true);
         repository.loadLearningAnalysis(new ApiCallback<JSONObject>() {
@@ -153,6 +159,7 @@ public class LearningAnalysisActivity extends BaseActivity {
         });
     }
 
+    /** Tách JSON phân tích thành KPI, streak, động viên và danh sách gợi ý. */
     private void bindAnalysis(JSONObject data) {
         JSONObject analysis = data.optJSONObject("analysis");
         JSONObject daily = data.optJSONObject("daily_goal");
@@ -182,6 +189,7 @@ public class LearningAnalysisActivity extends BaseActivity {
     }
 
     /** Thẻ động viên đổi lời theo việc học sinh còn thiếu mấy bài của mục tiêu hôm nay. */
+    /** Chọn thông điệp động viên theo tiến độ thực tế so với mục tiêu. */
     private void bindEncourage(int done, int target) {
         int remaining = target - done;
         if (target <= 0) {
@@ -200,6 +208,7 @@ public class LearningAnalysisActivity extends BaseActivity {
 
     // ===== DANH SÁCH BÀI HỌC NÊN HỌC TIẾP =====
 
+    /** Dựng các thẻ gợi ý bài học từ mảng JSON server trả về. */
     private void bindSuggestions(JSONArray source) {
         suggestionsContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -237,6 +246,7 @@ public class LearningAnalysisActivity extends BaseActivity {
      * Chuỗi này dài quá một dòng nên bị cắt cụt; rút lại thành "Toán lớp 4 • Chương 1"
      * bằng cách bỏ tên phụ của khóa và bỏ phần mô tả sau dấu hai chấm của chương.
      */
+    /** Rút gọn mô tả dài để thẻ gợi ý vẫn dễ đọc. */
     private String shortSubtitle(String raw) {
         if (raw == null || raw.trim().isEmpty()) return "";
         String[] parts = raw.split(" - ");
@@ -253,12 +263,14 @@ public class LearningAnalysisActivity extends BaseActivity {
         return chapter.isEmpty() ? course : course + " • " + chapter;
     }
 
+    /** Hiển thị trạng thái chưa có dữ liệu phân tích hoặc lỗi tải. */
     private void showEmpty(String message) {
         suggestionsContainer.removeAllViews();
         suggestionsEmpty.setText(message);
         suggestionsEmpty.setVisibility(View.VISIBLE);
     }
 
+    /** Mở khóa học hoặc bài học được đề xuất bởi hệ thống phân tích. */
     private void openSuggestion(String courseId, String lessonId, String title) {
         if (courseId.isEmpty() || lessonId.isEmpty()) {
             showShortMessage("Gợi ý này chưa liên kết với một bài học");
@@ -278,6 +290,7 @@ public class LearningAnalysisActivity extends BaseActivity {
 
     // ===== KHÔI PHỤC CHUỖI HỌC =====
 
+    /** Yêu cầu xác nhận trước khi dùng quyền khôi phục streak. */
     private void confirmRestore() {
         new AlertDialog.Builder(this).setTitle(R.string.analysis_restore_streak)
                 .setMessage("Chỉ khôi phục được khi chuỗi học đã mất và bạn còn lượt trong tháng này.")
@@ -286,6 +299,7 @@ public class LearningAnalysisActivity extends BaseActivity {
                 .show();
     }
 
+    /** Gọi API khôi phục streak và tải lại phân tích sau khi thành công. */
     private void restoreSafely() {
         setLoading(true);
         repository.restoreLearningStreak(new ApiCallback<String>() {
@@ -307,6 +321,7 @@ public class LearningAnalysisActivity extends BaseActivity {
 
     // ===== TIỆN ÍCH =====
 
+    /** Chuyển màn hình giữa trạng thái tải và nội dung phân tích. */
     private void setLoading(boolean loading) {
         if (!loading && refreshLayout != null) {
             refreshLayout.setRefreshing(false);
@@ -316,5 +331,6 @@ public class LearningAnalysisActivity extends BaseActivity {
         restoreButton.setEnabled(!loading);
     }
 
+    /** Chỉ cập nhật UI khi Activity vẫn còn hoạt động. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
 }

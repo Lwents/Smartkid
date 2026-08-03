@@ -50,6 +50,7 @@ public class StudentDashboardFragment extends Fragment {
     private Course resumeCourse;
 
     @Nullable
+    /** Tạo layout dashboard học viên. */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
@@ -57,6 +58,7 @@ public class StudentDashboardFragment extends Fragment {
         return inflater.inflate(R.layout.home_fragment_dashboard, container, false);
     }
 
+    /** Khởi tạo Repository, ánh xạ view và tải dữ liệu dashboard lần đầu. */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -79,12 +81,14 @@ public class StudentDashboardFragment extends Fragment {
         }
     }
 
+    /** Làm mới dashboard khi quay lại từ màn hình học hoặc bài thi. */
     @Override
     public void onResume() {
         super.onResume();
         if (getView() != null && notificationRepository != null) loadNotificationBadge();
     }
 
+    /** Ánh xạ KPI, streak, khóa học tiếp tục và trạng thái tải/lỗi. */
     private void bindViews(View view) {
         loadingView = view.findViewById(R.id.progressDashboard);
         contentView = view.findViewById(R.id.dashboardContent);
@@ -105,6 +109,7 @@ public class StudentDashboardFragment extends Fragment {
         }
     }
 
+    /** Gắn các lối tắt đến khóa học, bài thi, AI và thông báo. */
     private void bindQuickActions(View view) {
         notificationButton = view.findViewById(R.id.buttonDashboardNotifications);
         notificationBadge = view.findViewById(R.id.textDashboardNotificationBadge);
@@ -125,6 +130,7 @@ public class StudentDashboardFragment extends Fragment {
         catalogButton.setOnClickListener(clicked -> openActivity(CatalogActivity.class));
     }
 
+    /** Tải số thông báo chưa đọc để cập nhật badge trên dashboard. */
     private void loadNotificationBadge() {
         if (notificationRepository == null) return;
         notificationRepository.loadUnreadCount(
@@ -144,6 +150,7 @@ public class StudentDashboardFragment extends Fragment {
                 });
     }
 
+    /** Hiển thị badge với giới hạn trình bày phù hợp cho số lượng lớn. */
     private void showNotificationBadge(int unread) {
         if (notificationBadge == null || notificationButton == null) return;
         if (unread <= 0) {
@@ -161,6 +168,7 @@ public class StudentDashboardFragment extends Fragment {
                 getString(R.string.notification_badge_description, unread));
     }
 
+    /** Mở danh sách thông báo của học viên. */
     private void openNotifications() {
         if (!isAdded()) {
             return;
@@ -175,6 +183,7 @@ public class StudentDashboardFragment extends Fragment {
         }
     }
 
+    /** Mở một màn hình Student nội bộ nếu Fragment vẫn đang gắn vào Activity. */
     private void openActivity(Class<?> destination) {
         if (!isAdded()) {
             return;
@@ -190,6 +199,7 @@ public class StudentDashboardFragment extends Fragment {
     }
 
     /** Ô lửa hiển thị số ngày học liên tiếp thay cho nhãn "AI Tutor". */
+    /** Tải streak học tập và cập nhật phần động lực trên dashboard. */
     private void loadStreak() {
         if (streakText == null) return;
         new com.example.smartkid.data.repository.StudentFeatureRepository(requireContext())
@@ -214,6 +224,7 @@ public class StudentDashboardFragment extends Fragment {
                 });
     }
 
+    /** Bao thao tác tải dashboard để lỗi ngoài dự kiến được chuyển thành trạng thái UI. */
     private void safeLoadDashboard() {
         try {
             loadDashboard();
@@ -223,6 +234,7 @@ public class StudentDashboardFragment extends Fragment {
         }
     }
 
+    /** Gọi DashboardRepository và gắn DashboardSummary vào các view. */
     private void loadDashboard() {
         setLoading(true);
         repository.loadDashboard(new ApiCallback<DashboardSummary>() {
@@ -265,6 +277,7 @@ public class StudentDashboardFragment extends Fragment {
         });
     }
 
+    /** Mở khóa học/bài học gần nhất mà server đề xuất tiếp tục. */
     private void openResumeCourse() {
         if (resumeCourse == null || resumeCourse.getId().isEmpty()) {
             return;
@@ -279,6 +292,7 @@ public class StudentDashboardFragment extends Fragment {
         }
     }
 
+    /** Chuyển dashboard giữa trạng thái đang tải và hiển thị nội dung. */
     private void setLoading(boolean loading) {
         boolean swipeRefreshing = refreshLayout != null && refreshLayout.isRefreshing();
         if (!loading && refreshLayout != null) {
@@ -295,6 +309,7 @@ public class StudentDashboardFragment extends Fragment {
         }
     }
 
+    /** Hiển thị lỗi ngay trong dashboard thay vì đóng màn hình. */
     private void showInlineError(String message) {
         if (getView() == null) {
             return;

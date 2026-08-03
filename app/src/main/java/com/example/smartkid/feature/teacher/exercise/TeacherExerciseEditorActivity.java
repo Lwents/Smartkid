@@ -5,10 +5,9 @@ import com.example.smartkid.common.ui.form.ContentFormKind;
 import com.example.smartkid.common.ui.form.ExerciseScope;
 
 /**
- * Teacher-owned exercise/exam authoring form. A single screen serves two scopes selected via a
- * typed {@link ExerciseScope} extra (never a raw String): {@link ExerciseScope#LESSON_EXERCISE}
- * for an exercise attached to a lesson, and {@link ExerciseScope#STANDALONE_EXAM} for a
- * course-level exam.
+ * Form Teacher soạn bài tập/bài thi. Một màn hình phục vụ hai phạm vi được chọn bằng extra có kiểu
+ * {@link ExerciseScope}, không dùng chuỗi thô: {@link ExerciseScope#LESSON_EXERCISE} cho bài tập
+ * gắn với lesson và {@link ExerciseScope#STANDALONE_EXAM} cho bài thi cấp khóa học.
  */
 public final class TeacherExerciseEditorActivity extends ContentFormActivity {
     public static final String EXTRA_SCOPE = "teacher_exercise_scope";

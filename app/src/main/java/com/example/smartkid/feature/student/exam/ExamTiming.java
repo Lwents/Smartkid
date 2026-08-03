@@ -5,10 +5,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-/** Keeps the countdown tied to the deadline issued by the server. */
+/** Giữ đồng hồ làm bài bám theo deadline tuyệt đối do server cấp. */
 final class ExamTiming {
     private ExamTiming() { }
 
+    /** Tính số giây còn lại; dùng fallback khi deadline server không đọc được. */
     static int remainingSeconds(String deadlineAt, long nowMillis, int fallbackSeconds) {
         long deadlineMillis = parseIsoMillis(deadlineAt);
         if (deadlineMillis <= 0) return Math.max(1, fallbackSeconds);
@@ -17,6 +18,7 @@ final class ExamTiming {
         return (int) Math.min(Integer.MAX_VALUE, (remainingMillis + 999L) / 1000L);
     }
 
+    /** Đổi thời gian ISO của server sang giờ địa phương dễ đọc. */
     static String formatLocalDateTime(String raw, TimeZone timeZone) {
         long millis = parseIsoMillis(raw);
         if (millis <= 0) return "";
@@ -26,6 +28,7 @@ final class ExamTiming {
         return formatter.format(new Date(millis));
     }
 
+    /** Phân tích chuỗi ISO-8601 thành milliseconds, trả -1 nếu không hợp lệ. */
     private static long parseIsoMillis(String raw) {
         if (raw == null || raw.trim().isEmpty()) return -1;
         try {
@@ -40,6 +43,7 @@ final class ExamTiming {
         }
     }
 
+    /** Chuẩn hóa phần mili giây và múi giờ để SimpleDateFormat đọc ổn định. */
     private static String normalizeFraction(String value) {
         int zoneIndex = value.endsWith("Z") ? value.length() - 1 : -1;
         if (zoneIndex < 0) {

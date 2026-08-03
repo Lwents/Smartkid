@@ -1,0 +1,12 @@
+{
+  "name": "smartkid-android-project",
+  "private": true,
+  "scripts": {
+    "assistant:install": "npm install --prefix tools/ai-project-assistant",
+    "assistant:dev": "npm run dev --prefix tools/ai-project-assistant",
+    "assistant:build": "npm run build --prefix tools/ai-project-assistant",
+    "assistant:start": "npm run start --prefix tools/ai-project-assistant",
+    "assistant:test": "npm run test --prefix tools/ai-project-assistant",
+    "assistant:check": "npm run check --prefix tools/ai-project-assistant"
+  }
+}

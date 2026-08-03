@@ -315,7 +315,7 @@ public final class ApiClient {
         try (AssetFileDescriptor descriptor = resolver.openAssetFileDescriptor(uri, "r")) {
             if (descriptor != null && descriptor.getLength() >= 0) return descriptor.getLength();
         } catch (Exception ignored) {
-            // Some document providers only expose the size through metadata.
+            // Một số document provider chỉ cung cấp kích thước qua metadata.
         }
         try (Cursor cursor = resolver.query(uri,
                 new String[]{OpenableColumns.SIZE}, null, null, null)) {
@@ -324,7 +324,7 @@ public final class ApiClient {
                 if (column >= 0 && !cursor.isNull(column)) return cursor.getLong(column);
             }
         } catch (Exception ignored) {
-            // Unknown sizes continue to use chunked transfer mode.
+            // Nếu không biết kích thước thì tiếp tục dùng chế độ truyền theo chunk.
         }
         return -1;
     }
@@ -343,7 +343,7 @@ public final class ApiClient {
                 if (column >= 0) name = cursor.getString(column);
             }
         } catch (Exception ignored) {
-            // The provider may not expose a display name.
+            // Provider có thể không cung cấp tên hiển thị.
         }
         return name == null || name.trim().isEmpty() ? "upload" : name.trim();
     }
@@ -376,7 +376,7 @@ public final class ApiClient {
             }
             if (!message.isEmpty()) return new ApiError(statusCode, message, statusCode == 401);
         } catch (Exception ignored) {
-            // Fall back to the normalized status message below.
+            // Nếu không đọc được nội dung thì dùng thông báo chuẩn hóa theo status bên dưới.
         }
         return new ApiError(statusCode, thongBaoTheoMa(statusCode), statusCode == 401);
     }

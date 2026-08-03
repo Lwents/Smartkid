@@ -36,6 +36,7 @@ public class CatalogActivity extends BaseActivity {
     private CourseAdapter adapter;
     private CourseRepository repository;
 
+    /** Khởi tạo danh mục khóa học, tìm kiếm và adapter hiển thị kết quả. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +78,7 @@ public class CatalogActivity extends BaseActivity {
         }
     }
 
+    /** Tải danh mục theo từ khóa hiện tại và xử lý trạng thái rỗng/lỗi. */
     private void loadSafely() {
         try {
             setLoading(true);
@@ -104,6 +106,7 @@ public class CatalogActivity extends BaseActivity {
         }
     }
 
+    /** Mở chi tiết khóa học được chọn từ danh mục. */
     private void openCourse(Course course) {
         if (course == null || course.getId().isEmpty()) {
             showErrorDialog("Khóa học không có mã hợp lệ");
@@ -120,6 +123,7 @@ public class CatalogActivity extends BaseActivity {
         }
     }
 
+    /** Chuyển trạng thái loading và tạm khóa thao tác tìm kiếm. */
     private void setLoading(boolean loading) {
         if (!loading && refreshLayout != null) {
             refreshLayout.setRefreshing(false);
@@ -129,5 +133,6 @@ public class CatalogActivity extends BaseActivity {
         searchButton.setEnabled(!loading);
     }
 
+    /** Kiểm tra Activity còn hợp lệ trước khi callback cập nhật kết quả. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
 }

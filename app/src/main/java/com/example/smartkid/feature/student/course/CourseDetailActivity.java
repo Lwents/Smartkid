@@ -45,6 +45,7 @@ public class CourseDetailActivity extends BaseActivity {
     private CourseDetail courseDetail;
     private String courseId;
 
+    /** Khởi tạo màn chi tiết khóa học và đọc courseId từ Intent. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,12 +76,14 @@ public class CourseDetailActivity extends BaseActivity {
         }
     }
 
+    /** Tải lại chi tiết sau khi quay về từ bài học hoặc thao tác ghi danh. */
     @Override
     protected void onRestart() {
         super.onRestart();
         safeLoadDetail();
     }
 
+    /** Kết thúc tài nguyên Repository theo lifecycle của Activity. */
     @Override
     protected void onDestroy() {
         if (repository != null) {
@@ -89,6 +92,7 @@ public class CourseDetailActivity extends BaseActivity {
         super.onDestroy();
     }
 
+    /** Ánh xạ phần thông tin khóa học, danh sách bài học và nút hành động chính. */
     private void bindViews() {
         toolbar = findViewById(R.id.toolbarCourseDetail);
         thumbnail = findViewById(R.id.imageCourseDetail);
@@ -110,6 +114,7 @@ public class CourseDetailActivity extends BaseActivity {
         }
     }
 
+    /** Bao bước tải chi tiết để lỗi ngoài dự kiến không làm màn hình dừng. */
     private void safeLoadDetail() {
         try {
             loadDetail();
@@ -120,6 +125,7 @@ public class CourseDetailActivity extends BaseActivity {
         }
     }
 
+    /** Gọi API chi tiết khóa học rồi dựng các section và lesson. */
     private void loadDetail() {
         setLoading(true);
         repository.loadCourseDetail(courseId, new ApiCallback<CourseDetail>() {
@@ -149,6 +155,7 @@ public class CourseDetailActivity extends BaseActivity {
         });
     }
 
+    /** Gắn thông tin tổng quan và trạng thái ghi danh của khóa học lên UI. */
     private void bindCourse(Course course) {
         if (course == null) {
             throw new IllegalArgumentException("Khóa học rỗng");
@@ -181,6 +188,7 @@ public class CourseDetailActivity extends BaseActivity {
         }
     }
 
+    /** Ghi danh miễn phí hoặc mở bài học đầu tiên tùy trạng thái khóa học. */
     private void handlePrimaryAction() {
         if (courseDetail == null || courseDetail.getCourse() == null) {
             showShortMessage("Dữ liệu khóa học chưa sẵn sàng");
@@ -194,6 +202,7 @@ public class CourseDetailActivity extends BaseActivity {
         }
     }
 
+    /** Gọi API ghi danh miễn phí rồi tải lại dữ liệu khóa học. */
     private void enrollFreeCourse() {
         setLoading(true);
         repository.enroll(courseId, new ApiCallback<Boolean>() {
@@ -213,6 +222,7 @@ public class CourseDetailActivity extends BaseActivity {
         });
     }
 
+    /** Tìm bài học đầu tiên có thể học và mở LessonPlayerActivity. */
     private void openFirstLesson() {
         if (courseDetail == null || courseDetail.getLessons().isEmpty()) {
             showShortMessage("Khóa học chưa có bài học");
@@ -221,6 +231,7 @@ public class CourseDetailActivity extends BaseActivity {
         openLesson(courseDetail.getLessons().get(0));
     }
 
+    /** Truyền thông tin course/lesson sang màn hình phát bài học. */
     private void openLesson(Lesson lesson) {
         if (courseDetail != null && !courseDetail.getCourse().isEnrolled()) {
             showShortMessage("Bạn cần đăng ký khóa học trước");
@@ -250,6 +261,7 @@ public class CourseDetailActivity extends BaseActivity {
         }
     }
 
+    /** Chuyển màn hình giữa trạng thái tải và nội dung khóa học. */
     private void setLoading(boolean loading) {
         if (!loading && refreshLayout != null) {
             refreshLayout.setRefreshing(false);

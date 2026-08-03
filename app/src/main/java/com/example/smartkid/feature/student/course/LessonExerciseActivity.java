@@ -61,6 +61,7 @@ public final class LessonExerciseActivity extends BaseActivity {
     private CountDownTimer timer;
     private boolean submitting;
 
+    /** Khởi tạo màn bài tập của bài học và đọc exerciseId/lessonId từ Intent. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +91,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         }
     }
 
+    /** Dừng timer và giải phóng trạng thái attempt khi Activity đóng. */
     @Override
     protected void onDestroy() {
         if (timer != null) timer.cancel();
@@ -97,6 +99,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         super.onDestroy();
     }
 
+    /** Ánh xạ vùng câu hỏi, nút nộp, đồng hồ và trạng thái kết quả. */
     private void bindViews() {
         toolbar = findViewById(R.id.toolbarExam);
         progress = findViewById(R.id.progressExam);
@@ -108,6 +111,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         submitButton = findViewById(R.id.buttonSubmitExam);
     }
 
+    /** Tải cấu hình bài tập trước khi tạo attempt mới. */
     private void loadDetail() {
         setLoading(true);
         exerciseRepository.loadDetail(exerciseId, new ApiCallback<JSONObject>() {
@@ -137,6 +141,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         });
     }
 
+    /** Gọi API bắt đầu bài tập và nhận attempt cùng danh sách câu hỏi. */
     private void startExercise() {
         setLoading(true);
         exerciseRepository.start(exerciseId, new ApiCallback<JSONObject>() {
@@ -166,6 +171,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         });
     }
 
+    /** Dựng view nhập đáp án cho lựa chọn, tự luận ngắn và matching. */
     private void renderQuestions(JSONArray questions) {
         questionsContainer.removeAllViews();
         answerViews.clear();
@@ -229,6 +235,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         }
     }
 
+    /** Tạo ô nhập cho câu trả lời ngắn với kiểu bàn phím phù hợp. */
     private EditText createShortAnswerInput() {
         EditText answer = new EditText(this);
         answer.setHint(R.string.lesson_exercise_answer_hint);
@@ -239,6 +246,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         return answer;
     }
 
+    /** Dựng các hàng ghép cặp và lưu cấu trúc để thu thập đáp án. */
     private LinearLayout renderMatchingQuestion(JSONObject question) {
         MatchingDefinition definition = matchingDefinition(question);
         LinearLayout container = new LinearLayout(this);
@@ -428,6 +436,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         return SafeJson.string(choice, fallback, "text", "label");
     }
 
+    /** Yêu cầu xác nhận trước khi gửi toàn bộ câu trả lời. */
     private void confirmSubmit() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.submit_exam)
@@ -437,6 +446,7 @@ public final class LessonExerciseActivity extends BaseActivity {
                 .show();
     }
 
+    /** Thu thập đáp án rồi gửi lần lượt từng câu cho attempt hiện tại. */
     private void submitAnswers() {
         if (submitting || attemptId == null || attemptId.isEmpty()) return;
         submitting = true;
@@ -445,6 +455,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         submitAnswerAt(answers, 0);
     }
 
+    /** Chuyển trạng thái các view câu hỏi thành danh sách payload cần nộp. */
     private List<AnswerSubmission> collectAnswers() {
         List<AnswerSubmission> result = new ArrayList<>();
         for (Map.Entry<String, View> entry : answerViews.entrySet()) {
@@ -472,6 +483,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         return result;
     }
 
+    /** Gửi tuần tự từng đáp án để chỉ finalize sau khi tất cả request thành công. */
     private void submitAnswerAt(List<AnswerSubmission> answers, int index) {
         if (index >= answers.size()) {
             finalizeAttempt();
@@ -496,6 +508,7 @@ public final class LessonExerciseActivity extends BaseActivity {
                 });
     }
 
+    /** Kết thúc attempt, nhận kết quả và lưu tiến độ bài học nếu cần. */
     private void finalizeAttempt() {
         exerciseRepository.finalizeAttempt(attemptId, new ApiCallback<JSONObject>() {
             @Override
@@ -528,6 +541,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         });
     }
 
+    /** Hiển thị điểm bài tập và trạng thái đã đồng bộ tiến độ. */
     private void showResult(JSONObject data, boolean progressSaved) {
         submitting = false;
         setLoading(false);
@@ -540,6 +554,7 @@ public final class LessonExerciseActivity extends BaseActivity {
                 : R.string.lesson_exercise_result_not_saved, score));
     }
 
+    /** Khởi động thời gian làm bài nếu bài tập có giới hạn. */
     private void startTimer() {
         if (timer != null) timer.cancel();
         timer = new CountDownTimer(durationSeconds * 1000L, 1000L) {
@@ -558,12 +573,14 @@ public final class LessonExerciseActivity extends BaseActivity {
         }.start();
     }
 
+    /** Khóa các câu hỏi và nút nộp trong lúc request đang chạy. */
     private void setLoading(boolean loading) {
         progress.setVisibility(loading ? View.VISIBLE : View.GONE);
         startButton.setEnabled(!loading);
         submitButton.setEnabled(!loading);
     }
 
+    /** Hiển thị hướng dẫn, lỗi hoặc kết quả phụ của bài tập. */
     private void showStatus(String message) {
         status.setText(message);
         status.setVisibility(View.VISIBLE);
@@ -578,6 +595,7 @@ public final class LessonExerciseActivity extends BaseActivity {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
+    /** Kiểm tra Activity còn hợp lệ trước khi callback thay đổi giao diện. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

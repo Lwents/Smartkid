@@ -15,16 +15,18 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Loads the teacher KPIs and course summaries exposed by SmartKid's dashboard API. */
+/** Tải KPI và tóm tắt khóa học của giáo viên từ API dashboard SmartKid. */
 public final class TeacherDashboardRepository {
     private final Context appContext;
     private final ApiClient apiClient;
 
+    /** Khởi tạo Repository bằng application context và ApiClient dùng chung. */
     public TeacherDashboardRepository(Context context) {
         appContext = context.getApplicationContext();
         apiClient = ApiClient.getInstance(appContext);
     }
 
+    /** Tải dashboard Teacher và chuyển JSON thành model dành cho giao diện. */
     public void load(ApiCallback<TeacherDashboardData> callback) {
         apiClient.get("teacher/dashboard/", true, new ApiCallback<JSONObject>() {
             @Override
@@ -46,6 +48,7 @@ public final class TeacherDashboardRepository {
         });
     }
 
+    /** Đọc KPI và tỷ lệ từ response, chấp nhận các tên field backend tương đương. */
     private TeacherDashboardData parse(JSONObject response) {
         JSONObject root = response == null ? new JSONObject() : response;
         JSONObject stats = root.optJSONObject("stats");
@@ -67,6 +70,7 @@ public final class TeacherDashboardRepository {
                 parseCourses(root));
     }
 
+    /** Chuyển mảng khóa học nổi bật thành danh sách CourseItem an toàn. */
     private List<TeacherDashboardData.CourseItem> parseCourses(JSONObject root) {
         List<TeacherDashboardData.CourseItem> result = new ArrayList<>();
         JSONArray values = SafeJson.array(root, "myCourses", "courses");

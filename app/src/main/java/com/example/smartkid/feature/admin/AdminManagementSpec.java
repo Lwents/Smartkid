@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Typed registry of Admin-owned management features and their real API endpoints. */
+/** Danh bạ chức năng Admin cùng endpoint thật và loại hành động của từng mục. */
 public final class AdminManagementSpec {
     private static final String NOTIFICATION_HISTORY_ENDPOINT =
             "admin/activity-logs/?action=notification.broadcast&page=1&pageSize=100";
@@ -33,16 +33,21 @@ public final class AdminManagementSpec {
 
     private AdminManagementSpec() { }
 
+    /** Lấy cấu hình một chức năng Admin theo key truyền qua Intent. */
     public static FeatureSpec get(String key) { return SPECS.get(key); }
+    /** Trả toàn bộ danh bạ bất biến để dashboard có thể duyệt an toàn. */
     public static Map<String, FeatureSpec> all() { return SPECS; }
+    /** Endpoint lịch sử phát thông báo dùng để ghép với danh sách thông báo hiện tại. */
     public static String notificationHistoryEndpoint() {
         return NOTIFICATION_HISTORY_ENDPOINT;
     }
 
+    /** Chỉ danh sách người dùng hoạt động cần refresh tự động theo chu kỳ. */
     public static boolean isRealtimeList(String key) {
         return "admin_active_users".equals(key);
     }
 
+    /** Thêm một chức năng thuộc quyền Admin vào danh bạ khởi tạo. */
     private static void add(Map<String, FeatureSpec> target, String key, String title,
                             String endpoint, String actionKind) {
         target.put(key, new FeatureSpec(key, title, endpoint, actionKind, "", UserRole.ADMIN));

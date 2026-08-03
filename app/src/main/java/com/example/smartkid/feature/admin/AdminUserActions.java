@@ -1,6 +1,6 @@
 package com.example.smartkid.feature.admin;
 
-/** Endpoints and validation rules for Admin user-management actions. */
+/** Tập hợp endpoint và quy tắc kiểm tra cho các thao tác quản lý người dùng của Admin. */
 public final class AdminUserActions {
     public static final String ROLE_STUDENT = "student";
     public static final String ROLE_INSTRUCTOR = "instructor";

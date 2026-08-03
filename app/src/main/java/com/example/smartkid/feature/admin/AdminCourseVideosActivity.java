@@ -31,7 +31,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Admin can inspect or remove a course, and view or remove individual videos. */
+/** Cho phép Admin xem hoặc xóa khóa học, đồng thời xem hoặc xóa từng video bên trong. */
 public final class AdminCourseVideosActivity extends BaseActivity {
     public static final String EXTRA_COURSE_ID = "admin_course_id";
     public static final String EXTRA_COURSE_TITLE = "admin_course_title";
@@ -52,6 +52,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
     private String currentCourseTitle = "";
     private int totalLessons;
 
+    /** Khởi tạo màn quản lý video của một khóa học và đọc courseId từ Intent. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +80,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ thông tin khóa học, danh sách video và trạng thái tải. */
     private void bindViews() {
         MaterialToolbar toolbar = findViewById(R.id.toolbarAdminCourseVideos);
         progress = findViewById(R.id.progressAdminCourseVideos);
@@ -104,6 +106,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
                 ? getString(R.string.admin_course_videos_title) : title);
     }
 
+    /** Tải chi tiết khóa học Admin rồi tách danh sách lesson có video. */
     private void loadCourse() {
         setLoading(true, getString(R.string.admin_course_videos_loading));
         repository.loadObject(AdminCourseVideoActions.courseDetailEndpoint(courseId),
@@ -126,6 +129,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
                 });
     }
 
+    /** Gắn metadata khóa học và chuẩn bị danh sách VideoEntry. */
     private void bindCourse(JSONObject source) {
         currentCourseTitle = SafeJson.string(source,
                 getString(R.string.admin_course_fallback), "title");
@@ -167,6 +171,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         renderVideos();
     }
 
+    /** Chuẩn hóa trạng thái khóa học thành nhãn và màu hiển thị. */
     private void bindCourseStatus(String rawStatus) {
         String normalized = safe(rawStatus).toLowerCase(java.util.Locale.ROOT);
         boolean published = "published".equals(normalized);
@@ -176,6 +181,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
                         : published ? R.string.status_published : R.string.status_draft)));
     }
 
+    /** Yêu cầu xác nhận trước khi xóa toàn bộ khóa học. */
     private void confirmDeleteCourse() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.admin_course_delete_title)
@@ -186,6 +192,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
                 .show();
     }
 
+    /** Gọi API xóa khóa học rồi đóng màn hình khi thành công. */
     private void deleteCourse() {
         setLoading(true, getString(R.string.admin_course_deleting));
         repository.action(Request.Method.DELETE,
@@ -212,6 +219,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
                 });
     }
 
+    /** Dựng từng hàng video từ danh sách lesson đã phân tích. */
     private void renderVideos() {
         videosContainer.removeAllViews();
         empty.setVisibility(videos.isEmpty() ? View.VISIBLE : View.GONE);
@@ -239,6 +247,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         }
     }
 
+    /** Mở trình phát ở chế độ preview để Admin kiểm tra video. */
     private void openPreview(VideoEntry video) {
         try {
             Intent intent = new Intent(this, LessonPlayerActivity.class);
@@ -253,6 +262,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         }
     }
 
+    /** Yêu cầu xác nhận trước khi gỡ video khỏi lesson. */
     private void confirmDelete(VideoEntry video) {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.admin_course_video_delete_title)
@@ -263,6 +273,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
                 .show();
     }
 
+    /** Xóa nguồn video của lesson rồi tải lại khóa học. */
     private void deleteVideo(VideoEntry video) {
         setLoading(true, getString(R.string.admin_course_video_deleting));
         repository.action(Request.Method.DELETE,
@@ -294,6 +305,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
                 : getString(R.string.admin_course_video_source_file);
     }
 
+    /** Chuyển màn hình giữa trạng thái tải, lỗi và danh sách video. */
     private void setLoading(boolean loading, String message) {
         progress.setVisibility(loading ? View.VISIBLE : View.GONE);
         content.setVisibility(loading ? View.INVISIBLE : View.VISIBLE);
@@ -301,6 +313,7 @@ public final class AdminCourseVideosActivity extends BaseActivity {
         status.setVisibility(safe(message).isEmpty() ? View.GONE : View.VISIBLE);
     }
 
+    /** Chỉ cập nhật UI khi Activity quản lý video còn hoạt động. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

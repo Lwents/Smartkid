@@ -24,6 +24,7 @@ public class ChangePasswordActivity extends BaseActivity {
     private TextView statusText;
     private StudentFeatureRepository repository;
 
+    /** Khởi tạo form đổi mật khẩu dùng chung cho các role đã đăng nhập. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +51,7 @@ public class ChangePasswordActivity extends BaseActivity {
         }
     }
 
+    /** Kiểm tra mật khẩu cũ/mới rồi gọi endpoint phù hợp với role hiện tại. */
     private void changeSafely() {
         try {
             String oldPassword = rawText(oldInput);
@@ -97,6 +99,7 @@ public class ChangePasswordActivity extends BaseActivity {
         }
     }
 
+    /** Khóa form để tránh gửi nhiều yêu cầu đổi mật khẩu cùng lúc. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         saveButton.setEnabled(!loading);
@@ -105,14 +108,17 @@ public class ChangePasswordActivity extends BaseActivity {
         confirmationInput.setEnabled(!loading);
     }
 
+    /** Hiển thị kết quả đổi mật khẩu ngay trong form. */
     private void showStatus(String message) {
         statusText.setText(message);
         statusText.setVisibility(View.VISIBLE);
     }
 
+    /** Lấy nguyên văn mật khẩu, không trim dữ liệu bí mật. */
     private String rawText(TextInputEditText input) {
         return input.getText() == null ? "" : input.getText().toString();
     }
 
+    /** Kiểm tra Activity còn sống trước khi callback cập nhật UI. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/** Adapter hiển thị, tìm kiếm và phân biệt trạng thái đã đọc của danh sách thông báo. */
 final class NotificationItemAdapter extends BaseAdapter {
     private final Context context;
     private final LayoutInflater inflater;
@@ -30,12 +31,14 @@ final class NotificationItemAdapter extends BaseAdapter {
         this.inflater = LayoutInflater.from(context);
     }
 
+    /** Thay dữ liệu gốc rồi áp dụng lại bộ lọc để đồng bộ danh sách đang hiển thị. */
     void setItems(List<FeatureItem> items) {
         source.clear();
         if (items != null) source.addAll(items);
         filter("");
     }
 
+    /** Tìm thông báo theo tiêu đề, nội dung, loại và ngữ cảnh sau khi đã bỏ dấu. */
     void filter(String keyword) {
         displayed.clear();
         String query = normalize(keyword);
@@ -49,6 +52,7 @@ final class NotificationItemAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    /** Đếm thông báo chưa đọc trên dữ liệu gốc, không phụ thuộc từ khóa đang lọc. */
     int getUnreadCount() {
         int count = 0;
         for (FeatureItem item : source) {
@@ -65,6 +69,7 @@ final class NotificationItemAdapter extends BaseAdapter {
 
     @Override public long getItemId(int position) { return position; }
 
+    /** Tái sử dụng view cũ và gắn màu, biểu tượng, nội dung phù hợp cho từng thông báo. */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -108,6 +113,7 @@ final class NotificationItemAdapter extends BaseAdapter {
         return convertView;
     }
 
+    /** Chuẩn hóa chuỗi tìm kiếm: bỏ dấu, đổi về chữ thường và loại khoảng trắng thừa. */
     private static String normalize(String value) {
         if (value == null) return "";
         return Normalizer.normalize(value, Normalizer.Form.NFD)

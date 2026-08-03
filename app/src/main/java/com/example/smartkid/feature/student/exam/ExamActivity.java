@@ -72,6 +72,7 @@ public class ExamActivity extends BaseActivity {
     private CountDownTimer timer;
     private boolean submitting;
 
+    /** Khởi tạo phiên làm bài thi, đọc examId và chuẩn bị các điều khiển câu hỏi. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,12 +99,14 @@ public class ExamActivity extends BaseActivity {
         }
     }
 
+    /** Hủy bộ đếm thời gian và callback khi màn hình bài thi đóng. */
     @Override
     protected void onDestroy() {
         cancelTimer();
         super.onDestroy();
     }
 
+    /** Ánh xạ vùng câu hỏi, điều hướng, đồng hồ, nút nộp và trạng thái kết quả. */
     private void bindViews() {
         toolbar = findViewById(R.id.toolbarExam);
         progressBar = findViewById(R.id.progressExam);
@@ -130,6 +133,7 @@ public class ExamActivity extends BaseActivity {
         nextQuestionButton.setOnClickListener(view -> showQuestion(currentQuestionIndex + 1));
     }
 
+    /** Tải thông tin bài thi và chỉ cho phép bắt đầu khi dữ liệu hợp lệ. */
     private void loadDetailSafely() {
         setLoading(true);
         repository.loadDetail(examId, new ApiCallback<JSONObject>() {
@@ -201,6 +205,7 @@ public class ExamActivity extends BaseActivity {
         });
     }
 
+    /** Gọi API bắt đầu attempt, nhận câu hỏi và khởi động bộ đếm giờ. */
     private void startSafely() {
         try {
             setLoading(true);
@@ -239,6 +244,7 @@ public class ExamActivity extends BaseActivity {
         }
     }
 
+    /** Lưu danh sách câu hỏi và tạo vùng nhập đáp án phù hợp cho từng loại. */
     private void renderQuestions(JSONArray questions) {
         attemptQuestions = questions == null ? new JSONArray() : questions;
         savedAnswers = new JSONObject();
@@ -247,6 +253,7 @@ public class ExamActivity extends BaseActivity {
         showQuestion(0);
     }
 
+    /** Lưu đáp án hiện tại rồi chuyển giao diện sang câu hỏi được yêu cầu. */
     private void showQuestion(int requestedIndex) {
         if (attemptQuestions.length() == 0) return;
         int index = Math.max(0, Math.min(requestedIndex, attemptQuestions.length() - 1));
@@ -335,6 +342,7 @@ public class ExamActivity extends BaseActivity {
         examScroll.post(() -> examScroll.smoothScrollTo(0, questionsContainer.getTop()));
     }
 
+    /** Dựng các Spinner ghép cặp cho câu hỏi matching. */
     private View createMatchingAnswer(JSONObject question) {
         JSONArray leftItems = SafeJson.array(question, "leftItems", "left_items");
         JSONArray rightItems = SafeJson.array(question, "rightItems", "right_items");
@@ -396,6 +404,7 @@ public class ExamActivity extends BaseActivity {
         return container;
     }
 
+    /** Chuyển đáp án đang hiển thị thành JSON và lưu theo questionId. */
     private void saveVisibleAnswer() {
         if (answerViews.isEmpty()) return;
         Map.Entry<String, View> entry = answerViews.entrySet().iterator().next();
@@ -406,6 +415,7 @@ public class ExamActivity extends BaseActivity {
         }
     }
 
+    /** Đọc đáp án từ view theo loại câu hỏi và tạo payload chuẩn cho server. */
     private JSONObject answerFromView(View view) throws Exception {
         JSONObject answer = new JSONObject();
         if (view instanceof RadioGroup) {
@@ -431,6 +441,7 @@ public class ExamActivity extends BaseActivity {
         return answer;
     }
 
+    /** Khôi phục đáp án đã chọn khi học viên quay lại một câu hỏi trước đó. */
     private void restoreAnswer(String questionId, View view) {
         JSONObject answer = savedAnswers.optJSONObject(questionId);
         if (answer == null || view == null) return;
@@ -465,6 +476,7 @@ public class ExamActivity extends BaseActivity {
         }
     }
 
+    /** Cảnh báo số câu chưa trả lời trước khi cho phép nộp bài. */
     private void confirmSubmit() {
         if (submitting) return;
         try {
@@ -483,6 +495,7 @@ public class ExamActivity extends BaseActivity {
         }
     }
 
+    /** Thu thập toàn bộ đáp án và gửi attempt lên API đúng một lần. */
     private void submitSafely() {
         if (attemptId == null || attemptId.isEmpty() || submitting) return;
         try {
@@ -515,11 +528,13 @@ public class ExamActivity extends BaseActivity {
         }
     }
 
+    /** Gom đáp án đã lưu thành object JSON theo questionId. */
     private JSONObject collectAnswers() throws Exception {
         saveVisibleAnswer();
         return new JSONObject(savedAnswers.toString());
     }
 
+    /** Đếm số câu chưa có đáp án để cảnh báo trước khi nộp. */
     private int countUnanswered() {
         saveVisibleAnswer();
         int count = 0;
@@ -547,6 +562,7 @@ public class ExamActivity extends BaseActivity {
         return count;
     }
 
+    /** Hiển thị điểm, trạng thái đạt và mở hành động xem xếp hạng. */
     private void showResult(JSONObject result) {
         double score = SafeJson.decimal(result, 0, "totalScore", "total_score");
         double max = SafeJson.decimal(result, 0, "maxScore", "max_score");
@@ -563,6 +579,7 @@ public class ExamActivity extends BaseActivity {
         rankingButton.setVisibility(View.VISIBLE);
     }
 
+    /** Tải bảng xếp hạng của bài thi sau khi học viên hoàn thành. */
     private void loadRanking() {
         setLoading(true);
         repository.loadRanking(examId, new ApiCallback<JSONObject>() {
@@ -582,6 +599,7 @@ public class ExamActivity extends BaseActivity {
         });
     }
 
+    /** Phân loại lỗi bài thi, gồm hết lượt làm, hết phiên và lỗi mạng thông thường. */
     private void handleExamError(ApiError error, boolean startingExam) {
         if (startingExam && ExamErrorMessages.isAttemptLimit(error)) {
             showAttemptLimitDialog();
@@ -597,6 +615,7 @@ public class ExamActivity extends BaseActivity {
                 error.isSessionExpired()));
     }
 
+    /** Giải thích khi học viên đã dùng hết số lượt làm bài. */
     private void showAttemptLimitDialog() {
         startButton.setVisibility(View.GONE);
         rankingButton.setVisibility(View.VISIBLE);
@@ -610,6 +629,7 @@ public class ExamActivity extends BaseActivity {
                 .show();
     }
 
+    /** Dựng bottom sheet xếp hạng từ dữ liệu cá nhân và danh sách người học. */
     private void showRankingSheet(JSONObject data) {
         JSONArray top = SafeJson.array(data, "top");
         JSONObject me = data.optJSONObject("me");
@@ -778,6 +798,7 @@ public class ExamActivity extends BaseActivity {
         return item;
     }
 
+    /** Chạy đồng hồ đếm ngược và tự nộp bài khi hết thời gian. */
     private void startTimer(int seconds) {
         cancelTimer();
         timer = new CountDownTimer(Math.max(1, seconds) * 1000L, 1000L) {
@@ -794,6 +815,7 @@ public class ExamActivity extends BaseActivity {
         }.start();
     }
 
+    /** Dừng bộ đếm hiện tại để tránh nhiều timer chạy song song. */
     private void cancelTimer() {
         if (timer != null) {
             timer.cancel();
@@ -801,6 +823,7 @@ public class ExamActivity extends BaseActivity {
         }
     }
 
+    /** Khóa thao tác và hiện tiến trình trong lúc API bài thi đang chạy. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         startButton.setEnabled(!loading);
@@ -808,6 +831,7 @@ public class ExamActivity extends BaseActivity {
         rankingButton.setEnabled(!loading);
     }
 
+    /** Hiển thị hướng dẫn hoặc lỗi ngay trong màn hình bài thi. */
     private void showStatus(String message) {
         statusText.setText(message);
         statusText.setVisibility(View.VISIBLE);
@@ -852,6 +876,7 @@ public class ExamActivity extends BaseActivity {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
+    /** Chỉ xử lý callback khi Activity bài thi vẫn còn hoạt động. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
 
     private static final class MatchingOption {

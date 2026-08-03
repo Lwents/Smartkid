@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/** Native teacher home based on SmartKid's quick actions and course overview. */
+/** Màn hình chính của giáo viên, gồm thao tác nhanh và tổng quan các khóa học SmartKid. */
 public final class TeacherDashboardActivity extends RoleDashboardActivity {
     private static final int PAGE_OVERVIEW = 0;
     private static final int PAGE_COURSES = 1;
@@ -80,6 +80,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
     private float swipeStartX;
     private float swipeStartY;
 
+    /** Khởi tạo dashboard giáo viên, các trang quản lý và thanh điều hướng. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,12 +107,14 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         }
     }
 
+    /** Làm mới dashboard khi quay về từ màn tạo hoặc chỉnh sửa nội dung. */
     @Override
     protected void onRestart() {
         super.onRestart();
         if (repository != null) refreshDashboard();
     }
 
+    /** Tiếp tục animation/badge khi dashboard trở lại foreground. */
     @Override
     protected void onResume() {
         super.onResume();
@@ -119,12 +122,14 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         notificationHandler.postDelayed(notificationRefreshTask, NOTIFICATION_REFRESH_MS);
     }
 
+    /** Dừng hiệu ứng không cần thiết khi dashboard mất focus. */
     @Override
     protected void onPause() {
         notificationHandler.removeCallbacks(notificationRefreshTask);
         super.onPause();
     }
 
+    /** Hủy callback và animation để tránh giữ Activity sau khi đóng. */
     @Override
     protected void onDestroy() {
         notificationHandler.removeCallbacks(notificationRefreshTask);
@@ -132,6 +137,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         super.onDestroy();
     }
 
+    /** Ánh xạ header, ViewPager, thanh điều hướng, KPI và trạng thái tải. */
     private void bindViews() {
         progressBar = findViewById(R.id.progressTeacherDashboard);
         statusText = findViewById(R.id.textTeacherDashboardStatus);
@@ -161,6 +167,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                 this, notificationButton, notificationBadgeView);
     }
 
+    /** Hiển thị tên/avatar giáo viên và gắn menu tài khoản. */
     private void bindHeader() {
         User user = currentUser();
         String name = user.getFullName().isEmpty() ? user.getUsername() : user.getFullName();
@@ -172,6 +179,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         findViewById(R.id.buttonTeacherLogout).setOnClickListener(view -> showAccountMenu(name));
     }
 
+    /** Hiển thị các hành động hồ sơ, đổi mật khẩu và đăng xuất. */
     private void showAccountMenu(String displayName) {
         String[] labels = {
                 getString(R.string.account_menu_profile),
@@ -189,6 +197,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                 .show();
     }
 
+    /** Mở màn hình tài khoản dùng chung cho giáo viên. */
     private void openAccountScreen(Class<?> target) {
         try {
             startActivity(new Intent(this, target));
@@ -198,6 +207,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         }
     }
 
+    /** Gắn các hành động nhanh như tạo khóa học, bài kiểm tra và mở quản lý. */
     private void bindActions() {
         findViewById(R.id.buttonTeacherRefresh).setOnClickListener(view -> refreshDashboard());
         refreshLayouts = new androidx.swiperefreshlayout.widget.SwipeRefreshLayout[]{
@@ -240,6 +250,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                 openManagementFeature("teacher_notifications"));
     }
 
+    /** Đồng bộ các nút điều hướng với trang dashboard đang hiển thị. */
     private void bindNavigation() {
         navItems[0].setOnClickListener(view -> {
             if (selectedPage == PAGE_OVERVIEW) dashboardScroll.smoothScrollTo(0, 0);
@@ -271,6 +282,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         return handled;
     }
 
+    /** Chọn trang Teacher, cập nhật hiệu ứng và vị trí chỉ báo. */
     private void selectPage(int page, boolean animate) {
         if (page < PAGE_OVERVIEW || page > PAGE_STUDENTS) return;
         boolean changed = page != selectedPage || pageFlipper.getDisplayedChild() != page;
@@ -337,12 +349,14 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         }
     }
 
+    /** Lưu trang dashboard Teacher hiện tại khi hệ thống tạo lại Activity. */
     @Override
     protected void onSaveInstanceState(@androidx.annotation.NonNull Bundle outState) {
         outState.putInt(STATE_SELECTED_PAGE, selectedPage);
         super.onSaveInstanceState(outState);
     }
 
+    /** Tải KPI và danh sách khóa học từ TeacherDashboardRepository. */
     private void loadDashboard() {
         setLoading(true, getString(R.string.loading_dashboard));
         repository.load(new ApiCallback<TeacherDashboardData>() {
@@ -363,11 +377,13 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         });
     }
 
+    /** Thực hiện lại tải dashboard khi người dùng kéo làm mới. */
     private void refreshDashboard() {
         loadDashboard();
         loadNotificationBadge();
     }
 
+    /** Tải số thông báo Teacher chưa đọc để cập nhật badge. */
     private void loadNotificationBadge() {
         if (notificationRepository == null || notificationBadge == null) return;
         notificationRepository.loadUnreadCount(
@@ -385,6 +401,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
                 });
     }
 
+    /** Gắn toàn bộ KPI, tỷ lệ, biểu đồ và khóa học lên dashboard. */
     private void render(TeacherDashboardData data) {
         setText(R.id.textTeacherCourseCount, number(data.getCourseCount()));
         setText(R.id.textTeacherStudentCount, number(data.getStudentCount()));
@@ -411,6 +428,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         renderCourses(data.getCourses());
     }
 
+    /** Dựng biểu đồ hoạt động từ dữ liệu tổng hợp các khóa học. */
     private void renderActivityChart(List<TeacherDashboardData.CourseItem> courses) {
         List<String> labels = new ArrayList<>();
         List<Float> values = new ArrayList<>();
@@ -424,6 +442,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         chartEmpty.setVisibility(values.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
+    /** Dựng danh sách tóm tắt khóa học do giáo viên phụ trách. */
     private void renderCourses(List<TeacherDashboardData.CourseItem> courses) {
         coursesContainer.removeAllViews();
         findViewById(R.id.cardTeacherCoursesEmpty).setVisibility(
@@ -450,6 +469,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         return getString(R.string.status_draft);
     }
 
+    /** Chuyển dashboard giữa trạng thái tải, lỗi và nội dung. */
     private void setLoading(boolean loading, String message) {
         boolean swiping = false;
         if (refreshLayouts != null) {
@@ -490,6 +510,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         return (first + last).toUpperCase(new Locale("vi", "VN"));
     }
 
+    /** Mở TeacherManagementActivity bằng feature key đã đăng ký trong Spec. */
     private void openManagementFeature(String key) {
         FeatureSpec spec = TeacherManagementSpec.get(key);
         if (spec == null || !spec.isAllowedForRole(currentRole())) {
@@ -515,6 +536,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         }
     }
 
+    /** Mở đúng form tạo khóa học/bài kiểm tra theo action key. */
     private void openCreate(String key) {
         if (!currentRole().isTeacher()) {
             showErrorDialog("Tài khoản không có quyền tạo dữ liệu này");
@@ -540,6 +562,7 @@ public final class TeacherDashboardActivity extends RoleDashboardActivity {
         return value * getResources().getDisplayMetrics().density;
     }
 
+    /** Chỉ cập nhật UI khi dashboard chưa bị đóng. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

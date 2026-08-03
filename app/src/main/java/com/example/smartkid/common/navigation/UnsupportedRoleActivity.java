@@ -19,9 +19,9 @@ import com.example.smartkid.data.repository.AuthRepository;
 import com.example.smartkid.feature.shared.auth.LoginActivity;
 
 /**
- * Safe landing screen when the signed-in account has a role the app cannot map to a
- * Student, Teacher or Admin experience. It never falls through to the Student home and it
- * does not auto-redirect to Login, so it cannot create a Login → RoleNavigation → Login loop.
+ * Màn hình an toàn khi tài khoản có role mà app chưa ánh xạ được sang Student, Teacher hoặc
+ * Admin. Màn này không rơi mặc định vào Student và không tự chuyển về Login, nhờ đó tránh vòng
+ * lặp Login → RoleNavigation → Login.
  */
 public final class UnsupportedRoleActivity extends BaseActivity {
 

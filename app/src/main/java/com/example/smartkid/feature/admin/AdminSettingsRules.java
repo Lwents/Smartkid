@@ -2,7 +2,7 @@ package com.example.smartkid.feature.admin;
 
 import java.util.regex.Pattern;
 
-/** Pure validation and routing rules shared by the editable admin settings forms. */
+/** Các quy tắc kiểm tra và chọn chế độ dùng chung cho form cài đặt Admin. */
 public final class AdminSettingsRules {
     public static final String MODE_SECURITY = "admin_security";
     public static final String MODE_SYSTEM = "admin_config";
@@ -17,10 +17,12 @@ public final class AdminSettingsRules {
 
     private AdminSettingsRules() { }
 
+    /** Kiểm tra mode có phải màn bảo mật hoặc cấu hình hệ thống được hỗ trợ. */
     public static boolean supports(String mode) {
         return MODE_SECURITY.equals(mode) || MODE_SYSTEM.equals(mode);
     }
 
+    /** Đọc số nguyên trong khoảng; trả null nếu sai định dạng hoặc vượt giới hạn. */
     public static Integer boundedInteger(String value, int min, int max) {
         try {
             int parsed = Integer.parseInt(value == null ? "" : value.trim());
@@ -30,10 +32,12 @@ public final class AdminSettingsRules {
         }
     }
 
+    /** Kiểm tra thời gian theo định dạng 24 giờ HH:mm. */
     public static boolean validTime(String value) {
         return value != null && TIME.matcher(value.trim()).matches();
     }
 
+    /** Cho phép email trống, email Internet hợp lệ hoặc địa chỉ nội bộ dạng user@host. */
     public static boolean validOptionalEmail(String value) {
         String normalized = value == null ? "" : value.trim();
         return normalized.isEmpty() || EMAIL.matcher(normalized).matches()

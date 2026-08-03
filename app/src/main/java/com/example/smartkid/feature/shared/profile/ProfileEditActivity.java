@@ -35,6 +35,7 @@ public class ProfileEditActivity extends BaseActivity {
     private TextInputEditText addressInput;
     private static final String[] CLASS_VALUES = {"", "1", "2", "3", "4", "5"};
 
+    /** Khởi tạo form hồ sơ, tải dữ liệu tài khoản và gắn hành động lưu. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +54,7 @@ public class ProfileEditActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ các trường hồ sơ và kiểm tra layout có đủ view bắt buộc. */
     private void bindViews() {
         fullNameInput = findViewById(R.id.inputProfileFullName);
         emailInput = findViewById(R.id.inputProfileEmail);
@@ -80,6 +82,7 @@ public class ProfileEditActivity extends BaseActivity {
         }
     }
 
+    /** Tải hồ sơ hiện tại, điền dữ liệu vào form và giữ metadata cần thiết. */
     private void loadSafely() {
         setLoading(true);
         repository.loadAccountProfile(new ApiCallback<JSONObject>() {
@@ -107,6 +110,7 @@ public class ProfileEditActivity extends BaseActivity {
     }
 
     /** "3" hoặc "Lớp 3" -> chọn đúng mục trong danh sách lớp. */
+    /** Chọn đúng lớp trong Spinner theo giá trị backend trả về. */
     private void selectClass(String rawValue) {
         String digits = rawValue == null ? "" : rawValue.replaceAll("[^1-5]", "");
         for (int index = 1; index < CLASS_VALUES.length; index++) {
@@ -119,11 +123,13 @@ public class ProfileEditActivity extends BaseActivity {
     }
 
     /** Giá trị có thể nằm ở gốc response hoặc trong metadata. */
+    /** Đọc một field từ dữ liệu chính, nếu thiếu thì thử metadata phụ. */
     private String value(JSONObject data, JSONObject metadata, String key) {
         String direct = SafeJson.string(data, "", key);
         return direct.isEmpty() ? SafeJson.string(metadata, "", key) : direct;
     }
 
+    /** Kiểm tra form, tạo JSON thay đổi và gọi API cập nhật hồ sơ. */
     private void saveSafely() {
         try {
             String email = textOf(emailInput);
@@ -170,19 +176,23 @@ public class ProfileEditActivity extends BaseActivity {
     }
 
 
+    /** Khóa/mở form trong lúc tải hoặc lưu hồ sơ. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         saveButton.setEnabled(!loading);
     }
 
+    /** Hiển thị thông báo tải/lưu hồ sơ cho người dùng. */
     private void showStatus(String message) {
         statusText.setText(message);
         statusText.setVisibility(View.VISIBLE);
     }
 
+    /** Lấy nội dung đã trim từ một ô nhập hồ sơ. */
     private String textOf(TextInputEditText input) {
         return input.getText() == null ? "" : input.getText().toString().trim();
     }
 
+    /** Bảo vệ giao diện khỏi callback trả về sau khi Activity đã đóng. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
 }

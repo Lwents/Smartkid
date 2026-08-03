@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Immutable data rendered by the native teacher dashboard. */
+/** Dữ liệu bất biến được dashboard Teacher native sử dụng để hiển thị. */
 public final class TeacherDashboardData {
     private final int courseCount;
     private final int studentCount;

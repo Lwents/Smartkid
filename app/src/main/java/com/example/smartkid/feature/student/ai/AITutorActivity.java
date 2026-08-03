@@ -32,6 +32,7 @@ public class AITutorActivity extends BaseActivity {
     private String lessonTitle;
     private final StringBuilder conversation = new StringBuilder();
 
+    /** Khởi tạo màn chat với gia sư AI và ngữ cảnh bài học nếu có. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +57,7 @@ public class AITutorActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ vùng hội thoại, ô soạn tin, nút gửi và trạng thái request. */
     private void bindViews() {
         conversationText = findViewById(R.id.textAiConversation);
         statusText = findViewById(R.id.textAiStatus);
@@ -69,6 +71,7 @@ public class AITutorActivity extends BaseActivity {
     }
 
     /** Edge-to-edge không tự co layout ổn định trên mọi máy, nên bù đúng chiều cao IME. */
+    /** Giữ ô soạn tin nằm trên bàn phím khi cửa sổ thay đổi kích thước. */
     private void keepComposerAboveKeyboard() {
         View root = findViewById(R.id.rootAiTutor);
         if (root == null) return;
@@ -87,6 +90,7 @@ public class AITutorActivity extends BaseActivity {
         ViewCompat.requestApplyInsets(root);
     }
 
+    /** Kiểm tra câu hỏi, gọi API AI Tutor và thêm phản hồi vào hội thoại. */
     private void sendSafely() {
         try {
             String message = textOf(messageInput);
@@ -126,31 +130,37 @@ public class AITutorActivity extends BaseActivity {
         }
     }
 
+    /** Thêm một lượt nói của học viên hoặc AI vào vùng hội thoại. */
     private void appendLine(String speaker, String value) {
         if (conversation.length() > 0) conversation.append("\n");
         conversation.append(speaker).append(": ").append(safe(value)).append("\n");
         bindConversation();
     }
 
+    /** Khôi phục phần hội thoại ban đầu hoặc lời chào theo bài học. */
     private void bindConversation() {
         conversationText.setText(conversation.toString());
     }
 
+    /** Khóa ô nhập và nút gửi trong lúc chờ AI trả lời. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         sendButton.setEnabled(!loading);
         messageInput.setEnabled(!loading);
     }
 
+    /** Hiển thị lỗi hoặc trạng thái kết nối AI. */
     private void showStatus(String message) {
         statusText.setText(safe(message));
         statusText.setVisibility(View.VISIBLE);
     }
 
+    /** Lấy câu hỏi đã loại khoảng trắng thừa. */
     private String textOf(TextInputEditText input) {
         return input.getText() == null ? "" : input.getText().toString().trim();
     }
 
+    /** Kiểm tra Activity còn sống trước khi nhận callback AI. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
     private static String safe(String value) { return value == null ? "" : value.trim(); }
 }

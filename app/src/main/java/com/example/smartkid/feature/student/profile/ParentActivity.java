@@ -29,6 +29,7 @@ public class ParentActivity extends BaseActivity {
     private TextView statusText;
     private StudentFeatureRepository repository;
 
+    /** Khởi tạo form thông tin phụ huynh và tải dữ liệu hiện có. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +58,7 @@ public class ParentActivity extends BaseActivity {
         }
     }
 
+    /** Tải thông tin phụ huynh từ API rồi điền vào các trường. */
     private void loadSafely() {
         setLoading(true);
         repository.loadParent(new ApiCallback<JSONObject>() {
@@ -79,6 +81,7 @@ public class ParentActivity extends BaseActivity {
         });
     }
 
+    /** Kiểm tra form và gửi thông tin phụ huynh đã cập nhật. */
     private void saveSafely() {
         String email = textOf(emailInput);
         String phone = textOf(phoneInput);
@@ -109,19 +112,23 @@ public class ParentActivity extends BaseActivity {
                 });
     }
 
+    /** Khóa/mở form trong lúc tải hoặc lưu dữ liệu. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         saveButton.setEnabled(!loading);
     }
 
+    /** Hiển thị trạng thái tải/lưu cho người dùng. */
     private void showStatus(String message) {
         statusText.setText(message);
         statusText.setVisibility(View.VISIBLE);
     }
 
+    /** Lấy giá trị đã trim từ ô nhập. */
     private String textOf(TextInputEditText input) {
         return input.getText() == null ? "" : input.getText().toString().trim();
     }
 
+    /** Chỉ cho callback cập nhật UI khi Activity còn hoạt động. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
 }

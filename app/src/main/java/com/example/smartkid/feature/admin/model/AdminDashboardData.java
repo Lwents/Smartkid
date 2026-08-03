@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Immutable data rendered by the native admin dashboard. */
+/** Dữ liệu bất biến được dashboard Admin native sử dụng để hiển thị. */
 public final class AdminDashboardData {
     private final Kpis kpis;
     private final List<CourseItem> topCourses;

@@ -3,9 +3,9 @@ package com.example.smartkid.common.ui.form;
 import com.example.smartkid.common.navigation.UserRole;
 
 /**
- * Typed replacement for the former raw {@code kind} String that drove the shared create form.
- * Each value is owned by exactly one role, so a screen can no longer serve both Admin and
- * Teacher through String branching.
+ * Enum có kiểu rõ ràng thay cho chuỗi {@code kind} cũ từng điều khiển form tạo dùng chung.
+ * Mỗi giá trị chỉ thuộc đúng một role, nên một màn hình không còn phục vụ lẫn Admin và Teacher
+ * bằng cách rẽ nhánh trên chuỗi.
  */
 public enum ContentFormKind {
     ADMIN_USER(UserRole.ADMIN),

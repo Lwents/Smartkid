@@ -19,7 +19,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Student-friendly cards for lesson questions. */
+/** Hiển thị câu hỏi của bài học dưới dạng thẻ dễ đọc cho học viên. */
 final class LessonQuestionAdapter extends BaseAdapter {
     private final LayoutInflater inflater;
     private final Context context;

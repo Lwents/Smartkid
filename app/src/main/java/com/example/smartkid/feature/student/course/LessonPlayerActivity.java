@@ -108,6 +108,7 @@ public class LessonPlayerActivity extends BaseActivity {
     private boolean previewMode;
     private boolean youtubeFallbackTried;
 
+    /** Khởi tạo trình phát bài học, đọc course/lesson và chuẩn bị các vùng nội dung. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,6 +152,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Gắn xử lý nút quay lại, ưu tiên thoát toàn màn hình trước khi đóng Activity. */
     private void configureBackNavigation() {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -165,6 +167,7 @@ public class LessonPlayerActivity extends BaseActivity {
         });
     }
 
+    /** Tiếp tục phát và cập nhật tiến độ khi người học quay lại màn hình. */
     @Override
     protected void onResume() {
         super.onResume();
@@ -174,6 +177,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Tải lại bài học sau khi quay về từ bài tập hoặc thảo luận. */
     @Override
     protected void onRestart() {
         super.onRestart();
@@ -182,6 +186,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Lưu vị trí phát, giải phóng player/WebView và kết thúc Repository. */
     @Override
     protected void onDestroy() {
         try {
@@ -203,6 +208,7 @@ public class LessonPlayerActivity extends BaseActivity {
         super.onDestroy();
     }
 
+    /** Ánh xạ nội dung bài học, video, điều khiển, điều hướng và danh sách bài tập. */
     private void bindViews() {
         toolbar = findViewById(R.id.toolbarLessonPlayer);
         loadingView = findViewById(R.id.progressLessonLoading);
@@ -242,6 +248,7 @@ public class LessonPlayerActivity extends BaseActivity {
         completeButton = findViewById(R.id.buttonCompleteLesson);
     }
 
+    /** Kiểm tra quyền mở bài học rồi tải nội dung phù hợp cho Student hoặc preview Teacher. */
     private void loadLesson() {
         setLoading(true);
         if (previewMode) {
@@ -284,12 +291,13 @@ public class LessonPlayerActivity extends BaseActivity {
             @Override
             public void onError(ApiError error) {
                 if (isFinishing() || isDestroyed()) return;
-                // Player backend van kiem tra enrollment; khong chan bai neu endpoint unlock loi.
+                // Backend vẫn kiểm tra ghi danh khi phát; không chặn bài nếu endpoint mở khóa bị lỗi.
                 loadLessonContent();
             }
         });
     }
 
+    /** Gọi CourseRepository để lấy LessonContent theo courseId và lessonId. */
     private void loadLessonContent() {
         repository.loadLesson(courseId, lessonId, new ApiCallback<LessonContent>() {
             @Override
@@ -315,6 +323,7 @@ public class LessonPlayerActivity extends BaseActivity {
         });
     }
 
+    /** Chọn cách hiển thị text, video, tài liệu hoặc nội dung nhúng của bài học. */
     private void bindContent(LessonContent content) {
         toolbar.setTitle(content.getTitle());
         typeText.setText(getString(R.string.content_type_format,
@@ -353,6 +362,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Chuẩn bị YouTubePlayer cho video có ID YouTube hợp lệ. */
     private void prepareYoutube(String videoId) {
         try {
             youtubeFallbackTried = false;
@@ -389,6 +399,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Chuẩn bị WebView cho nội dung video nhúng không phát trực tiếp bằng MediaPlayer. */
     @SuppressLint("SetJavaScriptEnabled")
     private void prepareEmbeddedVideo(String videoUrl) {
         try {
@@ -414,6 +425,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Chọn Surface/MediaPlayer để phát URL video trực tiếp. */
     private void prepareVideo(String videoUrl) {
         try {
             releasePlayer();
@@ -970,6 +982,7 @@ public class LessonPlayerActivity extends BaseActivity {
         return true;
     }
 
+    /** Mở tài liệu hoặc liên kết ngoài bằng ứng dụng phù hợp trên thiết bị. */
     private void openExternalContent() {
         if (lessonContent == null) {
             showShortMessage("Nội dung chưa sẵn sàng");
@@ -993,6 +1006,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Mở AI Tutor kèm ngữ cảnh bài học hiện tại. */
     private void openAiTutor() {
         try {
             Intent intent = new Intent(this, AITutorActivity.class);
@@ -1006,6 +1020,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Mở màn hỏi đáp dành riêng cho bài học hiện tại. */
     private void openDiscussion() {
         if (lessonId == null || lessonId.trim().isEmpty()) {
             showShortMessage("Nội dung bài học chưa sẵn sàng");
@@ -1023,6 +1038,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Ghi nhận hoàn thành bài học; chế độ silent không hiện thông báo làm gián đoạn. */
     private void markCompleted(boolean silent) {
         if (previewMode) return;
         if (lessonId == null || lessonId.trim().isEmpty()) {
@@ -1159,6 +1175,7 @@ public class LessonPlayerActivity extends BaseActivity {
                 + "allowfullscreen></iframe></div></body></html>";
     }
 
+    /** Tải các bài tập gắn với bài học và dựng thẻ hành động. */
     private void loadExercises() {
         if (lessonId == null || lessonId.trim().isEmpty()) return;
         repository.loadLessonExercises(lessonId, new ApiCallback<List<FeatureItem>>() {
@@ -1191,6 +1208,7 @@ public class LessonPlayerActivity extends BaseActivity {
         });
     }
 
+    /** Mở LessonExerciseActivity với exerciseId và lessonId tương ứng. */
     private void openExercise(FeatureItem exercise) {
         if (exercise == null || exercise.getId().isEmpty()) return;
         try {
@@ -1206,6 +1224,7 @@ public class LessonPlayerActivity extends BaseActivity {
         }
     }
 
+    /** Chuyển màn hình giữa trạng thái tải và nội dung bài học. */
     private void setLoading(boolean loading) {
         loadingView.setVisibility(loading ? View.VISIBLE : View.GONE);
         completeButton.setEnabled(!loading && lessonContent != null

@@ -1,6 +1,6 @@
 package com.example.smartkid.feature.admin;
 
-/** API paths and small rules for the admin course-video workflow. */
+/** Tạo đường dẫn API và quy tắc nhỏ cho luồng Admin quản lý video khóa học. */
 public final class AdminCourseVideoActions {
     private AdminCourseVideoActions() {
     }

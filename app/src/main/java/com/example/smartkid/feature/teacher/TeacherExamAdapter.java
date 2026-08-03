@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/** Teacher exam cards with state, settings and result counts visible before opening actions. */
+/** Thẻ bài kiểm tra cho giáo viên, hiển thị trạng thái, thiết lập và số kết quả trước khi thao tác. */
 final class TeacherExamAdapter extends BaseAdapter {
     private final Context context;
     private final LayoutInflater inflater;

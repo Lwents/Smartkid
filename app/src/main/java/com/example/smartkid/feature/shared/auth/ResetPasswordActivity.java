@@ -28,6 +28,7 @@ public class ResetPasswordActivity extends BaseActivity {
     private TextView statusText;
     private AuthRepository repository;
 
+    /** Khởi tạo form đặt lại mật khẩu và đọc email/token từ deep link hoặc Intent. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +45,7 @@ public class ResetPasswordActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ các trường mã xác nhận, mật khẩu mới và nút gửi. */
     private void bindViews() {
         emailInput = findViewById(R.id.inputResetEmail);
         tokenInput = findViewById(R.id.inputResetToken);
@@ -59,6 +61,7 @@ public class ResetPasswordActivity extends BaseActivity {
         }
     }
 
+    /** Điền sẵn email và token nhận từ liên kết đặt lại mật khẩu. */
     private void prefillFromIntent(Intent intent) {
         if (intent == null) return;
         String email = intent.getStringExtra("email");
@@ -73,6 +76,7 @@ public class ResetPasswordActivity extends BaseActivity {
         if (token != null) tokenInput.setText(token);
     }
 
+    /** Kiểm tra token/mật khẩu rồi gọi API xác nhận đặt lại mật khẩu. */
     private void resetSafely() {
         try {
             String email = textOf(emailInput);
@@ -115,6 +119,7 @@ public class ResetPasswordActivity extends BaseActivity {
         }
     }
 
+    /** Khóa form trong lúc request đặt lại mật khẩu đang chạy. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         resetButton.setEnabled(!loading);
@@ -124,19 +129,23 @@ public class ResetPasswordActivity extends BaseActivity {
         confirmationInput.setEnabled(!loading);
     }
 
+    /** Cập nhật thông báo lỗi hoặc kết quả của thao tác. */
     private void showStatus(String message, boolean visible) {
         statusText.setText(message);
         statusText.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
+    /** Lấy giá trị đã trim cho email và token. */
     private String textOf(TextInputEditText input) {
         return rawTextOf(input).trim();
     }
 
+    /** Lấy nguyên văn mật khẩu mới để giữ đúng dữ liệu người dùng nhập. */
     private String rawTextOf(TextInputEditText input) {
         return input.getText() == null ? "" : input.getText().toString();
     }
 
+    /** Xác nhận Activity còn hợp lệ trước khi callback thay đổi giao diện. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

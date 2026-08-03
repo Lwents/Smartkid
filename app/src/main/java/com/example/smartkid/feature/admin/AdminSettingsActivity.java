@@ -29,7 +29,7 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONObject;
 
-/** Editable forms for security policy and system configuration backed by real admin APIs. */
+/** Các form chỉnh sửa chính sách bảo mật và cấu hình hệ thống qua API quản trị thật. */
 public final class AdminSettingsActivity extends BaseActivity {
     public static final String EXTRA_MODE = "admin_settings_mode";
 
@@ -105,10 +105,12 @@ public final class AdminSettingsActivity extends BaseActivity {
     private TextInputEditText configStorageBucket;
     private TextInputEditText configStorageRegion;
 
+    /** Tạo Intent mở đúng chế độ Security hoặc System settings. */
     public static Intent createIntent(Context context, String mode) {
         return new Intent(context, AdminSettingsActivity.class).putExtra(EXTRA_MODE, mode);
     }
 
+    /** Kiểm tra mode, chọn layout cài đặt và tải cấu hình hiện tại. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,6 +138,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ các trường chính sách mật khẩu, khóa tài khoản và session. */
     private void bindSecurityViews() {
         MaterialToolbar toolbar = required(R.id.toolbarAdminSecuritySettings);
         progress = required(R.id.progressAdminSecuritySettings);
@@ -159,6 +162,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         saveButton.setOnClickListener(view -> saveSecurity());
     }
 
+    /** Ánh xạ các trường email, ngôn ngữ, backup, log và lưu trữ hệ thống. */
     private void bindSystemViews() {
         MaterialToolbar toolbar = required(R.id.toolbarAdminSystemSettings);
         progress = required(R.id.progressAdminSystemSettings);
@@ -219,6 +223,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         configureDropdowns();
     }
 
+    /** Cấu hình dữ liệu hiển thị cho các AutoCompleteTextView trong form. */
     private void configureDropdowns() {
         configureDropdown(configLanguage,
                 new String[]{getString(R.string.admin_option_vietnamese),
@@ -243,6 +248,7 @@ public final class AdminSettingsActivity extends BaseActivity {
                 android.R.layout.simple_dropdown_item_1line, labels));
     }
 
+    /** Tải cấu hình từ endpoint theo mode và điền dữ liệu vào form. */
     private void loadSettings() {
         setLoading(true, getString(R.string.admin_settings_loading));
         repository.loadObject(endpoint(), new ApiCallback<JSONObject>() {
@@ -264,6 +270,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         });
     }
 
+    /** Điền JSON chính sách bảo mật vào các trường tương ứng. */
     private void bindSecurityData(JSONObject source) {
         JSONObject twofa = child(source, "twoFA");
         JSONObject rate = child(source, "rateLimit");
@@ -278,6 +285,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         securityRbacNote.setText(SafeJson.string(source, "", "rbacNote"));
     }
 
+    /** Điền JSON cấu hình hệ thống và metadata lần chạy gần nhất. */
     private void bindSystemData(JSONObject source) {
         JSONObject brand = child(source, "brand");
         JSONObject domainEmail = child(source, "domainEmail");
@@ -331,6 +339,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         configStorageRegion.setText(SafeJson.string(storage, "", "region"));
     }
 
+    /** Kiểm tra giới hạn rồi tạo payload cập nhật chính sách bảo mật. */
     private void saveSecurity() {
         Integer loginFailures = number(securityLoginFailuresLayout,
                 securityLoginFailures, 1, 50);
@@ -362,6 +371,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         }
     }
 
+    /** Kiểm tra form rồi tạo payload cập nhật cấu hình hệ thống. */
     private void saveSystem() {
         String siteName = requiredText(configSiteNameLayout, configSiteName);
         String timezone = requiredText(configTimezoneLayout, configTimezone);
@@ -438,6 +448,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         }
     }
 
+    /** Gửi PATCH cấu hình, hiển thị kết quả và tải lại dữ liệu chuẩn từ server. */
     private void save(JSONObject payload) {
         setLoading(true, getString(R.string.admin_settings_saving));
         repository.action(Request.Method.PATCH, endpoint(), payload,
@@ -464,6 +475,7 @@ public final class AdminSettingsActivity extends BaseActivity {
                 });
     }
 
+    /** Hiển thị form nhập địa chỉ nhận email kiểm tra. */
     private void showTestEmailDialog() {
         View form = getLayoutInflater().inflate(R.layout.admin_dialog_test_email, null, false);
         TextInputLayout layout = form.findViewById(R.id.layoutAdminTestEmail);
@@ -491,6 +503,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         dialog.show();
     }
 
+    /** Gọi API gửi email thử để xác minh cấu hình SMTP. */
     private void sendTestEmail(String email) {
         try {
             setLoading(true, getString(R.string.admin_config_test_email));
@@ -516,6 +529,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         }
     }
 
+    /** Đọc số nguyên và gắn lỗi vào TextInputLayout nếu vượt giới hạn. */
     private Integer number(TextInputLayout layout, TextInputEditText input, int min, int max) {
         Integer value = AdminSettingsRules.boundedInteger(text(input), min, max);
         layout.setError(value == null
@@ -523,18 +537,21 @@ public final class AdminSettingsActivity extends BaseActivity {
         return value;
     }
 
+    /** Đọc trường bắt buộc và hiển thị lỗi nếu người dùng để trống. */
     private String requiredText(TextInputLayout layout, TextInputEditText input) {
         String value = text(input);
         layout.setError(value.isEmpty() ? getString(R.string.admin_settings_required) : null);
         return value.isEmpty() ? null : value;
     }
 
+    /** Kiểm tra thời gian theo định dạng mà backend chấp nhận. */
     private boolean validateTime(TextInputLayout layout, TextInputEditText input) {
         boolean valid = AdminSettingsRules.validTime(text(input));
         layout.setError(valid ? null : getString(R.string.admin_settings_invalid_time));
         return valid;
     }
 
+    /** Ghi log lỗi tạo payload và trả form về trạng thái có thể chỉnh sửa. */
     private void failSave(Exception exception) {
         AppLogger.error(this, "AdminSettingsActivity",
                 "Không thể chuẩn bị dữ liệu cấu hình", exception);
@@ -542,10 +559,12 @@ public final class AdminSettingsActivity extends BaseActivity {
         showErrorDialog(getString(R.string.admin_settings_save_error));
     }
 
+    /** Chọn endpoint bảo mật hoặc hệ thống theo mode hiện tại. */
     private String endpoint() {
         return AdminSettingsRules.MODE_SECURITY.equals(mode) ? SECURITY_ENDPOINT : SYSTEM_ENDPOINT;
     }
 
+    /** Rút thông báo server trả về sau thao tác lưu hoặc kiểm tra email. */
     private String statusMessage(JSONObject source) {
         if (AdminSettingsRules.MODE_SECURITY.equals(mode)) {
             return getString(R.string.admin_settings_server_source);
@@ -557,6 +576,7 @@ public final class AdminSettingsActivity extends BaseActivity {
                 : getString(R.string.admin_settings_server_source);
     }
 
+    /** Khóa/mở form và cập nhật thông báo trong lúc request đang chạy. */
     private void setLoading(boolean loading, String message) {
         progress.setVisibility(loading ? View.VISIBLE : View.INVISIBLE);
         saveButton.setEnabled(!loading);
@@ -564,6 +584,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         status.setText(message == null ? "" : message);
     }
 
+    /** Lấy view bắt buộc và báo lỗi sớm nếu layout cấu hình bị thiếu. */
     private <T extends View> T required(int id) {
         T view = findViewById(id);
         if (view == null) throw new IllegalStateException("Thiếu view " + id);
@@ -652,6 +673,7 @@ public final class AdminSettingsActivity extends BaseActivity {
         return value == null ? "" : value.trim();
     }
 
+    /** Bảo vệ form khỏi callback trả về sau khi Activity đóng. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

@@ -1,0 +1,34 @@
+{
+  "name": "smartkid-ai-project-assistant",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently -n SERVER,CLIENT -c cyan,magenta \"npm run dev -w @smartkid/server\" \"npm run dev -w @smartkid/client\"",
+    "build": "npm run build -w @smartkid/shared && npm run build -w @smartkid/server && npm run build -w @smartkid/client",
+    "typecheck": "npm run typecheck -w @smartkid/shared && npm run typecheck -w @smartkid/server && npm run typecheck -w @smartkid/client",
+    "lint": "eslint . --max-warnings 0",
+    "test": "npm run test -w @smartkid/server",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "start": "npm run start -w @smartkid/server"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^9.2.0",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.8.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^16.3.0",
+    "monaco-editor": "0.53.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.38.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

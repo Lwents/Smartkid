@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.example.smartkid.common.util.SwipeRefreshFix;
 
-/** Admin-owned management list backed by real APIs, with admin-only actions. */
+/** Danh sách quản lý thuộc Admin, dùng API thật và chỉ cung cấp hành động quản trị. */
 public class AdminManagementActivity extends BaseActivity {
     public static final String EXTRA_SPEC_KEY = "admin_spec_key";
     private static final long REALTIME_REFRESH_MS = 30_000L;
@@ -67,18 +67,21 @@ public class AdminManagementActivity extends BaseActivity {
         }
     };
 
+    /** Kết thúc màn hình với animation quay về dashboard Admin. */
     @Override
     public void finish() {
         super.finish();
         overridePendingTransition(R.anim.common_slide_in_left, R.anim.common_slide_out_right);
     }
 
+    /** Tải lại dữ liệu sau khi quay về từ form tạo hoặc chỉnh sửa. */
     @Override
     protected void onRestart() {
         super.onRestart();
         if (repository != null && spec != null && spec.isAvailable()) loadSafely();
     }
 
+    /** Bắt đầu cơ chế refresh định kỳ cho các danh sách realtime. */
     @Override
     protected void onResume() {
         super.onResume();
@@ -88,18 +91,21 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Dừng refresh định kỳ khi Activity không còn ở foreground. */
     @Override
     protected void onPause() {
         realtimeHandler.removeCallbacks(realtimeRefreshTask);
         super.onPause();
     }
 
+    /** Hủy Handler và callback realtime khi Activity bị hủy. */
     @Override
     protected void onDestroy() {
         realtimeHandler.removeCallbacks(realtimeRefreshTask);
         super.onDestroy();
     }
 
+    /** Đọc feature key, kiểm tra quyền Admin và khởi tạo danh sách quản lý. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,6 +161,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Cấu hình nút chính theo feature: tạo user, backup, gửi thông báo hoặc refresh. */
     private void configurePrimaryAction(MaterialToolbar toolbar) {
         if (supportsCreate()) {
             ((TextView) refreshButton).setText(R.string.admin_create_new);
@@ -175,6 +182,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Thêm action làm mới vào toolbar cho các feature cần nút phụ. */
     private void addRefreshAction(MaterialToolbar toolbar) {
         android.view.MenuItem refresh = toolbar.getMenu().add(R.string.refresh);
         refresh.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM);
@@ -184,6 +192,7 @@ public class AdminManagementActivity extends BaseActivity {
         });
     }
 
+    /** Thêm action đánh dấu toàn bộ thông báo đã đọc. */
     private void addReadAllAction(MaterialToolbar toolbar) {
         android.view.MenuItem readAll = toolbar.getMenu().add(R.string.admin_notification_read_all);
         readAll.setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_NEVER);
@@ -193,22 +202,27 @@ public class AdminManagementActivity extends BaseActivity {
         });
     }
 
+    /** Xác định feature hiện tại có hỗ trợ tạo dữ liệu mới. */
     private boolean supportsCreate() {
         return "admin_users".equals(spec == null ? "" : spec.getActionKind());
     }
 
+    /** Xác định màn hình hiện tại có thao tác tạo backup. */
     private boolean supportsBackup() {
         return "admin_backups".equals(spec == null ? "" : spec.getActionKind());
     }
 
+    /** Xác định màn hình hiện tại có thao tác gửi thông báo. */
     private boolean supportsNotifications() {
         return "admin_notifications".equals(spec == null ? "" : spec.getKey());
     }
 
+    /** Xác định danh sách cần tự động refresh khi Activity đang hiển thị. */
     private boolean supportsRealtimeRefresh() {
         return AdminManagementSpec.isRealtimeList(spec == null ? "" : spec.getKey());
     }
 
+    /** Mở form tạo người dùng hoặc dữ liệu phù hợp với actionKind. */
     private void openCreate() {
         try {
             startActivity(new Intent(this, AdminUserCreateActivity.class));
@@ -218,10 +232,12 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Tải dữ liệu có hiển thị loading đầy đủ. */
     private void loadSafely() {
         loadSafely(false);
     }
 
+    /** Tải dữ liệu; chế độ quiet dùng cho refresh nền không làm nhấp nháy UI. */
     private void loadSafely(boolean quiet) {
         int generation = ++loadGeneration;
         loadFailed = false;
@@ -250,12 +266,14 @@ public class AdminManagementActivity extends BaseActivity {
     }
 
     /** Hộp thư admin và lịch sử gửi nằm ở hai API thật, nên ghép chúng thành một danh sách. */
+    /** Gộp nguồn thông báo và lịch sử gửi theo cùng một generation tải. */
     private void loadNotifications(int generation) {
         NotificationLoadResult result = new NotificationLoadResult(generation);
         loadNotificationSource(spec.getEndpoint(), result);
         loadNotificationSource(AdminManagementSpec.notificationHistoryEndpoint(), result);
     }
 
+    /** Tải một nguồn thông báo và chuyển kết quả vào bộ tổng hợp. */
     private void loadNotificationSource(String endpoint, NotificationLoadResult result) {
         repository.load(endpoint, new ApiCallback<List<FeatureItem>>() {
             @Override
@@ -270,6 +288,7 @@ public class AdminManagementActivity extends BaseActivity {
         });
     }
 
+    /** Cập nhật adapter, bộ lọc và empty state sau khi tải thành công. */
     private void showLoadedItems(List<FeatureItem> data) {
         loadFailed = false;
         setLoading(false);
@@ -282,6 +301,7 @@ public class AdminManagementActivity extends BaseActivity {
         showLoadError(error, false);
     }
 
+    /** Hiển thị hoặc chỉ ghi nhận lỗi tùy loại refresh đang chạy. */
     private void showLoadError(ApiError error, boolean quiet) {
         if (quiet && adapter != null && adapter.getCount() > 0) {
             loadFailed = false;
@@ -294,10 +314,12 @@ public class AdminManagementActivity extends BaseActivity {
         if (!quiet) handleApiError(error);
     }
 
+    /** Bỏ callback cũ nếu một lượt tải mới hơn đã được bắt đầu. */
     private boolean isCurrentLoad(int generation) {
         return generation == loadGeneration && isUsable();
     }
 
+    /** Điều phối click item đến chi tiết, video hoặc menu hành động. */
     private void showItem(FeatureItem item) {
         if (item == null) return;
         try {
@@ -326,6 +348,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Mở màn quản lý video của khóa học được chọn. */
     private void openCourseVideos(FeatureItem course) {
         if (course == null || course.getId().isEmpty()) {
             showErrorDialog(getString(R.string.admin_course_video_invalid_course));
@@ -343,6 +366,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Đánh dấu một thông báo Admin đã đọc và cập nhật danh sách cục bộ. */
     private void markNotificationRead(FeatureItem item) {
         if (item == null || item.getId().isEmpty()
                 || SafeJson.bool(item.getSource(), false, "is_read", "isRead")) return;
@@ -359,6 +383,7 @@ public class AdminManagementActivity extends BaseActivity {
     }
 
     /** Chi tiết dạng "Nhãn: giá trị" thay vì dump JSON thô. */
+    /** Chuyển dữ liệu JSON thô thành phần mô tả dễ đọc cho Admin. */
     private String friendlyDetail(FeatureItem item) {
         JSONObject source = item.getSource();
         StringBuilder detail = new StringBuilder();
@@ -486,6 +511,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Hiển thị menu hành động theo loại user, session, course hoặc backup. */
     private void showActions(FeatureItem item) {
         if (item == null || !"admin_users".equals(spec.getActionKind())) return;
         boolean active = SafeJson.bool(item.getSource(), true, "is_active", "isActive");
@@ -512,6 +538,7 @@ public class AdminManagementActivity extends BaseActivity {
                 .show();
     }
 
+    /** Hiển thị danh sách role hợp lệ để Admin thay đổi quyền người dùng. */
     private void showRoleChooser(FeatureItem item) {
         String[] roles = {
                 AdminUserActions.ROLE_STUDENT,
@@ -542,6 +569,7 @@ public class AdminManagementActivity extends BaseActivity {
                 .show();
     }
 
+    /** Yêu cầu xác nhận trước khi thay đổi role của tài khoản. */
     private void confirmRoleChange(FeatureItem item, String role, String roleName) {
         String message = getString(R.string.admin_user_role_confirm, item.getTitle(), roleName);
         if (AdminUserActions.ROLE_ADMIN.equals(role)) {
@@ -556,6 +584,7 @@ public class AdminManagementActivity extends BaseActivity {
                 .show();
     }
 
+    /** Gửi PATCH cập nhật role và tải lại danh sách người dùng. */
     private void updateUserRole(FeatureItem item, String role) {
         if (!AdminUserActions.isSupportedRole(role)) return;
         try {
@@ -582,6 +611,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Hiển thị form đặt mật khẩu mới cho tài khoản được chọn. */
     private void showPasswordReset(FeatureItem item) {
         View form = LayoutInflater.from(this).inflate(
                 R.layout.admin_dialog_reset_password, null, false);
@@ -630,6 +660,7 @@ public class AdminManagementActivity extends BaseActivity {
         dialog.show();
     }
 
+    /** Gọi endpoint Admin đặt lại mật khẩu và xử lý lỗi quyền/validation. */
     private void resetUserPassword(FeatureItem item, String password) {
         try {
             JSONObject body = new JSONObject();
@@ -655,6 +686,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Yêu cầu xác nhận trước khi tạo bản sao lưu hệ thống. */
     private void confirmCreateBackup() {
         new AlertDialog.Builder(this)
                 .setTitle("Tạo bản sao lưu")
@@ -664,6 +696,7 @@ public class AdminManagementActivity extends BaseActivity {
                 .show();
     }
 
+    /** Hiển thị form nhập tiêu đề, nội dung và đối tượng nhận thông báo. */
     private void showSendNotification() {
         View form = LayoutInflater.from(this).inflate(
                 R.layout.admin_dialog_send_notification, null, false);
@@ -731,6 +764,7 @@ public class AdminManagementActivity extends BaseActivity {
         return getString(R.string.admin_notification_audience_all);
     }
 
+    /** Tạo payload và gửi thông báo hàng loạt đến nhóm người dùng đã chọn. */
     private void sendNotification(String title, String message, String audience) {
         try {
             JSONObject body = new JSONObject()
@@ -764,6 +798,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Đánh dấu toàn bộ thông báo Admin đã đọc trên server và UI. */
     private void markAllNotificationsRead() {
         setLoading(true);
         repository.action(Request.Method.PATCH, "admin/notifications/read-all/",
@@ -785,6 +820,7 @@ public class AdminManagementActivity extends BaseActivity {
                 });
     }
 
+    /** Gọi API tạo backup và làm mới danh sách sau khi hoàn tất. */
     private void createBackup() {
         setLoading(true);
         JSONObject body = new JSONObject();
@@ -808,6 +844,7 @@ public class AdminManagementActivity extends BaseActivity {
                 });
     }
 
+    /** Yêu cầu xác nhận trước khi thu hồi một phiên đăng nhập. */
     private void confirmSessionRevoke(FeatureItem item) {
         JSONObject source = item == null ? new JSONObject() : item.getSource();
         String account = SafeJson.string(source, "", "userEmail");
@@ -822,6 +859,7 @@ public class AdminManagementActivity extends BaseActivity {
                 .show();
     }
 
+    /** Xóa session trên server để buộc thiết bị tương ứng đăng nhập lại. */
     private void revokeSession(FeatureItem item) {
         setLoading(true);
         repository.action(Request.Method.DELETE,
@@ -843,6 +881,7 @@ public class AdminManagementActivity extends BaseActivity {
                 });
     }
 
+    /** Yêu cầu xác nhận trước khi khóa hoặc mở lại tài khoản. */
     private void confirmStatusChange(FeatureItem item, boolean activate) {
         String label = getString(activate
                 ? R.string.admin_user_unlock : R.string.admin_user_lock);
@@ -855,6 +894,7 @@ public class AdminManagementActivity extends BaseActivity {
                 .show();
     }
 
+    /** Gửi PATCH thay đổi trạng thái hoạt động của tài khoản. */
     private void updateUserStatus(FeatureItem item, boolean activate) {
         try {
             if (!"admin_users".equals(spec.getActionKind())) return;
@@ -881,6 +921,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Chuẩn hóa lỗi thao tác user, gồm hết phiên, validation và lỗi quyền. */
     private void handleUserActionError(ApiError error) {
         if (!isUsable()) return;
         setLoading(false);
@@ -907,6 +948,7 @@ public class AdminManagementActivity extends BaseActivity {
         return role == null ? "" : role.trim().toLowerCase(java.util.Locale.ROOT);
     }
 
+    /** Hiển thị thông báo rỗng đúng với feature và bộ lọc hiện tại. */
     private void updateEmptyState() {
         if (emptyText == null || adapter == null) return;
         if (loading) {
@@ -942,6 +984,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Khóa danh sách và nút hành động trong lúc request quản lý đang chạy. */
     private void setLoading(boolean loading) {
         this.loading = loading;
         if (!loading && refreshLayout != null) {
@@ -955,6 +998,7 @@ public class AdminManagementActivity extends BaseActivity {
         }
     }
 
+    /** Chỉ cho callback cập nhật UI khi Activity còn hoạt động. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
 
     private final class NotificationLoadResult {

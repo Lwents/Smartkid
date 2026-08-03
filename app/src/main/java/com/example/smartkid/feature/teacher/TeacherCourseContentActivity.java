@@ -52,6 +52,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
     private int loadGeneration;
     private int nextModulePosition;
 
+    /** Khởi tạo màn xem cấu trúc course -> module -> lesson của giáo viên. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,16 +88,19 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         }
     }
 
+    /** Tải lại nội dung sau khi giáo viên tạo hoặc chỉnh sửa bài học/bài tập. */
     @Override
     protected void onRestart() {
         super.onRestart();
         if (repository != null && !courseId.isEmpty()) loadModules();
     }
 
+    /** Kiểm tra role hiện tại trước khi cho phép thao tác soạn nội dung. */
     private boolean isTeacher() {
         return UserRole.fromString(new SessionManager(this).getUser().getRole()).isTeacher();
     }
 
+    /** Ánh xạ tiêu đề khóa học, vùng module và trạng thái tải/lỗi. */
     private void bindViews() {
         progress = findViewById(R.id.progressTeacherCourseContent);
         status = findViewById(R.id.textTeacherCourseContentStatus);
@@ -110,6 +114,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         refreshLayout.setOnRefreshListener(this::loadModules);
     }
 
+    /** Hiển thị tên khóa học và gắn nút thêm module/bài học. */
     private void bindHeader() {
         MaterialToolbar toolbar = findViewById(R.id.toolbarTeacherCourseContent);
         toolbar.setNavigationOnClickListener(view -> finish());
@@ -119,6 +124,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         }
     }
 
+    /** Tải danh sách module của khóa học rồi tiếp tục tải lesson từng module. */
     private void loadModules() {
         int generation = ++loadGeneration;
         setLoading(true);
@@ -150,6 +156,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
                 });
     }
 
+    /** Dựng một khối module và vùng chứa lesson tương ứng. */
     private void renderModule(FeatureItem module, int index, int generation) {
         if (module == null || module.getId().isEmpty()) return;
         View row = LayoutInflater.from(this).inflate(
@@ -164,6 +171,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         loadLessons(module, index, generation, meta, lessons);
     }
 
+    /** Tải lesson của module và bỏ kết quả cũ nếu một lượt tải mới đã bắt đầu. */
     private void loadLessons(FeatureItem module, int moduleIndex, int generation,
                              TextView meta, LinearLayout container) {
         repository.load("content/modules/" + module.getId() + "/lessons/",
@@ -197,6 +205,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
                 });
     }
 
+    /** Dựng một hàng lesson cùng hành động xem trước và quản lý bài tập. */
     private void renderLesson(LinearLayout container, FeatureItem lesson,
                               int moduleIndex, int lessonIndex, int generation) {
         if (lesson == null || lesson.getId().isEmpty()) return;
@@ -223,6 +232,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         loadLessonExercises(lesson, row, generation);
     }
 
+    /** Tải các bài tập gắn với lesson để cập nhật trạng thái hàng. */
     private void loadLessonExercises(FeatureItem lesson, View lessonRow, int generation) {
         if (lesson == null || lesson.getId().isEmpty()) return;
         TextView exerciseStatus = lessonRow.findViewById(
@@ -279,6 +289,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         return matches;
     }
 
+    /** Gắn số lượng/trạng thái bài tập và hành động mở trình chọn. */
     private void bindLessonExercises(FeatureItem lesson, TextView exerciseStatus,
                                      MaterialButton exerciseButton,
                                      List<FeatureItem> exercises) {
@@ -316,6 +327,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
                 lesson, exercises, exerciseButton));
     }
 
+    /** Hiển thị danh sách bài tập hiện có và lựa chọn tạo/chỉnh sửa. */
     private void showExercisePicker(FeatureItem lesson, List<FeatureItem> exercises,
                                     MaterialButton exerciseButton) {
         if (exercises == null || exercises.isEmpty()) return;
@@ -343,12 +355,14 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         return getString(published ? R.string.status_published : R.string.status_draft);
     }
 
+    /** Mở form tạo mới hoặc sửa bài tập cho lesson. */
     private boolean openExerciseEditor(FeatureItem lesson, FeatureItem exercise) {
         if (lesson == null || exercise == null || exercise.getId().isEmpty()) return false;
         return openCreate("teacher_exercises", lesson.getId(), courseId,
                 lesson.getTitle(), 0, exercise.getId());
     }
 
+    /** Mở form tạo nội dung và truyền đầy đủ quan hệ cha/con cần thiết. */
     private boolean openCreate(String kind, String parentId, String linkedCourseId,
                                String parentTitle, int position) {
         return openCreate(kind, parentId, linkedCourseId, parentTitle, position, "");
@@ -394,6 +408,7 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         return getString(R.string.teacher_content_type_text);
     }
 
+    /** Chuyển màn hình giữa trạng thái tải và cây nội dung khóa học. */
     private void setLoading(boolean loading) {
         if (!loading && refreshLayout != null) {
             refreshLayout.setRefreshing(false);
@@ -403,11 +418,13 @@ public final class TeacherCourseContentActivity extends BaseActivity {
         findViewById(R.id.buttonTeacherAddModule).setEnabled(!loading);
     }
 
+    /** Hiển thị lỗi hoặc trạng thái thao tác soạn nội dung. */
     private void showStatus(String message) {
         status.setText(message == null ? getString(R.string.unknown_error) : message);
         status.setVisibility(View.VISIBLE);
     }
 
+    /** Bảo vệ UI khỏi callback trả về sau khi Activity đóng. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

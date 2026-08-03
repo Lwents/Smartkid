@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-/** Shared activity/line chart painter used by role dashboards. */
+/** View tự vẽ biểu đồ đường hoạt động dùng chung cho các dashboard theo role. */
 public final class ActivityChartView extends View {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path linePath = new Path();

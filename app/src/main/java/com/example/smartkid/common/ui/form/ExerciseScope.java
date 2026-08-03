@@ -1,13 +1,13 @@
 package com.example.smartkid.common.ui.form;
 
 /**
- * The two scopes the exercise/exam editor supports, replacing the former
- * {@code teacher_exercises} / {@code teacher_exams} raw String kinds inside the form.
+ * Hai phạm vi mà form bài tập/bài thi hỗ trợ, thay cho các chuỗi thô
+ * {@code teacher_exercises} / {@code teacher_exams} trước đây.
  */
 public enum ExerciseScope {
-    /** Exercise attached to a specific lesson (was {@code teacher_exercises}). */
+    /** Bài tập gắn với một lesson cụ thể (trước đây là {@code teacher_exercises}). */
     LESSON_EXERCISE(ContentFormKind.TEACHER_EXERCISE),
-    /** Standalone exam bound to a course (was {@code teacher_exams}). */
+    /** Bài thi độc lập gắn với khóa học (trước đây là {@code teacher_exams}). */
     STANDALONE_EXAM(ContentFormKind.TEACHER_EXAM);
 
     private final ContentFormKind formKind;

@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.example.smartkid.R;
 
-/** Renders a numeric unread badge and a restrained repeating bell pulse. */
+/** Hiển thị số thông báo chưa đọc và tạo hiệu ứng rung chuông lặp lại ở mức vừa phải. */
 public final class NotificationBadgeController {
     private final Context context;
     private final View bell;

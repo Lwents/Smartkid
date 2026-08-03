@@ -42,6 +42,7 @@ public class LoginActivity extends BaseActivity {
 
     private static final String STATE_OTP_REQUIRED = "state_otp_required";
 
+    /** Khởi tạo form đăng nhập, Repository và các hành động chuyển sang đăng ký/quên mật khẩu. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +72,7 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
+    /** Mở màn hình xác thực khác và chuyển mọi lỗi điều hướng thành thông báo dễ hiểu. */
     private void openSafely(Class<?> destination) {
         try {
             startActivity(new Intent(this, destination));
@@ -80,6 +82,7 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ các ô nhập, nút và vùng trạng thái; dừng sớm nếu layout không đầy đủ. */
     private void bindViews() {
         identifierInput = findViewById(R.id.inputIdentifier);
         passwordInput = findViewById(R.id.inputPassword);
@@ -99,6 +102,7 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
+    /** Cho phép phím Next/Done trên bàn phím chuyển ô hoặc gửi form đăng nhập. */
     private void bindKeyboardActions() {
         passwordInput.setOnEditorActionListener((view, actionId, event) ->
                 handleLoginEditorAction(actionId, event));
@@ -106,6 +110,7 @@ public class LoginActivity extends BaseActivity {
                 handleLoginEditorAction(actionId, event));
     }
 
+    /** Xác định sự kiện bàn phím có phải yêu cầu đăng nhập hay không. */
     private boolean handleLoginEditorAction(int actionId, KeyEvent event) {
         boolean imeDone = actionId == EditorInfo.IME_ACTION_DONE;
         boolean enterDown = event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
@@ -115,6 +120,7 @@ public class LoginActivity extends BaseActivity {
         return true;
     }
 
+    /** Xóa thông báo lỗi cũ khi người dùng bắt đầu sửa dữ liệu. */
     private void clearStatusWhenEditing(TextInputEditText... inputs) {
         TextWatcher watcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence text, int start, int count, int after) { }
@@ -126,6 +132,7 @@ public class LoginActivity extends BaseActivity {
         for (TextInputEditText input : inputs) input.addTextChangedListener(watcher);
     }
 
+    /** Bao luồng đăng nhập bằng try/catch để lỗi giao diện không làm ứng dụng dừng. */
     private void safelyLogin() {
         try {
             performLogin();
@@ -136,6 +143,7 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
+    /** Kiểm tra dữ liệu, gọi AuthRepository và điều hướng theo role khi đăng nhập thành công. */
     private void performLogin() {
         String identifier = textOf(identifierInput);
         String password = rawTextOf(passwordInput);
@@ -189,12 +197,14 @@ public class LoginActivity extends BaseActivity {
         });
     }
 
+    /** Lưu trạng thái đang yêu cầu OTP để xoay màn hình không làm mất bước xác thực. */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(STATE_OTP_REQUIRED, otpRequired);
     }
 
+    /** Khóa/mở form và nút trong lúc request đăng nhập đang chạy. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         loginButton.setEnabled(!loading);
@@ -205,6 +215,7 @@ public class LoginActivity extends BaseActivity {
         otpInput.setEnabled(!loading);
     }
 
+    /** Hiển thị thông báo thành công hoặc lỗi với màu tương ứng. */
     private void showStatus(String message, boolean error) {
         statusText.setText(message == null ? "" : message);
         statusText.setTextColor(ContextCompat.getColor(this,
@@ -212,14 +223,17 @@ public class LoginActivity extends BaseActivity {
         statusText.setVisibility(View.VISIBLE);
     }
 
+    /** Lấy chuỗi đã trim cho username, email hoặc OTP. */
     private String textOf(TextInputEditText editText) {
         return editText.getText() == null ? "" : editText.getText().toString().trim();
     }
 
+    /** Lấy nguyên văn mật khẩu để không vô tình thay đổi khoảng trắng hợp lệ. */
     private String rawTextOf(TextInputEditText editText) {
         return editText.getText() == null ? "" : editText.getText().toString();
     }
 
+    /** Ẩn bàn phím trước khi gửi request để người dùng thấy trạng thái tải. */
     private void hideKeyboard() {
         try {
             InputMethodManager manager =
@@ -233,6 +247,7 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
+    /** Đưa focus và mở bàn phím cho ô OTP khi server yêu cầu xác thực bước hai. */
     private void showKeyboard(View target) {
         if (target == null) return;
         target.post(() -> {

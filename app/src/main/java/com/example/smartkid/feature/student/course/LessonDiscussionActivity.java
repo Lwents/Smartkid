@@ -48,6 +48,7 @@ public class LessonDiscussionActivity extends BaseActivity {
     private SwipeRefreshLayout refreshLayout;
     private String lessonId;
 
+    /** Khởi tạo màn hỏi đáp của bài học và đọc lessonId từ Intent. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +84,7 @@ public class LessonDiscussionActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ danh sách câu hỏi, ô soạn câu hỏi và trạng thái tải. */
     private void bindViews() {
         progressBar = findViewById(R.id.progressLessonDiscussion);
         emptyText = findViewById(R.id.textLessonDiscussionEmpty);
@@ -98,7 +100,8 @@ public class LessonDiscussionActivity extends BaseActivity {
         refreshLayout.setOnRefreshListener(this::loadSafely);
     }
 
-    /** Edge-to-edge needs explicit IME padding so the question box remains visible. */
+    /** Giao diện edge-to-edge cần padding IME để ô nhập câu hỏi không bị bàn phím che. */
+    /** Giữ ô nhập câu hỏi nằm trên bàn phím khi cửa sổ thay đổi kích thước. */
     private void keepComposerAboveKeyboard() {
         View root = findViewById(R.id.rootLessonDiscussion);
         if (root == null) return;
@@ -117,6 +120,7 @@ public class LessonDiscussionActivity extends BaseActivity {
         ViewCompat.requestApplyInsets(root);
     }
 
+    /** Tải các câu hỏi của bài học và cập nhật adapter. */
     private void loadSafely() {
         try {
             setLoading(true);
@@ -147,6 +151,7 @@ public class LessonDiscussionActivity extends BaseActivity {
         }
     }
 
+    /** Kiểm tra nội dung rồi tạo câu hỏi mới cho bài học. */
     private void createQuestionSafely() {
         String content = textOf(questionInput);
         if (content.isEmpty()) {
@@ -159,6 +164,7 @@ public class LessonDiscussionActivity extends BaseActivity {
     }
 
     @SuppressLint("InflateParams")
+    /** Mở bottom sheet chi tiết câu hỏi, phản hồi và các hành động tương tác. */
     private void showQuestion(FeatureItem item) {
         if (item == null) return;
         try {
@@ -222,6 +228,7 @@ public class LessonDiscussionActivity extends BaseActivity {
         }
     }
 
+    /** Dựng danh sách phản hồi của giáo viên và học viên trong bottom sheet. */
     private void bindReplies(View content, JSONArray replies) {
         LinearLayout container = content.findViewById(R.id.layoutDiscussionReplies);
         TextView empty = content.findViewById(R.id.textDiscussionNoReplies);
@@ -257,12 +264,14 @@ public class LessonDiscussionActivity extends BaseActivity {
         }
     }
 
+    /** Gắn chuỗi vào TextView nếu view đó tồn tại trong layout. */
     private void bindText(View root, int viewId, String value) {
         TextView view = root.findViewById(viewId);
         view.setText(value == null ? "" : value);
         view.setVisibility(view.getText().length() == 0 ? View.GONE : View.VISIBLE);
     }
 
+    /** Chuyển hành động sửa, trả lời, reaction, report hoặc xóa sang Repository. */
     private void performAction(FeatureItem item, String action) {
         if ("Trả lời".equals(action)) {
             showTextDialog("Nhập phản hồi", "Gửi", "", value ->
@@ -285,6 +294,7 @@ public class LessonDiscussionActivity extends BaseActivity {
         }
     }
 
+    /** Yêu cầu xác nhận trước khi xóa câu hỏi khỏi server. */
     private void confirmDelete(FeatureItem item) {
         new AlertDialog.Builder(this).setTitle("Xóa câu hỏi")
                 .setMessage("Em có chắc muốn xóa câu hỏi này không? Các câu trả lời cũng sẽ bị xóa.")
@@ -296,6 +306,7 @@ public class LessonDiscussionActivity extends BaseActivity {
                 }).show();
     }
 
+    /** Hiển thị form nhập chữ dùng chung cho sửa, trả lời và báo cáo câu hỏi. */
     private void showTextDialog(String title, Object positiveLabel, String initial,
                                 TextAction action) {
         try {
@@ -334,6 +345,7 @@ public class LessonDiscussionActivity extends BaseActivity {
         }
     }
 
+    /** Tạo callback chung: chạy cập nhật cục bộ, báo thành công rồi tải lại danh sách. */
     private ApiCallback<Boolean> refreshCallback(String message, Runnable beforeRefresh) {
         return new ApiCallback<Boolean>() {
             @Override
@@ -359,6 +371,7 @@ public class LessonDiscussionActivity extends BaseActivity {
         };
     }
 
+    /** Khóa thao tác và hiện tiến trình trong lúc tải hoặc cập nhật câu hỏi. */
     private void setLoading(boolean loading) {
         if (!loading && refreshLayout != null) {
             refreshLayout.setRefreshing(false);
@@ -369,16 +382,19 @@ public class LessonDiscussionActivity extends BaseActivity {
         questionInput.setEnabled(!loading);
     }
 
+    /** Hiển thị thông báo lỗi hoặc kết quả thao tác hỏi đáp. */
     private void showStatus(String message) {
         statusText.setText(safe(message));
         statusText.setVisibility(statusText.getText().length() == 0
                 ? View.GONE : View.VISIBLE);
     }
 
+    /** Lấy nội dung câu hỏi đã loại khoảng trắng thừa. */
     private String textOf(TextInputEditText input) {
         return input.getText() == null ? "" : input.getText().toString().trim();
     }
 
+    /** Bảo vệ giao diện khỏi callback trả về sau khi Activity đóng. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
     private static String safe(String value) { return value == null ? "" : value.trim(); }
 

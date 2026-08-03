@@ -58,6 +58,7 @@ public class FeatureListActivity extends BaseActivity {
     private StudentFeatureRepository featureRepository;
     private ExamRepository examRepository;
 
+    /** Khởi tạo màn danh sách dùng chung cho thông báo, chứng chỉ và các mục thông tin. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +84,7 @@ public class FeatureListActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ toolbar, tìm kiếm, danh sách, trạng thái rỗng và thao tác làm mới. */
     private void bindViews() {
         toolbar = findViewById(R.id.toolbarFeatureList);
         progressBar = findViewById(R.id.progressFeatureList);
@@ -118,6 +120,7 @@ public class FeatureListActivity extends BaseActivity {
         });
     }
 
+    /** Cấu hình tiêu đề, adapter và hành động theo chế độ được truyền qua Intent. */
     private void configureMode() {
         if (MODE_LEARNING_PATH.equals(mode)) {
             toolbar.setTitle(R.string.learning_path);
@@ -136,6 +139,7 @@ public class FeatureListActivity extends BaseActivity {
         }
     }
 
+    /** Tải dữ liệu đúng với chế độ hiện tại và chuẩn hóa mọi lỗi ngoài dự kiến. */
     private void loadSafely() {
         try {
             setLoading(true);
@@ -150,6 +154,7 @@ public class FeatureListActivity extends BaseActivity {
         }
     }
 
+    /** Tạo callback dùng chung để nhận danh sách, cập nhật adapter hoặc hiện lỗi. */
     private ApiCallback<List<FeatureItem>> listCallback() {
         return new ApiCallback<List<FeatureItem>>() {
             @Override
@@ -168,6 +173,7 @@ public class FeatureListActivity extends BaseActivity {
         };
     }
 
+    /** Mở chi tiết item theo mode nhưng không để dữ liệu lỗi làm Activity crash. */
     private void openItemSafely(FeatureItem item) {
         if (item == null) return;
         try {
@@ -191,6 +197,7 @@ public class FeatureListActivity extends BaseActivity {
     }
 
     @SuppressLint("InflateParams")
+    /** Hiển thị nội dung thông báo và điều hướng đến bài học/bài thi nếu có ngữ cảnh. */
     private void showNotification(FeatureItem item) {
         JSONObject source = item.getSource();
         boolean wasUnread = !NotificationUiFormatter.isRead(source);
@@ -247,6 +254,7 @@ public class FeatureListActivity extends BaseActivity {
         sheet.show();
     }
 
+    /** Hiển thị thông tin chứng chỉ và cung cấp liên kết tải nếu server trả về. */
     private void showCertificate(FeatureItem item) {
         JSONObject source = item.getSource();
         String url = SafeJson.string(source, "", "pdf", "image");
@@ -262,6 +270,7 @@ public class FeatureListActivity extends BaseActivity {
         builder.show();
     }
 
+    /** Cập nhật trạng thái đã đọc trên UI trước, sau đó đồng bộ với server. */
     private void markReadOptimistically(FeatureItem item) {
         try {
             item.getSource().put("is_read", true);
@@ -278,6 +287,7 @@ public class FeatureListActivity extends BaseActivity {
         });
     }
 
+    /** Đánh dấu toàn bộ thông báo đã đọc và làm mới cách trình bày danh sách. */
     private void markAllRead() {
         if (notificationAdapter != null && notificationAdapter.getUnreadCount() == 0) return;
         setLoading(true);
@@ -291,11 +301,13 @@ public class FeatureListActivity extends BaseActivity {
         });
     }
 
+    /** Hiển thị một dialog thông tin đơn giản cho item không cần màn hình riêng. */
     private void showInfo(String title, String message) {
         new AlertDialog.Builder(this).setTitle(title).setMessage(message)
                 .setPositiveButton("Đã hiểu", null).show();
     }
 
+    /** Mở URL ngoài ứng dụng sau khi đã kiểm tra giá trị không rỗng. */
     private void openUrl(String url) {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -305,6 +317,7 @@ public class FeatureListActivity extends BaseActivity {
         }
     }
 
+    /** Điều hướng đến một Activity nội bộ bằng Intent. */
     private void openActivity(Class<?> destination) {
         try { startActivity(new Intent(this, destination)); }
         catch (Exception exception) {
@@ -313,6 +326,7 @@ public class FeatureListActivity extends BaseActivity {
         }
     }
 
+    /** Mở bài học được gắn trong metadata của thông báo. */
     private void openNotificationLesson(JSONObject source, String courseId, String lessonId) {
         try {
             Intent intent = new Intent(this, LessonPlayerActivity.class);
@@ -327,6 +341,7 @@ public class FeatureListActivity extends BaseActivity {
         }
     }
 
+    /** Mở bài thi được gắn trong metadata của thông báo. */
     private void openNotificationExam(JSONObject source, String examId) {
         try {
             Intent intent = new Intent(this, ExamActivity.class);
@@ -340,12 +355,14 @@ public class FeatureListActivity extends BaseActivity {
         }
     }
 
+    /** Lấy item đang hiển thị, trả null nếu vị trí không còn hợp lệ. */
     private FeatureItem itemAt(int position) {
         return notificationAdapter != null
                 ? notificationAdapter.getItem(position)
                 : adapter == null ? null : adapter.getItem(position);
     }
 
+    /** Thay dữ liệu nguồn, áp dụng bộ lọc hiện tại và cập nhật trạng thái rỗng. */
     private void setItems(List<FeatureItem> data) {
         if (notificationAdapter != null) {
             notificationAdapter.setItems(data);
@@ -355,11 +372,13 @@ public class FeatureListActivity extends BaseActivity {
         }
     }
 
+    /** Lọc danh sách theo từ khóa người dùng nhập. */
     private void filterItems(String query) {
         if (notificationAdapter != null) notificationAdapter.filter(query);
         else if (adapter != null) adapter.filter(query);
     }
 
+    /** Đồng bộ lại badge, màu và số lượng thông báo sau thao tác đọc. */
     private void refreshNotificationPresentation() {
         if (notificationAdapter == null) return;
         notificationAdapter.notifyDataSetChanged();
@@ -376,6 +395,7 @@ public class FeatureListActivity extends BaseActivity {
                 : R.string.notification_all_read);
     }
 
+    /** Chuyển giữa trạng thái tải, danh sách và thao tác người dùng. */
     private void setLoading(boolean loading) {
         if (loading && refreshLayout != null && refreshLayout.isRefreshing()) {
             actionButton.setEnabled(false);
@@ -388,10 +408,12 @@ public class FeatureListActivity extends BaseActivity {
         actionButton.setEnabled(!loading);
     }
 
+    /** Kiểm tra mode từ Intent có thuộc nhóm màn hình được hỗ trợ hay không. */
     private boolean isModeValid(String value) {
         return MODE_LEARNING_PATH.equals(value)
                 || MODE_NOTIFICATIONS.equals(value) || MODE_CERTIFICATES.equals(value);
     }
 
+    /** Chỉ cập nhật giao diện khi Activity chưa bị đóng hoặc hủy. */
     private boolean isUsable() { return !isFinishing() && !isDestroyed(); }
 }

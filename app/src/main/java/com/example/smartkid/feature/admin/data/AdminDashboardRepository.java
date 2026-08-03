@@ -15,16 +15,18 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Loads the structured data used by the admin dashboard instead of flattening JSON. */
+/** Tải dữ liệu có cấu trúc cho dashboard Admin thay vì làm phẳng toàn bộ JSON. */
 public final class AdminDashboardRepository {
     private final Context appContext;
     private final ApiClient apiClient;
 
+    /** Khởi tạo Repository dashboard bằng application context. */
     public AdminDashboardRepository(Context context) {
         appContext = context.getApplicationContext();
         apiClient = ApiClient.getInstance(appContext);
     }
 
+    /** Tải dashboard Admin và chuyển JSON thành model giao diện. */
     public void load(ApiCallback<AdminDashboardData> callback) {
         apiClient.get("admin/dashboard/", true, new ApiCallback<JSONObject>() {
             @Override
@@ -46,6 +48,7 @@ public final class AdminDashboardRepository {
         });
     }
 
+    /** Tải chuỗi thời gian hoạt động người dùng trong khoảng ngày được chọn. */
     public void loadActivityChart(String from, String to,
                                   ApiCallback<List<AdminDashboardData.ActivityPoint>> callback) {
         String endpoint = "admin/reports/users/?type=timeseries"
@@ -71,6 +74,7 @@ public final class AdminDashboardRepository {
         });
     }
 
+    /** Đọc KPI, sức khỏe hệ thống và khóa học từ response dashboard. */
     private AdminDashboardData parse(JSONObject response) {
         JSONObject root = response == null ? new JSONObject() : response;
         JSONObject kpis = object(root, "kpis");
@@ -106,6 +110,7 @@ public final class AdminDashboardRepository {
                 parsedActive, parsedSecurity, parsedSystem);
     }
 
+    /** Chuyển mảng khóa học thành danh sách CourseItem an toàn. */
     private List<AdminDashboardData.CourseItem> parseCourses(JSONObject root) {
         List<AdminDashboardData.CourseItem> result = new ArrayList<>();
         JSONArray values = SafeJson.array(root, "topCourses");

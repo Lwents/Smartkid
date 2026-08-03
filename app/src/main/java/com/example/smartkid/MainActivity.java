@@ -33,6 +33,7 @@ public class MainActivity extends BaseActivity {
     private View buttonSplashRetry;
     private ProgressBar progressSplash;
 
+    /** Tạo màn hình splash, khôi phục lỗi nghiêm trọng cũ và hẹn chuyển sang màn hình theo session. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,17 +41,17 @@ public class MainActivity extends BaseActivity {
             setContentView(R.layout.activity_main);
             bindViews();
 
-            // Set up fallback timeout to prevent hanging on Splash indefinitely
+            // Đặt timeout dự phòng để splash không bị treo vô thời hạn.
             timeoutRunnable = () -> {
                 AppLogger.error(this, "MainActivity", "Splash timeout reached, forcing navigation", null);
                 performNavigationSafely();
             };
             mainHandler.postDelayed(timeoutRunnable, TIMEOUT_MS);
 
-            // Start fade-in animation
+            // Bắt đầu hiệu ứng hiện dần của màn hình khởi động.
             startFadeInAnimation();
 
-            // Check for previous fatal errors or proceed with init
+            // Nếu lần chạy trước có lỗi nghiêm trọng thì hiển thị lỗi; nếu không thì tiếp tục khởi tạo.
             String previousFatalError = AppLogger.consumeFatalError(this);
             if (previousFatalError != null && !previousFatalError.trim().isEmpty()) {
                 mainHandler.removeCallbacks(timeoutRunnable);
@@ -71,6 +72,7 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ các view của splash và gắn hành động thử khởi tạo lại. */
     private void bindViews() {
         splashContent = findViewById(R.id.layoutSplashContent);
         errorContainer = findViewById(R.id.layoutErrorContainer);
@@ -83,6 +85,7 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    /** Chạy hiệu ứng xuất hiện cho splash; nếu animation lỗi thì hiển thị nội dung ngay. */
     private void startFadeInAnimation() {
         if (splashContent == null) return;
         try {
@@ -110,6 +113,7 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    /** Đặt lại trạng thái splash rồi thực hiện lại bước kiểm tra session. */
     private void retryInitialization() {
         if (errorContainer != null) {
             errorContainer.setVisibility(View.GONE);
@@ -122,6 +126,7 @@ public class MainActivity extends BaseActivity {
         mainHandler.postDelayed(this::performNavigationSafely, 600L);
     }
 
+    /** Kiểm tra phiên đăng nhập và điều hướng đến Login hoặc dashboard đúng role. */
     private void performNavigationSafely() {
         if (hasNavigated || isFinishing() || isDestroyed()) {
             return;
@@ -156,6 +161,7 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    /** Hiển thị lỗi khởi động ngay trên splash, có fallback sang dialog nếu layout thiếu view. */
     private void showInitializationError(String errorMessage) {
         if (isFinishing() || isDestroyed()) return;
         if (progressSplash != null) {
@@ -169,6 +175,7 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    /** Hủy callback và animation để splash không tiếp tục chạy sau khi Activity đóng. */
     @Override
     protected void onDestroy() {
         mainHandler.removeCallbacksAndMessages(null);

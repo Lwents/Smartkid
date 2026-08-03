@@ -11,8 +11,8 @@ import com.example.smartkid.feature.teacher.exercise.TeacherExerciseEditorActivi
 import org.json.JSONObject;
 
 /**
- * Teacher-owned form for creating a lesson. When the lesson content type is an exercise, it opens
- * the exercise editor for the freshly created lesson right after creation.
+ * Form Teacher tạo lesson. Nếu loại nội dung là bài tập, màn hình sẽ mở trình soạn bài tập cho
+ * lesson vừa tạo ngay sau khi API thành công.
  */
 public final class TeacherLessonCreateActivity extends ContentFormActivity {
 

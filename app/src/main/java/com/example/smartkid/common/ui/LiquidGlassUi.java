@@ -71,7 +71,7 @@ public final class LiquidGlassUi {
         }
     }
 
-    /** Keeps the top system-bar area visually attached to a screen's header. */
+    /** Giữ vùng system bar phía trên liền mạch về thị giác với header màn hình. */
     public static void useStatusBarBackdrop(Activity activity, int rootId,
                                             int backdropDrawable, boolean lightIcons) {
         if (activity == null || activity.getWindow() == null) return;
@@ -82,7 +82,7 @@ public final class LiquidGlassUi {
         decorate(activity);
     }
 
-    /** Keeps the system navigation area consistent with the role dashboards. */
+    /** Giữ vùng navigation bar hệ thống đồng nhất với các dashboard theo role. */
     public static void useDarkNavigationBar(Activity activity) {
         if (activity == null || activity.getWindow() == null) return;
         activity.getWindow().getDecorView().setTag(R.id.tag_dark_navigation_bar, true);

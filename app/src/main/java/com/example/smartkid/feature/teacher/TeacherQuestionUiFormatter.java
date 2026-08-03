@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-/** Friendly labels for the teacher lesson-question workflow. */
+/** Tạo nhãn dễ đọc cho quy trình Teacher xử lý câu hỏi bài học. */
 final class TeacherQuestionUiFormatter {
     private TeacherQuestionUiFormatter() { }
 

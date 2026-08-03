@@ -3,10 +3,9 @@ package com.example.smartkid.common.ui;
 import com.example.smartkid.common.navigation.UserRole;
 
 /**
- * Neutral value type describing a single management feature (title, backing endpoint, optional
- * action kind and availability). Role ownership is explicit via {@link #owner()} so the two
- * role registries ({@code TeacherManagementSpec}, {@code AdminManagementSpec}) stay independent
- * and no screen resolves both roles through String prefixes.
+ * Mô tả một chức năng quản lý gồm tiêu đề, endpoint, loại hành động và trạng thái khả dụng.
+ * Role sở hữu được khai báo rõ qua {@link #owner()} để danh bạ Teacher và Admin độc lập, không
+ * màn hình nào phải suy role bằng tiền tố chuỗi.
  */
 public final class FeatureSpec {
     private final String key;

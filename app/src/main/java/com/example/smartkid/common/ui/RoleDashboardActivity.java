@@ -15,9 +15,9 @@ import com.example.smartkid.data.repository.AuthRepository;
 import com.example.smartkid.feature.shared.auth.LoginActivity;
 
 /**
- * Shared session and logout actions for role-specific dashboards. This base is role-neutral: it
- * imports no {@code feature.admin} or {@code feature.teacher} screen. Management navigation and
- * feature listing are owned by each role's dashboard so Admin and Teacher stay decoupled.
+ * Cung cấp session và thao tác đăng xuất dùng chung cho dashboard từng role. Lớp nền này trung
+ * lập, không import màn hình {@code feature.admin} hoặc {@code feature.teacher}. Việc điều hướng
+ * danh sách quản lý thuộc dashboard từng role để Admin và Teacher không phụ thuộc lẫn nhau.
  */
 public abstract class RoleDashboardActivity extends BaseActivity {
     private SessionManager sessionManager;

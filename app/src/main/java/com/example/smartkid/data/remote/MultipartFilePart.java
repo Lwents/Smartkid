@@ -2,7 +2,7 @@ package com.example.smartkid.data.remote;
 
 import android.net.Uri;
 
-/** A content URI mapped to one multipart file field. */
+/** Ánh xạ một content URI vào một trường file của request multipart. */
 public final class MultipartFilePart {
     private final String fieldName;
     private final Uri uri;

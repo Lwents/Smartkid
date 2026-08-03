@@ -58,11 +58,10 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Neutral, role-agnostic content-authoring form engine ported verbatim from the former
- * ManagementCreateActivity. It holds no role branching of its own: the concrete
- * {@link #formKind()} is fixed by each role-owned subclass, and follow-up navigation after a
- * successful create is delegated to {@link #onContentCreated(JSONObject)} so this base never
- * imports any {@code feature.*} screen.
+ * Bộ máy form soạn nội dung trung lập với role, được tách từ ManagementCreateActivity cũ.
+ * Lớp này không tự rẽ nhánh theo role: mỗi lớp con cố định {@link #formKind()}, còn điều hướng
+ * sau khi tạo thành công được giao cho {@link #onContentCreated(JSONObject)}. Nhờ đó lớp nền
+ * không cần import bất kỳ màn hình {@code feature.*} nào.
  */
 public abstract class ContentFormActivity extends BaseActivity {
     public static final String EXTRA_PARENT_ID = "management_create_parent_id";
@@ -71,33 +70,33 @@ public abstract class ContentFormActivity extends BaseActivity {
     public static final String EXTRA_POSITION = "management_create_position";
     public static final String EXTRA_EDIT_ID = "management_edit_id";
 
-    /** The single content kind this screen authors. Fixed per role-owned subclass. */
+    /** Loại nội dung duy nhất mà màn hình tạo; được lớp con của từng role cố định. */
     protected abstract ContentFormKind formKind();
 
     /**
-     * Hook invoked after a successful create. Return {@code true} if the subclass launched a
-     * follow-up screen (the engine then just finishes). Default: no follow-up.
+     * Hook chạy sau khi tạo thành công. Trả {@code true} nếu lớp con đã mở màn hình tiếp theo,
+     * khi đó form chỉ cần tự đóng. Mặc định không có điều hướng tiếp.
      */
     protected boolean onContentCreated(JSONObject data) {
         return false;
     }
 
-    /** Read-only access for subclasses that need the linked course id for follow-up navigation. */
+    /** Cho lớp con chỉ đọc course ID liên kết để điều hướng sau khi tạo. */
     protected final String linkedCourseId() {
         return linkedCourseId;
     }
 
-    /** Read-only access for subclasses that need the created form's title for follow-up navigation. */
+    /** Cho lớp con chỉ đọc tiêu đề vừa tạo để truyền sang màn hình tiếp theo. */
     protected final String currentTitle() {
         return value("title");
     }
 
-    /** Parent id (module/lesson/course) passed in via the launching intent. */
+    /** ID cha (module/lesson/course) được truyền qua Intent mở form. */
     protected final String parentId() {
         return parentId;
     }
 
-    /** Currently selected lesson content type (e.g. {@code video}, {@code exercise}). */
+    /** Loại nội dung bài học đang được chọn, ví dụ {@code video} hoặc {@code exercise}. */
     protected final String selectedContentType() {
         return spinnerValue("content_type");
     }
@@ -155,6 +154,7 @@ public abstract class ContentFormActivity extends BaseActivity {
     private String savedFormSnapshot;
     private boolean formSubmitted;
 
+    /** Khởi tạo form động theo ContentFormKind, tải dữ liệu phụ và gắn hành động lưu. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -203,6 +203,7 @@ public abstract class ContentFormActivity extends BaseActivity {
         }
     }
 
+    /** Ánh xạ toolbar, vùng chứa trường động, nút lưu và trạng thái request. */
     private void bindViews() {
         container = findViewById(R.id.containerManagementFields);
         progressBar = findViewById(R.id.progressManagementCreate);
@@ -214,6 +215,7 @@ public abstract class ContentFormActivity extends BaseActivity {
         }
     }
 
+    /** Cấu hình nút quay lại và cảnh báo khi form còn thay đổi chưa lưu. */
     private void bindToolbar() {
         MaterialToolbar toolbar = findViewById(R.id.toolbarManagementCreate);
         if (toolbar == null) throw new IllegalStateException("Thiếu thanh điều hướng");
@@ -221,6 +223,7 @@ public abstract class ContentFormActivity extends BaseActivity {
         toolbar.setTitle("");
     }
 
+    /** Đóng form ngay hoặc yêu cầu xác nhận nếu có dữ liệu chưa lưu. */
     private void requestClose() {
         if (formSubmitted || !hasUnsavedChanges()) {
             finish();
@@ -234,6 +237,7 @@ public abstract class ContentFormActivity extends BaseActivity {
                 .show();
     }
 
+    /** Chọn tiêu đề, mô tả và biểu tượng theo loại nội dung đang tạo/sửa. */
     private void configureHeader() {
         ImageView icon = findViewById(R.id.imageManagementCreateIcon);
         TextView heading = findViewById(R.id.textManagementCreateHeading);
@@ -270,6 +274,7 @@ public abstract class ContentFormActivity extends BaseActivity {
         }
     }
 
+    /** Dựng tập trường phù hợp cho khóa học, module, lesson, user hoặc bài tập. */
     private void buildFields() {
         container.removeAllViews();
         if (kind == ContentFormKind.ADMIN_USER) {
@@ -414,6 +419,7 @@ public abstract class ContentFormActivity extends BaseActivity {
         addQuestionCard();
     }
 
+    /** Thêm tiêu đề phân nhóm để form dài vẫn dễ theo dõi. */
     private void addSection(int titleRes, int descriptionRes) {
         TextView title = new TextView(this);
         title.setText(titleRes);
@@ -434,6 +440,7 @@ public abstract class ContentFormActivity extends BaseActivity {
         container.addView(description);
     }
 
+    /** Tạo TextInput động, lưu theo key và theo dõi thay đổi của người dùng. */
     private View addInput(String key, String hint, int inputType, boolean multiline) {
         View row = LayoutInflater.from(this).inflate(
                 R.layout.management_item_create_input, container, false);
@@ -457,6 +464,7 @@ public abstract class ContentFormActivity extends BaseActivity {
         return row;
     }
 
+    /** Tạo vùng chọn ảnh bìa hoặc video khóa học. */
     private View addCourseFilePicker(boolean thumbnail) {
         View row = LayoutInflater.from(this).inflate(
                 R.layout.management_item_file_picker, container, false);
@@ -491,6 +499,7 @@ public abstract class ContentFormActivity extends BaseActivity {
         return row;
     }
 
+    /** Tạo vùng chọn tài liệu đính kèm cho lesson. */
     private View addDocumentFilePicker() {
         View row = LayoutInflater.from(this).inflate(
                 R.layout.management_item_file_picker, container, false);
@@ -517,7 +526,8 @@ public abstract class ContentFormActivity extends BaseActivity {
         return row;
     }
 
-private void registerFilePickers() {
+    /** Đăng ký Activity Result launcher cho ảnh, video, tài liệu và tệp nguồn AI. */
+    private void registerFilePickers() {
         thumbnailPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
                 uri -> handleSelectedFile(uri, true));
         videoPicker = registerForActivityResult(new ActivityResultContracts.OpenDocument(),
@@ -528,6 +538,7 @@ private void registerFilePickers() {
                 this::handleAiDocument);
     }
 
+    /** Theo dõi loại nội dung lesson để thay đổi các trường cần nhập. */
     private void bindLessonContentType() {
         SpinnerBinding binding = spinners.get("content_type");
         if (binding == null) return;
@@ -542,6 +553,7 @@ private void registerFilePickers() {
         updateLessonContentFields();
     }
 
+    /** Hiện/ẩn trường text, URL, video và tài liệu theo content type. */
     private void updateLessonContentFields() {
         String contentType = spinnerValue("content_type");
         boolean video = "video".equals(contentType);
@@ -561,13 +573,14 @@ private void registerFilePickers() {
         }
     }
 
+    /** Kiểm tra ảnh/video được chọn, kích thước và MIME trước khi lưu URI. */
     private void handleSelectedFile(Uri uri, boolean thumbnail) {
         if (uri == null) return;
         try {
             getContentResolver().takePersistableUriPermission(uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (Exception ignored) {
-            // The URI remains readable for the current activity even if not persistable.
+            // URI vẫn đọc được trong Activity hiện tại dù provider không cho lưu quyền lâu dài.
         }
         String mimeType = safe(getContentResolver().getType(uri)).toLowerCase(Locale.ROOT);
         String name = fileDisplayName(uri);
@@ -603,13 +616,14 @@ private void registerFilePickers() {
         }
     }
 
+    /** Kiểm tra tài liệu được chọn rồi cập nhật tên và trạng thái form. */
     private void handleSelectedDocument(Uri uri) {
         if (uri == null) return;
         try {
             getContentResolver().takePersistableUriPermission(uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (Exception ignored) {
-            // The URI remains readable for this activity.
+            // URI vẫn đọc được trong vòng đời Activity hiện tại.
         }
         String name = fileDisplayName(uri);
         String lowerName = name.toLowerCase(Locale.ROOT);
@@ -642,6 +656,7 @@ private void registerFilePickers() {
         documentClearButton.setVisibility(View.VISIBLE);
     }
 
+    /** Bỏ ảnh/video đã chọn và khôi phục vùng file picker. */
     private void clearSelectedFile(boolean thumbnail) {
         if (thumbnail) {
             selectedThumbnailUri = null;
@@ -656,6 +671,7 @@ private void registerFilePickers() {
         }
     }
 
+    /** Bỏ tài liệu đã chọn khỏi payload sắp gửi. */
     private void clearSelectedDocument() {
         selectedDocumentUri = null;
         if (documentFileName != null) {
@@ -675,7 +691,7 @@ private void registerFilePickers() {
                 if (column >= 0) return safe(cursor.getString(column));
             }
         } catch (Exception ignored) {
-            // Fall through to URI path.
+            // Nếu metadata không có tên thì dùng path của URI.
         }
         String path = safe(uri.getLastPathSegment());
         return path.isEmpty() ? "Tệp đã chọn" : path;
@@ -689,7 +705,7 @@ private void registerFilePickers() {
                 if (column >= 0 && !cursor.isNull(column)) return cursor.getLong(column);
             }
         } catch (Exception ignored) {
-            // Unknown size is validated by the backend while streaming.
+            // Kích thước chưa xác định sẽ được backend kiểm tra khi nhận luồng dữ liệu.
         }
         return -1;
     }
@@ -715,6 +731,7 @@ private void registerFilePickers() {
         return String.format(Locale.getDefault(), "%.1f MB", bytes / (1024d * 1024d));
     }
 
+    /** Tạo Spinner động và ánh xạ nhãn hiển thị sang giá trị API. */
     private void addSpinner(String key, String label, String[] labels, String[] values) {
         View row = LayoutInflater.from(this).inflate(
                 R.layout.management_item_create_spinner, container, false);
@@ -725,6 +742,7 @@ private void registerFilePickers() {
         spinners.put(key, new SpinnerBinding(spinner, values));
     }
 
+    /** Tạo nhóm nút chọn khối lớp cho khóa học. */
     private void addGradeSelector() {
         View row = LayoutInflater.from(this).inflate(
                 R.layout.management_item_grade_selector, container, false);
@@ -738,7 +756,7 @@ private void registerFilePickers() {
             final int selected = index;
             gradeButtons[index].setOnClickListener(view -> selectGrade(selected));
         }
-        // SmartKid's routed wizard starts at grade 3.
+        // Luồng tạo nội dung của SmartKid chỉ hỗ trợ từ lớp 3 trở lên.
         selectGrade(2);
         container.addView(row);
     }
@@ -752,6 +770,7 @@ private void registerFilePickers() {
         }
     }
 
+    /** Tạo Spinner chọn khóa học liên kết cho bài kiểm tra hoặc nội dung. */
     private void addCourseSpinner() {
         View row = LayoutInflater.from(this).inflate(
                 R.layout.management_item_create_spinner, container, false);
@@ -788,10 +807,12 @@ private void registerFilePickers() {
         return adapter;
     }
 
+    /** Thêm một thẻ câu hỏi mới với loại mặc định. */
     private QuestionFields addQuestionCard() {
         return addQuestionCard(true, "mcq");
     }
 
+    /** Kiểm tra giới hạn rồi thêm câu hỏi khi người dùng bấm nút. */
     private void addQuestionFromButton() {
         if (AiQuestionPolicy.remainingCapacity(totalQuestionCount()) == 0) {
             showShortMessage(getString(R.string.management_question_limit));
@@ -819,12 +840,14 @@ private void registerFilePickers() {
         return fields;
     }
 
+    /** Đảm bảo chỉ một lựa chọn được đánh dấu đúng trong câu single-choice. */
     private void selectCorrectChoice(QuestionFields fields, ChoiceFields selected) {
         for (ChoiceFields choice : fields.choices) {
             choice.correct.setChecked(choice == selected);
         }
     }
 
+    /** Xóa thẻ câu hỏi và đánh số lại các câu còn lại. */
     private void removeQuestion(QuestionFields fields) {
         if (totalQuestionCount() <= 1) {
             showShortMessage(getString(R.string.management_exam_requires_question));
@@ -843,6 +866,7 @@ private void registerFilePickers() {
         updateCompactQuestionsSummary();
     }
 
+    /** Cập nhật số thứ tự và nút xóa sau thay đổi danh sách câu hỏi. */
     private void updateQuestionNumbers() {
         for (int index = 0; index < questions.size(); index++) {
             questions.get(index).number.setText(
@@ -866,6 +890,7 @@ private void registerFilePickers() {
         compactQuestionsSummary.setVisibility(View.VISIBLE);
     }
 
+    /** Mở trình chọn tài liệu nguồn để yêu cầu backend sinh câu hỏi. */
     private void launchAiDocumentPicker() {
         if (AiQuestionPolicy.remainingCapacity(totalQuestionCount()) == 0) {
             showShortMessage(getString(R.string.management_question_limit));
@@ -882,13 +907,14 @@ private void registerFilePickers() {
         }
     }
 
+    /** Kiểm tra tài liệu nguồn AI trước khi hỏi số lượng câu cần tạo. */
     private void handleAiDocument(Uri uri) {
         if (uri == null) return;
         try {
             getContentResolver().takePersistableUriPermission(uri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (Exception ignored) {
-            // The URI remains readable for this activity.
+            // URI vẫn đọc được trong vòng đời Activity hiện tại.
         }
         String name = fileDisplayName(uri);
         String lowerName = name.toLowerCase(Locale.ROOT);
@@ -910,6 +936,7 @@ private void registerFilePickers() {
         showAiQuestionCountDialog(uri);
     }
 
+    /** Cho người dùng chọn số câu hỏi muốn sinh từ tài liệu. */
     private void showAiQuestionCountDialog(Uri uri) {
         int[] counts = AiQuestionPolicy.allowedCounts();
         String[] labels = new String[counts.length];
@@ -927,6 +954,7 @@ private void registerFilePickers() {
                 .show();
     }
 
+    /** Upload tài liệu đến endpoint AI và nhận danh sách câu hỏi đã tạo. */
     private void requestAiQuestionsFromFile(Uri uri, int requestedCount) {
         if (!AiQuestionPolicy.isAllowedCount(requestedCount)) {
             showStatus(getString(R.string.management_ai_error));
@@ -1003,6 +1031,7 @@ private void registerFilePickers() {
         return "Tiểu học";
     }
 
+    /** Tìm mảng câu hỏi trong các cấu trúc response AI được backend hỗ trợ. */
     private JSONArray extractAiQuestions(JSONObject data) throws Exception {
         if (data == null) return new JSONArray();
         JSONArray direct = data.optJSONArray("questions");
@@ -1035,6 +1064,7 @@ private void registerFilePickers() {
         return new JSONArray();
     }
 
+    /** Chuẩn hóa và thêm các câu hỏi AI hợp lệ vào form hiện tại. */
     private int applyGeneratedQuestions(JSONArray generated) {
         if (generated == null || generated.length() == 0) return 0;
         if (totalQuestionCount() == 1 && questions.size() == 1
@@ -1064,6 +1094,7 @@ private void registerFilePickers() {
         return added;
     }
 
+    /** Chuyển câu hỏi AI về schema thống nhất mà form và API tạo bài dùng. */
     private JSONObject normalizeGeneratedQuestion(JSONObject source) {
         if (source == null) return null;
         try {
@@ -1121,6 +1152,7 @@ private void registerFilePickers() {
         }
     }
 
+    /** Tải danh sách khóa học để điền vào Spinner liên kết. */
     private void loadCourseOptions() {
         setLoading(true);
         showStatus(getString(R.string.management_loading_courses));
@@ -1175,6 +1207,7 @@ private void registerFilePickers() {
                 });
     }
 
+    /** Tải bài kiểm tra hiện có khi form chạy ở chế độ chỉnh sửa. */
     private void loadExerciseForEdit() {
         setLoading(true);
         showStatus(getString(R.string.management_loading_exercise));
@@ -1210,6 +1243,7 @@ private void registerFilePickers() {
                 });
     }
 
+    /** Điền thiết lập và câu hỏi của bài kiểm tra vào form động. */
     private void populateExercise(JSONObject exercise) {
         Object lessonValue = exercise.opt("lesson");
         String exerciseLessonId = "";
@@ -1286,6 +1320,7 @@ private void registerFilePickers() {
         updateCompactQuestionsSummary();
     }
 
+    /** Điền một câu hỏi JSON vào QuestionFields tương ứng. */
     private void populateQuestion(QuestionFields fields, JSONObject source) {
         fields.existingId = safe(source.optString("id", ""));
         fields.prompt.setText(safe(source.optString("prompt",
@@ -1375,6 +1410,7 @@ private void registerFilePickers() {
         if (binding != null) binding.selectValue(value);
     }
 
+    /** Kiểm tra form, tạo payload và chọn request JSON hoặc multipart phù hợp. */
     private void submitSafely() {
         try {
             JSONObject body = buildBody();
@@ -1406,8 +1442,8 @@ private void registerFilePickers() {
                             showShortMessage(successMessage());
                             setResult(RESULT_OK);
                             formSubmitted = true;
-                            // Follow-up navigation is delegated to the role-owned subclass so
-                            // this neutral engine never imports a feature screen.
+                            // Điều hướng tiếp được giao cho lớp con của role để bộ máy form
+                            // trung lập này không phải import màn hình feature cụ thể.
                             onContentCreated(data);
                             finish();
                         }
@@ -1439,6 +1475,7 @@ private void registerFilePickers() {
         }
     }
 
+    /** Tạo lesson trước rồi upload file vào endpoint lesson vừa được cấp ID. */
     private void createLessonThenUpload(String endpoint, JSONObject body,
                                         List<MultipartFilePart> files,
                                         ApiCallback<JSONObject> finalCallback) {
@@ -1479,6 +1516,7 @@ private void registerFilePickers() {
         });
     }
 
+    /** Đọc toàn bộ trường động và tạo request body theo ContentFormKind. */
     private JSONObject buildBody() throws Exception {
         JSONObject body = new JSONObject();
         if (kind == ContentFormKind.ADMIN_USER) {
@@ -1595,6 +1633,7 @@ private void registerFilePickers() {
         return body;
     }
 
+    /** Kiểm tra và chuyển các QuestionFields thành mảng JSON gửi server. */
     private JSONArray buildQuestions() throws Exception {
         if (totalQuestionCount() == 0) {
             showStatus(getString(R.string.management_exam_requires_question));
@@ -1743,6 +1782,7 @@ private void registerFilePickers() {
         return result;
     }
 
+    /** Đọc trường bắt buộc và ném lỗi có nội dung rõ ràng nếu để trống. */
     private String required(String key) {
         String value = value(key);
         TextInputEditText input = inputs.get(key);
@@ -1754,6 +1794,7 @@ private void registerFilePickers() {
         return value;
     }
 
+    /** Kiểm tra URL tùy chọn chỉ chấp nhận HTTP/HTTPS hợp lệ. */
     private String optionalHttpUrl(String key) {
         String raw = value(key);
         if (raw.isEmpty()) return "";
@@ -1781,6 +1822,7 @@ private void registerFilePickers() {
         return decimal(inputs.get(key), defaultValue, min, max);
     }
 
+    /** Đọc số thực và kiểm tra giới hạn nghiệp vụ của trường. */
     private double decimal(TextInputEditText input, double defaultValue, double min, double max) {
         String raw = text(input);
         if (raw.isEmpty()) return defaultValue;
@@ -1822,6 +1864,7 @@ private void registerFilePickers() {
         }
     }
 
+    /** Tạo danh sách file multipart từ các URI người dùng đã chọn. */
     private List<MultipartFilePart> multipartFiles() {
         List<MultipartFilePart> files = new ArrayList<>();
         if (kind == ContentFormKind.TEACHER_COURSE) {
@@ -1869,6 +1912,7 @@ private void registerFilePickers() {
                 : "Đã cập nhật bài kiểm tra";
     }
 
+    /** Khóa toàn bộ form và hiện tiến trình trong lúc tải/lưu. */
     private void setLoading(boolean loading) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         submitButton.setEnabled(!loading);
@@ -1895,6 +1939,7 @@ private void registerFilePickers() {
         for (QuestionFields fields : questions) fields.setEnabled(!loading);
     }
 
+    /** Hiển thị lỗi kiểm tra hoặc trạng thái request ngay trên form. */
     private void showStatus(String message) {
         statusText.setText(message == null ? getString(R.string.unknown_error) : message);
         statusText.setVisibility(View.VISIBLE);
@@ -1904,14 +1949,17 @@ private void registerFilePickers() {
         return input == null || input.getText() == null ? "" : input.getText().toString().trim();
     }
 
+    /** Lưu snapshot sau khi tải/lưu để phát hiện thay đổi chưa đồng bộ. */
     private void rememberFormState() {
         savedFormSnapshot = formSnapshot();
     }
 
+    /** So sánh snapshot hiện tại với trạng thái đã ghi nhớ. */
     private boolean hasUnsavedChanges() {
         return savedFormSnapshot != null && !savedFormSnapshot.equals(formSnapshot());
     }
 
+    /** Tạo chuỗi đại diện ổn định cho toàn bộ giá trị trong form động. */
     private String formSnapshot() {
         StringBuilder state = new StringBuilder();
         for (Map.Entry<String, TextInputEditText> entry : inputs.entrySet()) {
@@ -1961,6 +2009,7 @@ private void registerFilePickers() {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
+    /** Chỉ xử lý callback khi Activity form vẫn còn hoạt động. */
     private boolean isUsable() {
         return !isFinishing() && !isDestroyed();
     }

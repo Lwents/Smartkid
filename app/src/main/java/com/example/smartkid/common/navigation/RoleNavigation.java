@@ -33,7 +33,7 @@ public final class RoleNavigation {
                 return StudentHomeActivity.class;
             case UNKNOWN:
             default:
-                // An unrecognised role must never fall through to the Student home.
+                // Role không nhận diện được tuyệt đối không được rơi mặc định vào màn Student.
                 return UnsupportedRoleActivity.class;
         }
     }
