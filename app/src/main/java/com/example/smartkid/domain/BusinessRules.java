@@ -48,8 +48,8 @@ public final class BusinessRules {
         if (normalizedPhone.isEmpty()) {
             return "Vui lòng nhập số điện thoại";
         }
-        if (!normalizedPhone.matches("^\\+?[0-9]{9,15}$")) {
-            return "Số điện thoại phải có từ 9 đến 15 chữ số";
+        if (!isVietnameseMobileNumber(normalizedPhone)) {
+            return "Số điện thoại không phải của Việt Nam";
         }
         if (password == null || password.length() < 8) {
             return "Mật khẩu phải có ít nhất 8 ký tự";
@@ -89,6 +89,14 @@ public final class BusinessRules {
             return false;
         }
         return value.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    }
+
+    /** Chấp nhận số di động Việt Nam dạng nội địa 0x hoặc quốc tế +84x. */
+    public static boolean isVietnameseMobileNumber(String value) {
+        if (value == null) {
+            return false;
+        }
+        return value.trim().matches("^(?:0|\\+84)[35789][0-9]{8}$");
     }
 
     /** Lọc khóa học theo từ khóa; bỏ dấu nên gõ 'dai so' vẫn tìm ra 'Đại số'. */
