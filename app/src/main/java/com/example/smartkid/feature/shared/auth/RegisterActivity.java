@@ -129,7 +129,8 @@ public class RegisterActivity extends BaseActivity {
 
     /** Hiển thị lỗi kiểm tra cục bộ trước khi gọi server. */
     private void showValidationError(String message) {
-        if (message != null && message.toLowerCase(java.util.Locale.ROOT).contains("số điện thoại")) {
+        String normalized = message == null ? "" : message.toLowerCase(java.util.Locale.ROOT);
+        if (normalized.contains("số điện thoại") || normalized.contains("sđt")) {
             phoneInputLayout.setError(message);
             phoneInput.requestFocus();
             return;
@@ -140,7 +141,8 @@ public class RegisterActivity extends BaseActivity {
     /** Hiển thị lỗi do API đăng ký trả về. */
     private void showRegistrationError(String message) {
         String normalized = message == null ? "" : message.toLowerCase(java.util.Locale.ROOT);
-        if (normalized.contains("phone") || normalized.contains("số điện thoại")) {
+        if (normalized.contains("phone") || normalized.contains("số điện thoại")
+                || normalized.contains("sđt")) {
             String localized = normalized.contains("blank") || normalized.contains("required")
                     ? getString(R.string.phone_required_error) : message;
             phoneInputLayout.setError(localized);

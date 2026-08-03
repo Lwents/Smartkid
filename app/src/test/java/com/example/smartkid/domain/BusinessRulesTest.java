@@ -28,9 +28,23 @@ public class BusinessRulesTest {
         assertEquals("Vui lòng nhập số điện thoại",
                 BusinessRules.validateRegistration(
                         "student", "student@example.com", "", "12345678", "12345678"));
-        assertEquals("Số điện thoại phải có từ 9 đến 15 chữ số",
+        assertEquals("Số điện thoại không phải của Việt Nam",
                 BusinessRules.validateRegistration(
                         "student", "student@example.com", "123", "12345678", "12345678"));
+        assertEquals("Số điện thoại không phải của Việt Nam",
+                BusinessRules.validateRegistration(
+                        "student", "student@example.com", "0000000000",
+                        "12345678", "12345678"));
+        assertEquals("Số điện thoại không phải của Việt Nam",
+                BusinessRules.validateRegistration(
+                        "student", "student@example.com", "0000260524",
+                        "12345678", "12345678"));
+        assertTrue(BusinessRules.validateRegistration(
+                "student", "student@example.com", "0912345678", "12345678", "12345678")
+                .isEmpty());
+        assertTrue(BusinessRules.validateRegistration(
+                "student", "student@example.com", "0323456789", "12345678", "12345678")
+                .isEmpty());
         assertTrue(BusinessRules.validateRegistration(
                 "student", "student@example.com", "+84912345678", "12345678", "12345678")
                 .isEmpty());
