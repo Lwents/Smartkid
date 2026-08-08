@@ -49,7 +49,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import com.example.smartkid.common.util.SwipeRefreshFix;
 
 /** Danh sách quản lý thuộc Teacher, dùng API thật và chỉ cung cấp hành động của giáo viên. */
@@ -379,7 +381,7 @@ public class TeacherManagementActivity extends BaseActivity {
                         String.valueOf(attempts));
             }
             appendInfoLine(detail, "Trạng thái",
-                    source.optBoolean("published", false) ? "Đã xuất bản" : "Bản nháp");
+                    examStatusLabel(source));
         } else if ("teacher_students".equals(specKey) || "teacher_progress".equals(specKey)) {
             appendInfoLine(detail, "Email", SafeJson.string(source, "", "email"));
             double score = SafeJson.decimal(source, -1, "avgScore");
@@ -1050,6 +1052,14 @@ public class TeacherManagementActivity extends BaseActivity {
                 : String.format(java.util.Locale.US, "%.1f", value);
     }
 
+    /** Phân biệt đề chưa xuất bản với đề đã đóng nhưng vẫn giữ lịch sử nộp. */
+    private String examStatusLabel(JSONObject source) {
+        if (source != null && source.optBoolean("published", false)) return "Đã xuất bản";
+        String status = SafeJson.string(source, "", "status");
+        int submissions = SafeJson.integer(source, 0, "submissions", "total_attempts");
+        return "closed".equals(status) || submissions > 0 ? "Đã tạm đóng" : "Bản nháp";
+    }
+
     /** Tải và hiển thị danh sách attempt của bài kiểm tra. */
     private void showAttempts(FeatureItem item) {
         setLoading(true);
@@ -1059,14 +1069,33 @@ public class TeacherManagementActivity extends BaseActivity {
                         if (!isUsable()) return;
                         setLoading(false);
                         StringBuilder message = new StringBuilder();
+                        Set<String> studentKeys = new LinkedHashSet<>();
+                        int submissionCount = 0;
+                        boolean everySubmissionHasStudent = true;
                         for (FeatureItem attempt : data) {
-                            message.append("• ").append(attempt.getTitle())
-                                    .append(" — ").append(attempt.getStatus()).append('\n');
+                            if (attempt == null || !TeacherAttemptUiFormatter.isSubmission(
+                                    attempt.getSource())) continue;
+                            submissionCount++;
+                            String studentKey = TeacherAttemptUiFormatter.studentKey(
+                                    attempt.getSource());
+                            if (studentKey.isEmpty()) everySubmissionHasStudent = false;
+                            else studentKeys.add(studentKey);
+                            message.append(submissionCount).append(". ")
+                                    .append(TeacherAttemptUiFormatter.studentName(
+                                            attempt.getSource(), submissionCount))
+                                    .append('\n').append("   ")
+                                    .append(TeacherAttemptUiFormatter.detail(attempt.getSource()))
+                                    .append('\n');
                         }
+                        String summary = everySubmissionHasStudent && submissionCount > 0
+                                ? studentKeys.size() + " học sinh • " + submissionCount + " lượt nộp"
+                                : submissionCount + " lượt nộp đã ghi nhận";
+                        String body = message.length() == 0
+                                ? "Chưa có học sinh nộp bài."
+                                : summary + "\n\n" + message.toString().trim();
                         new AlertDialog.Builder(TeacherManagementActivity.this)
-                                .setTitle("Lượt nộp • " + data.size())
-                                .setMessage(message.length() == 0
-                                        ? "Chưa có học viên nộp bài." : message.toString().trim())
+                                .setTitle("Lượt nộp bài (" + submissionCount + ")")
+                                .setMessage(body)
                                 .setPositiveButton("Đóng", null).show();
                     }
 

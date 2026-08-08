@@ -549,11 +549,17 @@ public class ManagementRepository {
         if (item.has("published") && isExerciseType(exerciseType)) {
             JSONArray questions = item.optJSONArray("questions");
             int questionCount = questions == null ? 0 : questions.length();
+            String exerciseStatus = SafeJson.string(item, "", "status");
+            if (exerciseStatus.isEmpty()) {
+                exerciseStatus = SafeJson.bool(item, false, "published") ? "published"
+                        : SafeJson.integer(item, 0, "submissions", "total_attempts") > 0
+                                ? "closed" : "draft";
+            }
             return new FeatureItem(id,
                     SafeJson.string(item, "Bài kiểm tra", "title"),
                     questionCount + " câu • " + exerciseTypeSummary(questions, exerciseType),
                     SafeJson.string(item, "", "description"),
-                    SafeJson.bool(item, false, "published") ? "Đã xuất bản" : "Bản nháp",
+                    statusLabel(exerciseStatus),
                     item);
         }
         // Khóa học: ưu tiên tên môn do server trả về, không hiển thị UUID môn học.
@@ -682,6 +688,7 @@ public class ManagementRepository {
             case "published": return "Đã xuất bản";
             case "draft": return "Bản nháp";
             case "archived": return "Đã lưu trữ";
+            case "closed": return "Đã tạm đóng";
             case "in_progress": return "Đang học";
             case "completed": return "Hoàn thành";
             case "success": return "Thành công";
