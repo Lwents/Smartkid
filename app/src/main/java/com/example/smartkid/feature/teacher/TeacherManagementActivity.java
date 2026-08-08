@@ -6,7 +6,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -412,8 +411,6 @@ public class TeacherManagementActivity extends BaseActivity {
                     SafeJson.string(source, "Phản hồi chung", "courseTitle", "course_title"));
             appendInfoLine(detail, "Lời nhận xét",
                     SafeJson.string(source, item.getDetail(), "message"));
-            appendInfoLine(detail, "Điểm đánh giá",
-                    readableMetric(SafeJson.decimal(source, 0, "rating")) + "/10");
             appendInfoLine(detail, "Đã gửi lúc",
                     readableTime(SafeJson.string(source, "", "createdAt", "created_at")));
         } else {
@@ -1165,7 +1162,7 @@ public class TeacherManagementActivity extends BaseActivity {
         }
     }
 
-    /** Hiển thị form nhập nội dung và mức đánh giá cho học viên. */
+    /** Hiển thị form nhập nội dung phản hồi cho học viên. */
     private void promptFeedback(FeatureItem item) {
         try {
             LinearLayout container = new LinearLayout(this);
@@ -1176,11 +1173,7 @@ public class TeacherManagementActivity extends BaseActivity {
             message.setHint("Nội dung phản hồi");
             message.setMinLines(2);
             message.setMaxLines(5);
-            EditText rating = new EditText(this);
-            rating.setHint("Điểm đánh giá từ 0 đến 10");
-            rating.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
             container.addView(message);
-            container.addView(rating);
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("Gửi phản hồi cho " + item.getTitle())
                     .setView(container).setNegativeButton(R.string.cancel, null)
@@ -1189,24 +1182,12 @@ public class TeacherManagementActivity extends BaseActivity {
                     .setOnClickListener(view -> {
                         String content = message.getText() == null ? ""
                                 : message.getText().toString().trim();
-                        String rawRating = rating.getText() == null ? ""
-                                : rating.getText().toString().trim();
                         if (content.isEmpty()) {
                             message.setError("Nội dung không được để trống");
                             return;
                         }
-                        double score;
-                        try { score = Double.parseDouble(rawRating); }
-                        catch (Exception exception) {
-                            rating.setError("Điểm phải là số từ 0 đến 10");
-                            return;
-                        }
-                        if (score < 0 || score > 10) {
-                            rating.setError("Điểm phải nằm trong khoảng 0–10");
-                            return;
-                        }
                         dialog.dismiss();
-                        sendFeedback(item, content, score);
+                        sendFeedback(item, content);
                     }));
             dialog.show();
         } catch (Exception exception) {
@@ -1216,12 +1197,11 @@ public class TeacherManagementActivity extends BaseActivity {
     }
 
     /** Gửi phản hồi của Teacher cho học viên rồi tải lại danh sách. */
-    private void sendFeedback(FeatureItem item, String message, double rating) {
+    private void sendFeedback(FeatureItem item, String message) {
         try {
             JSONObject body = new JSONObject();
             body.put("studentId", item.getId());
             body.put("message", message);
-            body.put("rating", rating);
             setLoading(true);
             repository.action(Request.Method.POST, "teacher/students/feedback/", body,
                     actionCallback("Đã gửi phản hồi và thông báo cho học viên"));

@@ -500,11 +500,6 @@ public class ManagementRepository {
         return String.format(Locale.getDefault(), "%.1f%%", value);
     }
 
-    private String feedbackRating(double value) {
-        return value == Math.rint(value) ? String.valueOf((int) value)
-                : String.format(Locale.getDefault(), "%.1f", value);
-    }
-
     private void appendArray(List<FeatureItem> target, JSONArray array) {
         for (int index = 0; index < array.length(); index++) {
             Object value = array.opt(index);
@@ -605,15 +600,13 @@ public class ManagementRepository {
                     subtitle, detail,
                     "Hoạt động: " + SafeJson.string(item, "", "lastActive"), item);
         }
-        // Lịch sử phản hồi giáo viên đã gửi: hiện đúng học sinh, khóa học và điểm.
-        if (item.has("studentName") && item.has("rating") && item.has("message")) {
+        // Lịch sử phản hồi giáo viên đã gửi: hiện học sinh, khóa học và lời nhận xét.
+        if (item.has("studentName") && item.has("message")) {
             String courseTitle = SafeJson.string(item, "", "courseTitle", "course_title");
-            double rating = SafeJson.decimal(item, 0, "rating");
-            String status = "Đánh giá " + feedbackRating(rating) + "/10";
             return new FeatureItem(id,
                     SafeJson.string(item, "Học viên", "studentName"),
                     courseTitle.isEmpty() ? "Phản hồi chung" : courseTitle,
-                    SafeJson.string(item, "", "message"), status, item);
+                    SafeJson.string(item, "", "message"), "", item);
         }
         // Người dùng đang hoạt động: tên + vai trò/email + lần hoạt động gần nhất
         if (item.has("lastActive") && item.has("name")) {
